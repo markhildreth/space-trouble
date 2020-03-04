@@ -49,15 +49,15 @@ impl I2CLCD {
         i2c.write(self.addr, &[0u8]);
         delay.delay_ms(1000u16);
 
-        self.pulse_nibble(i2c, delay, 0x03);
+        self.pulse_nibble(i2c, delay, 0x03 << 4);
         delay.delay_us(4500u16);
-        self.pulse_nibble(i2c, delay, 0x03);
+        self.pulse_nibble(i2c, delay, 0x03 << 4);
         delay.delay_us(4500u16);
-        self.pulse_nibble(i2c, delay, 0x03);
+        self.pulse_nibble(i2c, delay, 0x03 << 4);
         delay.delay_us(150u8);
 
         // Set 4-bit mode (function set)
-        self.pulse_nibble(i2c, delay, 0b0010);
+        self.pulse_nibble(i2c, delay, 0b0010 << 4);
 
         // Full Function Set
         self.send(i2c, delay, 0b00101000, false);
@@ -107,7 +107,7 @@ impl I2CLCD {
             nibble_flags |= NibbleFlags::RS;
         }
 
-        let first_nibble_data = data & 0xf;
+        let first_nibble_data = data & 0xf0;
         let second_nibble_data = (data & 0x0f) << 4;
         self.pulse_nibble(i2c, delay, first_nibble_data | nibble_flags.bits());
         self.pulse_nibble(i2c, delay, second_nibble_data | nibble_flags.bits());

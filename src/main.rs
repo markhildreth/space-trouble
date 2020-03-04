@@ -46,7 +46,7 @@ fn main() -> ! {
     lcd.initialize(&mut i2c, &mut delay);
     lcd.clear(&mut i2c, &mut delay);
     lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
-    lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::CURSOR);
+    lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::CURSOR | DisplayControls::BLINK);
 
     loop {
         red_led.set_low().unwrap();
