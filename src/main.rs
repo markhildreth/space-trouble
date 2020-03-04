@@ -11,7 +11,7 @@ use hal::delay::Delay;
 
 mod lcd;
 
-use crate::lcd::I2CLCD;
+use crate::lcd::{I2CLCD, Backlight};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
@@ -39,9 +39,10 @@ fn main() -> ! {
         &mut pins.port,
     );
 
-    let lcd = I2CLCD::new(LCD_I2C_ADDRESS);
+    let mut lcd = I2CLCD::new(LCD_I2C_ADDRESS);
     lcd.initialize(&mut i2c, &mut delay);
     lcd.clear(&mut i2c, &mut delay);
+    lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
     lcd.display_control(&mut i2c, &mut delay);
 
 
