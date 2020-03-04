@@ -18,6 +18,15 @@ bitflags! {
     }
 }
 
+bitflags! {
+    pub struct NibbleFlags: u8 {
+        const BACKLIGHT = 0b1000;
+        const E         = 0b0100;
+        const RW        = 0b0010;
+        const RS        = 0b0001;
+    }
+}
+
 pub struct I2CLCD {
     addr: u8,
     backlight: Backlight
@@ -83,8 +92,7 @@ impl I2CLCD {
     pub fn display_control<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
         where I2C: Write
     {
-        self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
+        self.send(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
     }
 
     fn write_nibbles<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, val: u8, command: bool)
@@ -100,5 +108,32 @@ impl I2CLCD {
         delay.delay_us(50u8);
     }
 
+    fn send<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8, command: bool)
+        where I2C: Write
+    {
+        let mut nibble_flags = NibbleFlags::empty();
+
+        if self.backlight == Backlight::ON {
+            nibble_flags |= NibbleFlags::BACKLIGHT;
+        }
+
+        if command {
+            nibble_flags |= NibbleFlags::RS;
+        }
+
+        let first_nibble_data = data & 0xf;
+        let second_nibble_data = (data & 0x0f) << 4;
+        self._write_nibbles(i2c, delay, first_nibble_data | nibble_flags.bits());
+        self._write_nibbles(i2c, delay, second_nibble_data | nibble_flags.bits());
+    }
+
+    fn _write_nibbles<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8)
+        where I2C: Write
+    {
+        i2c.write(self.addr, &[data | NibbleFlags::E.bits()]);
+        delay.delay_us(1u8);
+        i2c.write(self.addr, &[data]);
+        delay.delay_us(50u8);
+    }
 }
 
