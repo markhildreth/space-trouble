@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 feather_m0 = "0.6.0"
 panic-halt = "0.2.0"
+atsamd-hal = "0.8.2"
