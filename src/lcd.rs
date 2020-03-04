@@ -9,7 +9,9 @@ pub enum Backlight {
     ON
 }
 
+const CLEAR_DISPLAY: u8   = 0b00000001;
 const DISPLAY_CONTROL: u8 = 0b00001000;
+
 bitflags! {
     pub struct DisplayControls: u8 {
         const DISPLAY = 0b100;
@@ -45,26 +47,23 @@ impl I2CLCD {
         // Manually reset the SPLC780D circuit to a 4-bit interface
         i2c.write(self.addr, &[0u8]);
         delay.delay_ms(50u8);
-        self.write_nibbles(i2c, delay, 0x03, false);
+        self.pulse_nibble(i2c, delay, 0x03);
         delay.delay_ms(10u8);
-        self.write_nibbles(i2c, delay, 0x03, false);
+        self.pulse_nibble(i2c, delay, 0x03);
         delay.delay_ms(1u8);
-        self.write_nibbles(i2c, delay, 0x03, false);
+        self.pulse_nibble(i2c, delay, 0x03);
 
         // Set 4-bit mode (function set)
-        self.write_nibbles(i2c, delay, 0b0010, false);
+        self.pulse_nibble(i2c, delay, 0b0010);
 
         // Full Function Set
-        self.write_nibbles(i2c, delay, 0b0010, false);
-        self.write_nibbles(i2c, delay, 0b1000, false);
+        self.send(i2c, delay, 0b00101000, false);
 
         // Display off
-        self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, 0b1000, false);
+        self.display_control(i2c, delay, DisplayControls::empty());
 
         // Display Clear
-        self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, 0b0001, false);
+        self.clear(i2c, delay);
 
         // Entry mode set
         self.write_nibbles(i2c, delay, 0, false);
@@ -75,8 +74,7 @@ impl I2CLCD {
     pub fn clear<I2C>(&self, i2c: &mut I2C, delay: &mut Delay)
         where I2C: Write
     {
-        self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, 0b0011, false);
+        self.send(i2c, delay, CLEAR_DISPLAY, false);
         delay.delay_ms(2u8);
     }
 
@@ -85,8 +83,7 @@ impl I2CLCD {
     {
         self.backlight = backlight;
         // Send a noop just to ensure that the backlight flag is changed 
-        self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, 0, false);
+        self.send(i2c, delay, 0, false);
     }
 
     pub fn display_control<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
@@ -123,11 +120,11 @@ impl I2CLCD {
 
         let first_nibble_data = data & 0xf;
         let second_nibble_data = (data & 0x0f) << 4;
-        self._write_nibbles(i2c, delay, first_nibble_data | nibble_flags.bits());
-        self._write_nibbles(i2c, delay, second_nibble_data | nibble_flags.bits());
+        self.pulse_nibble(i2c, delay, first_nibble_data | nibble_flags.bits());
+        self.pulse_nibble(i2c, delay, second_nibble_data | nibble_flags.bits());
     }
 
-    fn _write_nibbles<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8)
+    fn pulse_nibble<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8)
         where I2C: Write
     {
         i2c.write(self.addr, &[data | NibbleFlags::E.bits()]);
