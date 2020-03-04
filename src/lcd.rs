@@ -9,6 +9,15 @@ pub enum Backlight {
     ON
 }
 
+const DISPLAY_CONTROL: u8 = 0b00001000;
+bitflags! {
+    pub struct DisplayControls: u8 {
+        const DISPLAY = 0b100;
+        const CURSOR  = 0b010;
+        const BLINK   = 0b001;
+    }
+}
+
 pub struct I2CLCD {
     addr: u8,
     backlight: Backlight
@@ -71,12 +80,11 @@ impl I2CLCD {
         self.write_nibbles(i2c, delay, 0, false);
     }
 
-    pub fn display_control<I2C>(self, i2c: &mut I2C, delay: &mut Delay)
+    pub fn display_control<I2C>(self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
         where I2C: Write
     {
         self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, 0b1111, false);
-        delay.delay_ms(1u8);
+        self.write_nibbles(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
     }
 
     fn write_nibbles<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, val: u8, command: bool)

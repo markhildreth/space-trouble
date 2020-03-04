@@ -1,7 +1,10 @@
 #![no_std]
 #![no_main]
 
+#[macro_use]
+extern crate bitflags;
 extern crate panic_halt;
+
 use feather_m0 as hal;
 use hal::prelude::*;
 use hal::entry;
@@ -11,7 +14,7 @@ use hal::delay::Delay;
 
 mod lcd;
 
-use crate::lcd::{I2CLCD, Backlight};
+use crate::lcd::{I2CLCD, Backlight, DisplayControls};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
@@ -43,7 +46,7 @@ fn main() -> ! {
     lcd.initialize(&mut i2c, &mut delay);
     lcd.clear(&mut i2c, &mut delay);
     lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
-    lcd.display_control(&mut i2c, &mut delay);
+    lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::CURSOR);
 
 
     /*
