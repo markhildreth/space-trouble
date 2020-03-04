@@ -45,13 +45,16 @@ impl I2CLCD {
     {
 
         // Manually reset the SPLC780D circuit to a 4-bit interface
-        i2c.write(self.addr, &[0u8]);
         delay.delay_ms(50u8);
+        i2c.write(self.addr, &[0u8]);
+        delay.delay_ms(1000u16);
+
         self.pulse_nibble(i2c, delay, 0x03);
-        delay.delay_ms(10u8);
+        delay.delay_us(4500u16);
         self.pulse_nibble(i2c, delay, 0x03);
-        delay.delay_ms(1u8);
+        delay.delay_us(4500u16);
         self.pulse_nibble(i2c, delay, 0x03);
+        delay.delay_us(150u8);
 
         // Set 4-bit mode (function set)
         self.pulse_nibble(i2c, delay, 0b0010);
@@ -66,8 +69,7 @@ impl I2CLCD {
         self.clear(i2c, delay);
 
         // Entry mode set
-        self.write_nibbles(i2c, delay, 0, false);
-        self.write_nibbles(i2c, delay, 0b0111, false);
+        self.send(i2c, delay, 0b00000110, false);
         delay.delay_ms(1u8);
     }
 
@@ -90,19 +92,6 @@ impl I2CLCD {
         where I2C: Write
     {
         self.send(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
-    }
-
-    fn write_nibbles<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, val: u8, command: bool)
-        where I2C: Write
-    {
-        let e_flag = 0b100;
-        let backlight_flag = (self.backlight == Backlight::ON) as u8 * 0b1000;
-        let command_flag = command as u8 * 0b1;
-
-        i2c.write(self.addr, &[(val << 4) | e_flag | backlight_flag | command_flag]);
-        delay.delay_us(1u8);
-        i2c.write(self.addr, &[(val << 4) & !e_flag | backlight_flag | command_flag]);
-        delay.delay_us(50u8);
     }
 
     fn send<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8, command: bool)
