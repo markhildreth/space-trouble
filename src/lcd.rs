@@ -80,7 +80,7 @@ impl I2CLCD {
         self.write_nibbles(i2c, delay, 0, false);
     }
 
-    pub fn display_control<I2C>(self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
+    pub fn display_control<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
         where I2C: Write
     {
         self.write_nibbles(i2c, delay, 0, false);

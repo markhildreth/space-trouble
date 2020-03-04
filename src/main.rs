@@ -48,15 +48,6 @@ fn main() -> ! {
     lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
     lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::CURSOR);
 
-
-    /*
-    // Set ddram
-    for x in 0..80u8 {
-        write_nibble(&mut i2c, &mut delay, 0b0011, true, true);
-        write_nibble(&mut i2c, &mut delay, 0b0011, true, true);
-    }
-    */
-
     loop {
         red_led.set_low().unwrap();
         delay.delay_ms(200u8);
