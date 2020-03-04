@@ -242,6 +242,7 @@ name = "space_team_irl"
 version = "0.1.0"
 dependencies = [
  "atsamd-hal",
+ "embedded-hal",
  "feather_m0",
  "panic-halt",
 ]
