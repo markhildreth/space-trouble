@@ -48,6 +48,9 @@ fn main() -> ! {
     lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
     lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::CURSOR);
 
+    lcd.set_display_address(&mut i2c, &mut delay, 0x08);
+    lcd.write_to_ram(&mut i2c, &mut delay, 0x32);
+
     loop {
         red_led.set_low().unwrap();
         delay.delay_ms(200u8);

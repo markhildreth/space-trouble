@@ -9,9 +9,10 @@ pub enum Backlight {
     ON
 }
 
-const CLEAR_DISPLAY: u8   = 0b00000001;
-const RETURN_HOME: u8     = 0b00000010;
-const DISPLAY_CONTROL: u8 = 0b00001000;
+const CLEAR_DISPLAY: u8       = 0b00000001;
+const RETURN_HOME: u8         = 0b00000010;
+const DISPLAY_CONTROL: u8     = 0b00001000;
+const SET_DISPLAY_ADDRESS: u8 = 0b10000000;
 
 bitflags! {
     pub struct DisplayControls: u8 {
@@ -74,6 +75,14 @@ impl I2CLCD {
         delay.delay_ms(1u8);
     }
 
+    pub fn backlight<I2C>(&mut self, i2c: &mut I2C, delay: &mut Delay, backlight: Backlight)
+        where I2C: Write
+    {
+        self.backlight = backlight;
+        // Send a noop just to ensure that the backlight flag is changed 
+        self.send(i2c, delay, 0, false);
+    }
+
     pub fn clear<I2C>(&self, i2c: &mut I2C, delay: &mut Delay)
         where I2C: Write
     {
@@ -88,18 +97,16 @@ impl I2CLCD {
         delay.delay_ms(2u8);
     }
 
-    pub fn backlight<I2C>(&mut self, i2c: &mut I2C, delay: &mut Delay, backlight: Backlight)
-        where I2C: Write
-    {
-        self.backlight = backlight;
-        // Send a noop just to ensure that the backlight flag is changed 
-        self.send(i2c, delay, 0, false);
-    }
-
     pub fn display_control<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
         where I2C: Write
     {
         self.send(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
+    }
+
+    pub fn set_display_address<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, address: u8)
+        where I2C: Write
+    {
+        self.send(i2c, delay, SET_DISPLAY_ADDRESS | address, false);
     }
 
     pub fn write_to_ram<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8)
