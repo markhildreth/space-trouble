@@ -10,6 +10,7 @@ pub enum Backlight {
 }
 
 const CLEAR_DISPLAY: u8   = 0b00000001;
+const RETURN_HOME: u8     = 0b00000010;
 const DISPLAY_CONTROL: u8 = 0b00001000;
 
 bitflags! {
@@ -80,6 +81,13 @@ impl I2CLCD {
         delay.delay_ms(2u8);
     }
 
+    pub fn return_home<I2C>(&self, i2c: &mut I2C, delay: &mut Delay)
+        where I2C: Write
+    {
+        self.send(i2c, delay, RETURN_HOME, false);
+        delay.delay_ms(2u8);
+    }
+
     pub fn backlight<I2C>(&mut self, i2c: &mut I2C, delay: &mut Delay, backlight: Backlight)
         where I2C: Write
     {
@@ -92,6 +100,12 @@ impl I2CLCD {
         where I2C: Write
     {
         self.send(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
+    }
+
+    pub fn write_to_ram<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8)
+        where I2C: Write
+    {
+        self.send(i2c, delay, data, true);
     }
 
     fn send<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8, command: bool)
