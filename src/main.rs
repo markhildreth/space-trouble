@@ -14,7 +14,7 @@ use hal::delay::Delay;
 
 mod lcd;
 
-use crate::lcd::{I2CLCD, Backlight, DisplayControls, EntryModes};
+use crate::lcd::{I2CLCD, Backlight, DisplayControls, EntryModes, CursorShifts, DisplayShifts};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
@@ -46,7 +46,7 @@ fn main() -> ! {
     lcd.initialize(&mut i2c, &mut delay);
     lcd.clear(&mut i2c, &mut delay);
     lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
-    lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::CURSOR);
+    lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::BLINK);
 
     for x in 0x31..0x40 {
         lcd.write_to_ram(&mut i2c, &mut delay, x);

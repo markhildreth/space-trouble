@@ -9,17 +9,28 @@ pub enum Backlight {
     ON
 }
 
-const CLEAR_DISPLAY: u8       = 0b00000001;
-const RETURN_HOME: u8         = 0b00000010;
-const ENTRY_MODE_SET: u8      = 0b00000100;
-const DISPLAY_CONTROL: u8     = 0b00001000;
-const SET_DISPLAY_ADDRESS: u8 = 0b10000000;
+const CLEAR_DISPLAY: u8           = 0b00000001;
+const RETURN_HOME: u8             = 0b00000010;
+const ENTRY_MODE_SET: u8          = 0b00000100;
+const DISPLAY_CONTROL: u8         = 0b00001000;
+const CURSOR_OR_DISPLAY_SHIFT: u8 = 0b00010000;
+const SET_DISPLAY_ADDRESS: u8     = 0b10000000;
 
 pub enum EntryModes {
     CursorLeft  = 0b00,
     CursorRight = 0b10,
     ShiftLeft   = 0b01,
     ShiftRight  = 0b11
+}
+
+pub enum CursorShifts {
+    Left  = 0b0000,
+    Right = 0b0100 
+}
+
+pub enum DisplayShifts {
+    Left   = 0b1000,
+    Right  = 0b1100 
 }
 
 bitflags! {
@@ -115,6 +126,18 @@ impl I2CLCD {
         where I2C: Write
     {
         self.send(i2c, delay, DISPLAY_CONTROL | controls.bits(), false);
+    }
+
+    pub fn shift_cursor<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, cursor_shift: CursorShifts)
+        where I2C: Write
+    {
+        self.send(i2c, delay, CURSOR_OR_DISPLAY_SHIFT | (cursor_shift as u8), false);
+    }
+
+    pub fn shift_display<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, display_shift: DisplayShifts)
+        where I2C: Write
+    {
+        self.send(i2c, delay, CURSOR_OR_DISPLAY_SHIFT | (display_shift as u8), false);
     }
 
     pub fn set_display_address<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, address: u8)
