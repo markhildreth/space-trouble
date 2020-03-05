@@ -12,3 +12,8 @@ panic-halt = "0.2.0"
 atsamd-hal = "0.8.2"
 embedded-hal = "0.2.3"
 bitflags = "1.2.1"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

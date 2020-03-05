@@ -11,8 +11,16 @@ pub enum Backlight {
 
 const CLEAR_DISPLAY: u8       = 0b00000001;
 const RETURN_HOME: u8         = 0b00000010;
+const ENTRY_MODE_SET: u8      = 0b00000100;
 const DISPLAY_CONTROL: u8     = 0b00001000;
 const SET_DISPLAY_ADDRESS: u8 = 0b10000000;
+
+pub enum EntryModes {
+    CursorLeft  = 0b00,
+    CursorRight = 0b10,
+    ShiftLeft   = 0b01,
+    ShiftRight  = 0b11
+}
 
 bitflags! {
     pub struct DisplayControls: u8 {
@@ -71,7 +79,7 @@ impl I2CLCD {
         self.clear(i2c, delay);
 
         // Entry mode set
-        self.send(i2c, delay, 0b00000110, false);
+        self.set_entry_mode(i2c, delay, EntryModes::CursorRight);
         delay.delay_ms(1u8);
     }
 
@@ -95,6 +103,12 @@ impl I2CLCD {
     {
         self.send(i2c, delay, RETURN_HOME, false);
         delay.delay_ms(2u8);
+    }
+
+    pub fn set_entry_mode<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, entry_mode: EntryModes)
+        where I2C: Write
+    {
+        self.send(i2c, delay, ENTRY_MODE_SET | (entry_mode as u8), false);
     }
 
     pub fn display_control<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, controls: DisplayControls)
