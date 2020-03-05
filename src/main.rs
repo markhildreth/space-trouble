@@ -14,7 +14,7 @@ use hal::delay::Delay;
 
 mod lcd;
 
-use crate::lcd::{I2CLCD, Backlight, DisplayControls, EntryModes, CursorShifts, DisplayShifts};
+use crate::lcd::{I2CLCD, Backlight, DisplayControls, EntryModes, CursorShifts, DisplayShifts, DisplayAddress};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
@@ -48,8 +48,10 @@ fn main() -> ! {
     lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
     lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::BLINK);
 
-    for x in 0x31..0x40 {
-        lcd.write_to_ram(&mut i2c, &mut delay, x);
+    lcd.set_display_address(&mut i2c, &mut delay, DisplayAddress::from_row_col(0, 10));
+    let s: &str = "Hull: 100%";
+    for c in s.bytes() {
+        lcd.write_to_ram(&mut i2c, &mut delay, c);
     }
 
     loop {

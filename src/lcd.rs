@@ -3,6 +3,28 @@ use hal::delay::Delay;
 use embedded_hal::blocking::i2c::Write;
 use embedded_hal::blocking::delay::{DelayUs, DelayMs};
 
+const DISPLAY_ADDRESS_ROWS: [u8; 4] = [0, 0x40, 0x14, 0x54];
+
+pub struct DisplayAddress {
+    address: u8
+}
+
+impl DisplayAddress {
+    pub fn raw(address: u8) -> DisplayAddress {
+        DisplayAddress { address }
+    }
+
+    pub fn from_row_col(row: u8, col: u8) -> DisplayAddress {
+        DisplayAddress {
+            address: DISPLAY_ADDRESS_ROWS[row as usize] + col
+        }
+    }
+
+    fn bits(&self) -> u8 {
+        self.address
+    }
+}
+
 #[derive(PartialEq, Eq)]
 pub enum Backlight {
     OFF,
@@ -140,10 +162,10 @@ impl I2CLCD {
         self.send(i2c, delay, CURSOR_OR_DISPLAY_SHIFT | (display_shift as u8), false);
     }
 
-    pub fn set_display_address<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, address: u8)
+    pub fn set_display_address<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, address: DisplayAddress)
         where I2C: Write
     {
-        self.send(i2c, delay, SET_DISPLAY_ADDRESS | address, false);
+        self.send(i2c, delay, SET_DISPLAY_ADDRESS | address.bits(), false);
     }
 
     pub fn write_to_ram<I2C>(&self, i2c: &mut I2C, delay: &mut Delay, data: u8)
@@ -180,4 +202,3 @@ impl I2CLCD {
         delay.delay_us(50u8);
     }
 }
-
