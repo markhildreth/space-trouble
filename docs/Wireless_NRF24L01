@@ -1,11 +1,11 @@
 Pins (Top->Bottom, Left-> Right, Holding Landscape w/ pins up and on the right).
-1 VCC
-2 GND
-3 CSN   SPI Chip Select
-4 CE    Enables RX or RT
-5 MOSI  SPI Slave Data Input
-6 SCK   SPI Clock
-7 IRQ   Maskable Interrupt Pin
-8 MISO  SPI Slave Data Output (Tri-state option)
+0 VCC
+1 GND
+2 CSN   SPI Chip Select
+3 CE    Enables RX or RT
+4 MOSI  SPI Slave Data Input
+5 SCK   SPI Clock
+6 IRQ   Maskable Interrupt Pin
+7 MISO  SPI Slave Data Output (Tri-state option)
 
 Datasheet: https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf
