@@ -8,4 +8,6 @@ Pins (Top->Bottom, Left-> Right, Holding Landscape w/ pins up and on the right).
 6 IRQ   Maskable Interrupt Pin
 7 MISO  SPI Slave Data Output (Tri-state option)
 
-Datasheet: https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf
+Datasheet:
+* https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf
+* https://www.sparkfun.com/datasheets/Components/nRF24L01_prelim_prod_spec_1_2.pdf
