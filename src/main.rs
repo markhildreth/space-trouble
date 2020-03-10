@@ -1,8 +1,6 @@
 #![no_std]
 #![no_main]
 
-#[macro_use]
-extern crate bitflags;
 extern crate panic_halt;
 
 use core::fmt::Write;
@@ -30,8 +28,9 @@ fn main() -> ! {
     );
     let mut pins = hal::Pins::new(peripherals.PORT);
     let mut red_led = pins.d13.into_open_drain_output(&mut pins.port);
+    red_led.set_high().unwrap();
 
-    let mut i2c = hal::i2c_master(
+    let i2c = hal::i2c_master(
         &mut clocks,
         270.khz(),
         peripherals.SERCOM3,
@@ -41,7 +40,6 @@ fn main() -> ! {
         &mut pins.port,
     );
 
-    // let mut lcd = I2CLCD::new(LCD_I2C_ADDRESS);
     let lcd_delay = Delay::new(core.SYST, &mut clocks);
     let mut lcd = LCD::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay);
 
@@ -53,6 +51,6 @@ fn main() -> ! {
     lcd.reset();
     lcd.clear();
     lcd.set_cursor_pos(DisplayAddress::from_row_col(0, 10).bits());
-    lcd.write_str("Hull: 100%");
+    lcd.write_str("Hull: 100%").unwrap();
     loop {}
 }
