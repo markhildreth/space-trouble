@@ -145,6 +145,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "hd44780-driver"
+version = "0.3.0"
+source = "git+https://github.com/JohnDoneth/hd44780-driver#7d899265fa66d02f41a0323b4967879414467bae"
+dependencies = [
+ "embedded-hal",
+]
+
+[[package]]
 name = "nb"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -251,6 +259,7 @@ dependencies = [
  "bitflags",
  "embedded-hal",
  "feather_m0",
+ "hd44780-driver",
  "panic-halt",
 ]
 

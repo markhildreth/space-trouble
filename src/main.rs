@@ -5,16 +5,16 @@
 extern crate bitflags;
 extern crate panic_halt;
 
+use core::fmt::Write;
 use feather_m0 as hal;
-use hal::prelude::*;
-use hal::entry;
-use hal::pac::{CorePeripherals, Peripherals};
 use hal::clock::GenericClockController;
 use hal::delay::Delay;
+use hal::entry;
+use hal::pac::{CorePeripherals, Peripherals};
+use hal::prelude::*;
 
 mod lcd;
-
-use crate::lcd::{I2CLCD, Backlight, DisplayControls, EntryModes, CursorShifts, DisplayShifts, DisplayAddress};
+use crate::lcd::{Cursor, CursorBlink, Display, DisplayAddress, DisplayMode, LCD};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
@@ -30,7 +30,6 @@ fn main() -> ! {
     );
     let mut pins = hal::Pins::new(peripherals.PORT);
     let mut red_led = pins.d13.into_open_drain_output(&mut pins.port);
-    let mut delay = Delay::new(core.SYST, &mut clocks);
 
     let mut i2c = hal::i2c_master(
         &mut clocks,
@@ -42,22 +41,18 @@ fn main() -> ! {
         &mut pins.port,
     );
 
-    let mut lcd = I2CLCD::new(LCD_I2C_ADDRESS);
-    lcd.initialize(&mut i2c, &mut delay);
-    lcd.clear(&mut i2c, &mut delay);
-    lcd.backlight(&mut i2c, &mut delay, Backlight::ON);
-    lcd.display_control(&mut i2c, &mut delay, DisplayControls::DISPLAY | DisplayControls::BLINK);
+    // let mut lcd = I2CLCD::new(LCD_I2C_ADDRESS);
+    let lcd_delay = Delay::new(core.SYST, &mut clocks);
+    let mut lcd = LCD::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay);
 
-    lcd.set_display_address(&mut i2c, &mut delay, DisplayAddress::from_row_col(0, 10));
-    let s: &str = "Hull: 100%";
-    for c in s.bytes() {
-        lcd.write_to_ram(&mut i2c, &mut delay, c);
-    }
-
-    loop {
-        red_led.set_low().unwrap();
-        delay.delay_ms(200u8);
-        red_led.set_high().unwrap();
-        delay.delay_ms(200u8);
-    }
+    lcd.set_display_mode(DisplayMode {
+        display: Display::On,
+        cursor_visibility: Cursor::Invisible,
+        cursor_blink: CursorBlink::Off,
+    });
+    lcd.reset();
+    lcd.clear();
+    lcd.set_cursor_pos(DisplayAddress::from_row_col(0, 10).bits());
+    lcd.write_str("Hull: 100%");
+    loop {}
 }

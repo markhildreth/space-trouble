@@ -12,6 +12,7 @@ panic-halt = "0.2.0"
 atsamd-hal = "0.8.2"
 embedded-hal = "0.2.3"
 bitflags = "1.2.1"
+hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
 
 [profile.release]
 debug = true
