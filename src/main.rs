@@ -10,6 +10,7 @@ use hal::delay::Delay;
 use hal::entry;
 use hal::pac::{CorePeripherals, Peripherals};
 use hal::prelude::*;
+use hal::timer::TimerCounter;
 
 mod lcd;
 use crate::lcd::{Cursor, CursorBlink, Display, DisplayAddress, DisplayMode, LCD};
@@ -20,7 +21,7 @@ const LCD_I2C_ADDRESS: u8 = 0x27;
 fn main() -> ! {
     let mut peripherals = Peripherals::take().unwrap();
     let core = CorePeripherals::take().unwrap();
-    let mut clocks = GenericClockController::with_external_32kosc(
+    let mut clocks = GenericClockController::with_internal_32kosc(
         peripherals.GCLK,
         &mut peripherals.PM,
         &mut peripherals.SYSCTRL,
@@ -43,6 +44,11 @@ fn main() -> ! {
     let lcd_delay = Delay::new(core.SYST, &mut clocks);
     let mut lcd = LCD::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay);
 
+    let gclk0 = clocks.gclk0();
+    let timer_clock = clocks.tcc2_tc3(&gclk0).unwrap();
+    let mut timer = TimerCounter::tc3_(&timer_clock, peripherals.TC3, &mut peripherals.PM);
+    timer.start(1.hz());
+
     lcd.set_display_mode(DisplayMode {
         display: Display::On,
         cursor_visibility: Cursor::Invisible,
@@ -52,5 +58,12 @@ fn main() -> ! {
     lcd.clear();
     lcd.set_cursor_pos(DisplayAddress::from_row_col(0, 10).bits());
     lcd.write_str("Hull: 100%").unwrap();
-    loop {}
+    let mut count = 0;
+    loop {
+        if let Ok(_) = timer.wait() {
+            count += 1;
+            lcd.set_cursor_pos(DisplayAddress::from_row_col(0, 0).bits());
+            lcd.write_char(count.into());
+        }
+    }
 }
