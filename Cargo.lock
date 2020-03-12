@@ -250,6 +250,8 @@ name = "space_team_irl"
 version = "0.1.0"
 dependencies = [
  "atsamd-hal",
+ "cortex-m",
+ "cortex-m-rt",
  "embedded-hal",
  "feather_m0",
  "hd44780-driver",
