@@ -3,6 +3,9 @@
 
 extern crate panic_halt;
 
+mod game;
+mod game_clock;
+
 use feather_m0 as hal;
 use hal::clock::GenericClockController;
 use hal::entry;
