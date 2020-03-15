@@ -8,6 +8,7 @@ use feather_m0::entry;
 mod device;
 // mod game;
 // mod game_clock;
+mod game_screen;
 mod lcd;
 mod states;
 // mod transport;
@@ -21,6 +22,6 @@ fn main() -> ! {
     let mut state = GameState::new(device);
 
     loop {
-        state = state.tick();
+        state.tick();
     }
 }
