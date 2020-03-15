@@ -5,7 +5,6 @@ use hal::gpio::{OpenDrain, Output, Pa17};
 use hal::pac::{CorePeripherals, Peripherals, TC3};
 use hal::prelude::*;
 use hal::timer::TimerCounter;
-use hal::Pins;
 
 use crate::lcd::LCD;
 
@@ -19,7 +18,7 @@ pub struct Device {
 
 impl Device {
     pub fn new() -> Device {
-        let mut core = CorePeripherals::take().unwrap();
+        let core = CorePeripherals::take().unwrap();
         let mut peripherals = Peripherals::take().unwrap();
         let mut clocks = GenericClockController::with_internal_32kosc(
             peripherals.GCLK,

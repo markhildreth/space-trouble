@@ -1,5 +1,4 @@
 use crate::game_clock::ElapsedMs;
-const DELAY_BETWEEN_ORDERS_MS: u32 = 2_000;
 
 pub enum MessageDestination {
     PlayerOne,
@@ -37,7 +36,7 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn new(destination: MessageDestination, payload: MessagePayload) {}
+    pub fn new(_destination: MessageDestination, _payload: MessagePayload) {}
 }
 
 pub enum MessageGeneration {
@@ -85,7 +84,7 @@ impl Game {
         }
     }
 
-    fn generate_order(&self, player: Player) -> Order {
+    fn generate_order(&self, _player: Player) -> Order {
         Order {}
     }
 }
