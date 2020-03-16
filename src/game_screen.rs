@@ -2,6 +2,8 @@ use crate::lcd::{Cursor, CursorBlink, DisplayAddress, LCD};
 use core::fmt;
 use core::fmt::Write;
 
+type StaticStrRef = &'static str;
+
 struct Dirtiable<T: Copy> {
     current: T,
     dirty: bool,
@@ -34,25 +36,42 @@ impl<T: Copy> core::convert::From<T> for Dirtiable<T> {
     }
 }
 
-pub struct GameScreen<'a> {
+pub struct GameScreen {
     distance: Dirtiable<u16>,
-    hull_health: Dirtiable<u16>,
+    hull_health: Dirtiable<u8>,
     timer: Dirtiable<Option<u8>>,
-    command_text_1: Dirtiable<Option<&'a str>>,
-    command_text_2: Dirtiable<Option<&'a str>>,
+    command_text_1: Dirtiable<Option<StaticStrRef>>,
+    command_text_2: Dirtiable<Option<StaticStrRef>>,
 }
 
 const BLOCK: char = 0xff as char;
 
-impl<'a> GameScreen<'a> {
-    pub fn new() -> GameScreen<'a> {
+impl GameScreen {
+    pub fn new() -> GameScreen {
         GameScreen {
-            distance: 3104u16.into(),
+            distance: 0.into(),
             hull_health: 100.into(),
-            timer: Some(8).into(),
-            command_text_1: Some("  Set Oblitiblaster").into(),
-            command_text_2: Some("        to 3").into(),
+            timer: None.into(),
+            command_text_1: None.into(),
+            command_text_2: None.into(),
         }
+    }
+
+    pub fn update_distance(&mut self, distance: u16) {
+        self.distance.update(distance);
+    }
+
+    pub fn update_hull_health(&mut self, hull_health: u8) {
+        self.hull_health.update(hull_health);
+    }
+
+    pub fn update_command_text(
+        &mut self,
+        text_1: Option<StaticStrRef>,
+        text_2: Option<StaticStrRef>,
+    ) {
+        self.command_text_1.update(text_1);
+        self.command_text_2.update(text_2);
     }
 
     pub fn update_timer(&mut self, n: Option<u8>) {
@@ -67,6 +86,7 @@ impl<'a> GameScreen<'a> {
 
     pub fn update(&mut self, lcd: &mut LCD) {
         self.distance.clean(|new| {
+            lcd.set_cursor_pos(DisplayAddress::from_row_col(0, 0).bits());
             fmt::write(lcd, format_args!("{} km", new)).unwrap();
         });
 

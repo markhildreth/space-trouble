@@ -16,6 +16,6 @@ cortex-m-rt = "0.6.12"
 cortex-m = "0.6.2"
 
 [profile.release]
+codegen-units = 1
 debug = true
 lto = true
-opt-level = "s"
