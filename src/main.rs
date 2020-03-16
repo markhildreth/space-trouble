@@ -20,8 +20,17 @@ use states::GameState;
 fn main() -> ! {
     let device = Device::new();
     let mut state = GameState::new(device);
+    let mut timer = 20;
 
+    state.change_timer(Some(timer));
+
+    let mut x = 0;
     loop {
         state.tick();
+        x += 1;
+        if x % 100_000 == 0 {
+            timer -= 1;
+            state.change_timer(Some(timer));
+        }
     }
 }

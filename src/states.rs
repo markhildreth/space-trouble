@@ -7,12 +7,17 @@ pub struct GameState<'a> {
 }
 
 impl GameState<'_> {
-    pub fn new(device: Device) -> Self {
-        let screen = GameScreen::new();
+    pub fn new(mut device: Device) -> Self {
+        let mut screen = GameScreen::new();
+        screen.init(&mut device.lcd);
         GameState { device, screen }
     }
 
     pub fn tick(&mut self) {
         self.screen.update(&mut self.device.lcd);
+    }
+
+    pub fn change_timer(&mut self, n: Option<u8>) {
+        self.screen.update_timer(n);
     }
 }
