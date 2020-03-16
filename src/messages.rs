@@ -1,5 +1,5 @@
 pub enum Messages {
-    UpdateDistance(u16),
+    UpdateDistance(u32),
     UpdateHullHealth(u8),
     NewDirective(Directive),
 }

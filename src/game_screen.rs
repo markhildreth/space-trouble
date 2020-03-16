@@ -37,7 +37,7 @@ impl<T: Copy> core::convert::From<T> for Dirtiable<T> {
 }
 
 pub struct GameScreen {
-    distance: Dirtiable<u16>,
+    distance: Dirtiable<u32>,
     hull_health: Dirtiable<u8>,
     timer: Dirtiable<Option<u8>>,
     command_text_1: Dirtiable<Option<StaticStrRef>>,
@@ -57,7 +57,7 @@ impl GameScreen {
         }
     }
 
-    pub fn update_distance(&mut self, distance: u16) {
+    pub fn update_distance(&mut self, distance: u32) {
         self.distance.update(distance);
     }
 
