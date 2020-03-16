@@ -1,8 +1,8 @@
 pub enum Messages {
     UpdateDistance(u32),
     UpdateHullHealth(u8),
-    UpdateDirectiveTimeRemaining(u16),
     NewDirective(Directive),
+    CompleteDirective,
 }
 
 pub enum Interface {

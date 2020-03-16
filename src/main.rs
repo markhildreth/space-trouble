@@ -6,16 +6,15 @@ extern crate panic_halt;
 use feather_m0::entry;
 
 mod device;
-// mod game_clock;
 mod game_screen;
 mod lcd;
 mod messages;
 mod states;
+mod timing;
 
 use crate::device::Device;
 use crate::messages::{Action, Directive, Interface, Messages, Value};
 use crate::states::GameState;
-use core::convert::TryInto;
 
 #[entry]
 fn main() -> ! {
@@ -26,38 +25,50 @@ fn main() -> ! {
 
     let mut distance = 0;
     let mut hull = 100;
-    let directive_time = 10_000;
 
     loop {
         device.update();
         state.update(&mut device);
 
         // Test stuff
-        if device.ms() == 1_000 {
-            state.handle(Messages::NewDirective(Directive {
-                action: Action {
-                    interface: Interface::Eigenthrottle,
-                    value: Value::Enable,
-                },
-                time_ms: 20,
-            }));
-        }
-
-        if device.ms() > 1_000 && device.ms() % 500 == 0 {
-            let blocks = ((directive_time as u32 - (device.ms() - 1_000)) * 20) / directive_time;
-            state.handle(Messages::UpdateDirectiveTimeRemaining(
-                blocks.try_into().unwrap(),
-            ));
-        }
-
         if device.ms() % 1_000 == 0 {
             distance += 204;
-            state.handle(Messages::UpdateDistance(distance));
+            state.handle(&mut device, Messages::UpdateDistance(distance));
         }
 
-        if device.ms() % 2_000 == 0 {
+        if device.ms() % 18_000 == 0 {
             hull -= 4;
-            state.handle(Messages::UpdateHullHealth(hull));
+            state.handle(&mut device, Messages::UpdateHullHealth(hull));
+        }
+
+        if device.ms() == 1_000 {
+            state.handle(
+                &mut device,
+                Messages::NewDirective(Directive {
+                    action: Action {
+                        interface: Interface::Eigenthrottle,
+                        value: Value::Enable,
+                    },
+                    time_ms: 10_000,
+                }),
+            );
+        }
+
+        if device.ms() == 6_000 {
+            state.handle(&mut device, Messages::CompleteDirective);
+        }
+
+        if device.ms() == 8_000 {
+            state.handle(
+                &mut device,
+                Messages::NewDirective(Directive {
+                    action: Action {
+                        interface: Interface::Eigenthrottle,
+                        value: Value::Enable,
+                    },
+                    time_ms: 10_000,
+                }),
+            );
         }
     }
 }

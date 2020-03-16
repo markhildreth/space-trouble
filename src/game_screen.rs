@@ -4,12 +4,14 @@ use core::fmt::Write;
 
 type StaticStrRef = &'static str;
 
-struct Dirtiable<T: Copy> {
+const BLANK_LINE: &str = "                    ";
+
+struct Dirtiable<T: Copy + PartialEq + Eq> {
     current: T,
     dirty: bool,
 }
 
-impl<T: Copy> Dirtiable<T> {
+impl<T: Copy + PartialEq + Eq> Dirtiable<T> {
     pub fn new(start: T) -> Dirtiable<T> {
         Dirtiable {
             current: start,
@@ -18,8 +20,10 @@ impl<T: Copy> Dirtiable<T> {
     }
 
     pub fn update(&mut self, new: T) {
-        self.current = new;
-        self.dirty = true;
+        if self.current != new {
+            self.current = new;
+            self.dirty = true;
+        }
     }
 
     pub fn clean(&mut self, mut f: impl FnMut(T)) {
@@ -30,7 +34,7 @@ impl<T: Copy> Dirtiable<T> {
     }
 }
 
-impl<T: Copy> core::convert::From<T> for Dirtiable<T> {
+impl<T: Copy + PartialEq + Eq> core::convert::From<T> for Dirtiable<T> {
     fn from(value: T) -> Dirtiable<T> {
         Dirtiable::new(value)
     }
@@ -39,7 +43,7 @@ impl<T: Copy> core::convert::From<T> for Dirtiable<T> {
 pub struct GameScreen {
     distance: Dirtiable<u32>,
     hull_health: Dirtiable<u8>,
-    timer: Dirtiable<Option<u8>>,
+    timer: Dirtiable<u8>,
     command_text_1: Dirtiable<Option<StaticStrRef>>,
     command_text_2: Dirtiable<Option<StaticStrRef>>,
 }
@@ -51,7 +55,7 @@ impl GameScreen {
         GameScreen {
             distance: 0.into(),
             hull_health: 100.into(),
-            timer: None.into(),
+            timer: 0.into(),
             command_text_1: None.into(),
             command_text_2: None.into(),
         }
@@ -74,7 +78,7 @@ impl GameScreen {
         self.command_text_2.update(text_2);
     }
 
-    pub fn update_timer(&mut self, n: Option<u8>) {
+    pub fn update_timer(&mut self, n: u8) {
         self.timer.update(n);
     }
 
@@ -96,28 +100,30 @@ impl GameScreen {
         });
 
         self.timer.clean(|new| {
-            if let Some(blocks) = new {
-                lcd.set_cursor_pos(DisplayAddress::from_row_col(1, 0).bits());
-                for _ in 0..blocks {
-                    lcd.write_char(BLOCK);
-                }
-                for _ in blocks..=20 {
-                    lcd.write_char(' ');
-                }
+            lcd.set_cursor_pos(DisplayAddress::from_row_col(1, 0).bits());
+            for _ in 0..new {
+                lcd.write_char(BLOCK);
+            }
+            for _ in new..=20 {
+                lcd.write_char(' ');
             }
         });
 
         self.command_text_1.clean(|new| {
+            lcd.set_cursor_pos(DisplayAddress::from_row_col(2, 0).bits());
             if let Some(command_text_1) = new {
-                lcd.set_cursor_pos(DisplayAddress::from_row_col(2, 0).bits());
                 lcd.write_str(command_text_1).unwrap();
+            } else {
+                lcd.write_str(BLANK_LINE).unwrap();
             }
         });
 
         self.command_text_2.clean(|new| {
+            lcd.set_cursor_pos(DisplayAddress::from_row_col(3, 0).bits());
             if let Some(command_text_2) = new {
-                lcd.set_cursor_pos(DisplayAddress::from_row_col(3, 0).bits());
                 lcd.write_str(command_text_2).unwrap();
+            } else {
+                lcd.write_str(BLANK_LINE).unwrap();
             }
         });
     }
