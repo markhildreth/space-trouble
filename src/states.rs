@@ -15,7 +15,7 @@ impl GameState {
         GameState { device, screen }
     }
 
-    pub fn tick(&mut self) {
+    pub fn update(&mut self) {
         self.screen.update(&mut self.device.lcd);
     }
 
@@ -27,10 +27,13 @@ impl GameState {
             Messages::UpdateHullHealth(health) => {
                 self.screen.update_hull_health(health);
             }
-            Messages::NewDirective(_directive) => {
+            Messages::UpdateDirectiveTimeRemaining(remaining_ms) => {
+                self.screen.update_timer(Some(remaining_ms as u8));
+            }
+            Messages::NewDirective(directive) => {
                 let (msg1, msg2) = ("      Enable", "   Eigenthrottle");
                 self.screen.update_command_text(Some(msg1), Some(msg2));
-                self.screen.update_timer(Some(20));
+                self.screen.update_timer(Some(directive.time_ms as u8));
             }
         }
     }
