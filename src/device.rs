@@ -13,10 +13,12 @@ const LCD_I2C_ADDRESS: u8 = 0x27;
 pub struct Device {
     pub led_pin: Pa17<Output<OpenDrain>>,
     pub lcd: LCD,
+    pub timer: TimerCounter<TC3>,
+    ms: u32,
 }
 
 impl Device {
-    pub fn new() -> (Device, TimerCounter<TC3>) {
+    pub fn new() -> Device {
         let core = CorePeripherals::take().unwrap();
         let mut peripherals = Peripherals::take().unwrap();
         let mut clocks = GenericClockController::with_internal_32kosc(
@@ -47,7 +49,21 @@ impl Device {
         let mut timer = TimerCounter::tc3_(&timer_clock, peripherals.TC3, &mut peripherals.PM);
         timer.start(1.khz());
 
-        let device = Device { led_pin, lcd };
-        (device, timer)
+        Device {
+            led_pin,
+            lcd,
+            timer,
+            ms: 0,
+        }
+    }
+
+    pub fn ms(&self) -> u32 {
+        return self.ms;
+    }
+
+    pub fn update(&mut self) {
+        if let Ok(_) = self.timer.wait() {
+            self.ms += 1;
+        }
     }
 }

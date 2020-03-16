@@ -3,20 +3,18 @@ use crate::game_screen::GameScreen;
 use crate::messages::Messages;
 
 pub struct GameState {
-    device: Device,
     screen: GameScreen,
 }
 
 impl GameState {
-    pub fn new(mut device: Device) -> Self {
+    pub fn new(device: &mut Device) -> Self {
         let mut screen = GameScreen::new();
         screen.init(&mut device.lcd);
-
-        GameState { device, screen }
+        GameState { screen }
     }
 
-    pub fn update(&mut self) {
-        self.screen.update(&mut self.device.lcd);
+    pub fn update(&mut self, device: &mut Device) {
+        self.screen.update(&mut device.lcd);
     }
 
     pub fn handle(&mut self, msg: Messages) {
