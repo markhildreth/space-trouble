@@ -1,8 +1,9 @@
 use crate::device::Device;
 use crate::game_screen::GameScreen;
-use crate::messages::Messages;
+use crate::messages::{Action, ClientMessages, Interface, Messages, Value};
+use crate::queue::OutgoingProducer;
 use crate::timing::{SpanStatus, TimeSpan};
-use embedded_hal::digital::v2::{InputPin, OutputPin};
+use embedded_hal::digital::v2::InputPin;
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     // +1 ensures that the time will run out with one
@@ -11,18 +12,22 @@ fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     return (20 * remaining_ms / total_ms + 1) as u8;
 }
 
-pub struct GameState {
+pub struct GameState<'a> {
+    producer: OutgoingProducer<'a>,
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
+    button_is_down: bool,
 }
 
-impl GameState {
-    pub fn new(device: &mut Device) -> Self {
+impl<'a> GameState<'a> {
+    pub fn new(producer: OutgoingProducer<'a>, device: &mut Device) -> Self {
         let mut screen = GameScreen::new();
         screen.init(&mut device.lcd);
         GameState {
+            producer,
             screen,
             directive_time_span: None,
+            button_is_down: device.button_pin.is_high().unwrap(),
         }
     }
 
@@ -46,10 +51,20 @@ impl GameState {
             }
         }
 
-        if device.button_pin.is_high().unwrap() {
-            device.led_pin.set_high().unwrap();
-        } else {
-            device.led_pin.set_low().unwrap();
+        match (self.button_is_down, device.button_pin.is_high().unwrap()) {
+            (false, true) => {
+                self.button_is_down = true;
+                self.producer
+                    .enqueue(ClientMessages::ActionPerformed(Action {
+                        interface: Interface::Eigenthrottle,
+                        value: Value::Enable,
+                    }))
+                    .unwrap();
+            }
+            (true, false) => {
+                self.button_is_down = false;
+            }
+            _ => (),
         }
     }
 
@@ -68,7 +83,7 @@ impl GameState {
                 self.screen.update_timer(blocks);
                 self.directive_time_span = Some(TimeSpan::new(ms, directive.time_ms as u32));
             }
-            Messages::CompleteDirective => {
+            Messages::DirectiveComplete => {
                 self.screen.update_command_text(None, None);
                 self.screen.update_timer(0);
                 self.directive_time_span = None;

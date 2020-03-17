@@ -1,5 +1,5 @@
-use crate::messages::{Action, Directive, Interface, Messages, Value};
-use crate::queue::OutgoingProducer;
+use crate::messages::{Action, ClientMessages, Directive, Interface, Messages, Value};
+use crate::queue::IncomingProducer;
 
 const TIME_BETWEEN_DIRECTIVES: u32 = 2_000;
 const SHIP_DISTANCE_UPDATE: u32 = 2_000;
@@ -15,8 +15,17 @@ enum DirectiveStatus {
     },
 }
 
+impl DirectiveStatus {
+    pub fn requires(&self, action: Action) -> bool {
+        match self {
+            DirectiveStatus::AwaitingDirective { .. } => false,
+            DirectiveStatus::HasDirective { directive, .. } => directive.action == action,
+        }
+    }
+}
+
 pub struct Game<'a> {
-    queue: OutgoingProducer<'a>,
+    queue: IncomingProducer<'a>,
     hull_health: u8,
     ship_distance: u32,
     next_ship_distance_update: u32,
@@ -24,7 +33,7 @@ pub struct Game<'a> {
 }
 
 impl<'a> Game<'a> {
-    pub fn new(queue: OutgoingProducer<'a>) -> Game {
+    pub fn new(queue: IncomingProducer<'a>) -> Game {
         Game {
             queue,
             hull_health: 100,
@@ -33,6 +42,24 @@ impl<'a> Game<'a> {
             directive_status: DirectiveStatus::AwaitingDirective {
                 wait_until: 0 + TIME_BETWEEN_DIRECTIVES,
             },
+        }
+    }
+
+    pub fn handle(&mut self, ms: u32, msg: ClientMessages) {
+        match msg {
+            ClientMessages::ActionPerformed(action) => {
+                if self.directive_status.requires(action) {
+                    self.directive_status = DirectiveStatus::AwaitingDirective {
+                        wait_until: ms + TIME_BETWEEN_DIRECTIVES,
+                    };
+                    self.queue.enqueue(Messages::DirectiveComplete).unwrap();
+                } else {
+                    self.hull_health -= 2;
+                    self.queue
+                        .enqueue(Messages::UpdateHullHealth(self.hull_health))
+                        .unwrap();
+                }
+            }
         }
     }
 
