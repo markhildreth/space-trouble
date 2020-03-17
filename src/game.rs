@@ -16,6 +16,12 @@ enum DirectiveStatus {
 }
 
 impl DirectiveStatus {
+    pub fn reset(ms: u32) -> DirectiveStatus {
+        DirectiveStatus::AwaitingDirective {
+            wait_until: ms + TIME_BETWEEN_DIRECTIVES,
+        }
+    }
+
     pub fn requires(&self, action: Action) -> bool {
         match self {
             DirectiveStatus::AwaitingDirective { .. } => false,
@@ -39,9 +45,7 @@ impl<'a> Game<'a> {
             hull_health: 100,
             ship_distance: 0,
             next_ship_distance_update: 0,
-            directive_status: DirectiveStatus::AwaitingDirective {
-                wait_until: 0 + TIME_BETWEEN_DIRECTIVES,
-            },
+            directive_status: DirectiveStatus::reset(0),
         }
     }
 
@@ -49,9 +53,7 @@ impl<'a> Game<'a> {
         match msg {
             ClientMessages::ActionPerformed(action) => {
                 if self.directive_status.requires(action) {
-                    self.directive_status = DirectiveStatus::AwaitingDirective {
-                        wait_until: ms + TIME_BETWEEN_DIRECTIVES,
-                    };
+                    self.directive_status = DirectiveStatus::reset(ms);
                     self.queue.enqueue(Messages::DirectiveComplete).unwrap();
                 } else {
                     self.hull_health -= 2;
@@ -79,9 +81,7 @@ impl<'a> Game<'a> {
             }
             DirectiveStatus::HasDirective { expiration, .. } => {
                 if ms > expiration {
-                    self.directive_status = DirectiveStatus::AwaitingDirective {
-                        wait_until: ms + TIME_BETWEEN_DIRECTIVES,
-                    };
+                    self.directive_status = DirectiveStatus::reset(ms);
                     self.hull_health -= 4;
                     self.queue
                         .enqueue(Messages::UpdateHullHealth(self.hull_health))
