@@ -1,3 +1,4 @@
+use crate::data::get_action_text;
 use crate::device::Device;
 use crate::game_screen::GameScreen;
 use crate::messages::{Action, ClientMessages, Interface, Messages, Value};
@@ -77,8 +78,8 @@ impl<'a> GameState<'a> {
                 self.screen.update_hull_health(health);
             }
             Messages::NewDirective(directive) => {
-                let (msg1, msg2) = ("      Enable", "   Eigenthrottle");
-                self.screen.update_command_text(Some(msg1), Some(msg2));
+                let (text_1, text_2) = get_action_text(directive.action);
+                self.screen.update_command_text(Some(text_1), Some(text_2));
                 let blocks = calc_blocks(0, directive.time_ms as u32);
                 self.screen.update_timer(blocks);
                 self.directive_time_span = Some(TimeSpan::new(ms, directive.time_ms as u32));
