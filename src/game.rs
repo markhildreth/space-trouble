@@ -56,10 +56,7 @@ impl<'a> Game<'a> {
                     self.directive_status = DirectiveStatus::reset(ms);
                     self.queue.enqueue(Messages::DirectiveComplete).unwrap();
                 } else {
-                    self.hull_health -= 2;
-                    self.queue
-                        .enqueue(Messages::UpdateHullHealth(self.hull_health))
-                        .unwrap();
+                    self.update_hull_health(-2);
                 }
             }
         }
@@ -82,10 +79,7 @@ impl<'a> Game<'a> {
             DirectiveStatus::HasDirective { expiration, .. } => {
                 if ms > expiration {
                     self.directive_status = DirectiveStatus::reset(ms);
-                    self.hull_health -= 4;
-                    self.queue
-                        .enqueue(Messages::UpdateHullHealth(self.hull_health))
-                        .unwrap();
+                    self.update_hull_health(-4);
                 }
             }
         }
@@ -107,5 +101,12 @@ impl<'a> Game<'a> {
             },
             time_ms: 10_000,
         }
+    }
+
+    fn update_hull_health(&mut self, change: i8) {
+        self.hull_health = (self.hull_health as i16 + change as i16) as u8;
+        self.queue
+            .enqueue(Messages::UpdateHullHealth(self.hull_health))
+            .unwrap();
     }
 }
