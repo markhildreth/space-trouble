@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum Messages {
     UpdateDistance(u32),
     UpdateHullHealth(u8),
@@ -5,24 +6,24 @@ pub enum Messages {
     CompleteDirective,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Interface {
     Eigenthrottle,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Value {
     Enable,
     Disable,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Action {
     pub interface: Interface,
     pub value: Value,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Directive {
     pub action: Action,
     pub time_ms: u32,

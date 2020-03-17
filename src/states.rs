@@ -53,7 +53,7 @@ impl GameState {
         }
     }
 
-    pub fn handle(&mut self, device: &mut Device, msg: Messages) {
+    pub fn handle(&mut self, ms: u32, msg: Messages) {
         match msg {
             Messages::UpdateDistance(distance) => {
                 self.screen.update_distance(distance);
@@ -66,8 +66,7 @@ impl GameState {
                 self.screen.update_command_text(Some(msg1), Some(msg2));
                 let blocks = calc_blocks(0, directive.time_ms as u32);
                 self.screen.update_timer(blocks);
-                self.directive_time_span =
-                    Some(TimeSpan::new(device.ms(), directive.time_ms as u32));
+                self.directive_time_span = Some(TimeSpan::new(ms, directive.time_ms as u32));
             }
             Messages::CompleteDirective => {
                 self.screen.update_command_text(None, None);
