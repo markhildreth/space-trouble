@@ -1,4 +1,4 @@
-use crate::messages::{Action, Interface as IF, Value, Value as V};
+use crate::messages::{Action, Interface as IF, Value as V};
 
 const EIGENTHROTTLE_ONE_ENABLE: &str = "      Enable";
 const EIGENTHROTTLE_ONE_DISABLE: &str = "     Disable";
