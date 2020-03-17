@@ -2,6 +2,7 @@ use crate::device::Device;
 use crate::game_screen::GameScreen;
 use crate::messages::Messages;
 use crate::timing::{SpanStatus, TimeSpan};
+use embedded_hal::digital::v2::{InputPin, OutputPin};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     // +1 ensures that the time will run out with one
@@ -43,6 +44,12 @@ impl GameState {
                     self.directive_time_span = None;
                 }
             }
+        }
+
+        if device.button_pin.is_high().unwrap() {
+            device.led_pin.set_high().unwrap();
+        } else {
+            device.led_pin.set_low().unwrap();
         }
     }
 
