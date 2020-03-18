@@ -1,5 +1,9 @@
-use crate::messages::{Action, ClientMessages, Directive, Interface, Messages, Value};
+use crate::messages::{Action, ClientMessages, Directive, Messages};
 use crate::queue::IncomingProducer;
+use crate::ship_state::ShipState;
+
+use rand::rngs::SmallRng;
+use rand::SeedableRng;
 
 const TIME_BETWEEN_DIRECTIVES: u32 = 2_000;
 const SHIP_DISTANCE_UPDATE: u32 = 2_000;
@@ -31,27 +35,33 @@ impl DirectiveStatus {
 }
 
 pub struct Game<'a> {
+    rng: SmallRng,
     queue: IncomingProducer<'a>,
     hull_health: u8,
     ship_distance: u32,
     next_ship_distance_update: u32,
     directive_status: DirectiveStatus,
+    ship_state: ShipState,
 }
 
 impl<'a> Game<'a> {
     pub fn new(queue: IncomingProducer<'a>) -> Game {
+        let rng = SmallRng::seed_from_u64(0x123456);
         Game {
+            rng,
             queue,
             hull_health: 100,
             ship_distance: 0,
             next_ship_distance_update: 0,
             directive_status: DirectiveStatus::reset(0),
+            ship_state: ShipState::default(),
         }
     }
 
     pub fn handle(&mut self, ms: u32, msg: ClientMessages) {
         match msg {
             ClientMessages::ActionPerformed(action) => {
+                self.ship_state.update(action);
                 if self.directive_status.requires(action) {
                     self.directive_status = DirectiveStatus::reset(ms);
                     self.queue.enqueue(Messages::DirectiveComplete).unwrap();
@@ -93,12 +103,10 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn generate_directive(&self) -> Directive {
+    fn generate_directive(&mut self) -> Directive {
+        let action = self.ship_state.generate_action_needed(&mut self.rng);
         Directive {
-            action: Action {
-                interface: Interface::Eigenthrottle,
-                value: Value::Enable,
-            },
+            action,
             time_ms: 10_000,
         }
     }

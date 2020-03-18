@@ -10,6 +10,7 @@ mod game_screen;
 mod lcd;
 mod messages;
 mod queue;
+mod ship_state;
 mod states;
 mod timing;
 

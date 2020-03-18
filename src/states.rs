@@ -1,7 +1,7 @@
 use crate::data::get_action_text;
 use crate::device::Device;
 use crate::game_screen::GameScreen;
-use crate::messages::{Action, ClientMessages, Interface, Messages, Value};
+use crate::messages::{Action, ClientMessages, Messages, ToggleSwitch};
 use crate::queue::OutgoingProducer;
 use crate::timing::{SpanStatus, TimeSpan};
 use embedded_hal::digital::v2::InputPin;
@@ -56,14 +56,18 @@ impl<'a> GameState<'a> {
             (false, true) => {
                 self.button_is_down = true;
                 self.producer
-                    .enqueue(ClientMessages::ActionPerformed(Action {
-                        interface: Interface::Eigenthrottle,
-                        value: Value::Enable,
-                    }))
+                    .enqueue(ClientMessages::ActionPerformed(Action::Eigenthrottle(
+                        ToggleSwitch::Enabled,
+                    )))
                     .unwrap();
             }
             (true, false) => {
                 self.button_is_down = false;
+                self.producer
+                    .enqueue(ClientMessages::ActionPerformed(Action::Eigenthrottle(
+                        ToggleSwitch::Disabled,
+                    )))
+                    .unwrap();
             }
             _ => (),
         }

@@ -6,30 +6,33 @@ pub enum Messages {
     DirectiveComplete,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Interface {
-    Eigenthrottle,
+#[derive(Debug)]
+pub enum ClientMessages {
+    ActionPerformed(Action),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Value {
-    Enable,
-    Disable,
+pub enum Action {
+    Eigenthrottle(ToggleSwitch),
+    VentControl(VentControl),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Action {
-    pub interface: Interface,
-    pub value: Value,
+pub enum ToggleSwitch {
+    Disabled,
+    Enabled,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum VentControl {
+    Hydrogen,
+    WaterVapor,
+    Waste,
+    Frustrations,
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct Directive {
     pub action: Action,
     pub time_ms: u32,
-}
-
-#[derive(Debug)]
-pub enum ClientMessages {
-    ActionPerformed(Action),
 }
