@@ -21,3 +21,4 @@ game_logic = { path = "game_logic" }
 [profile.release]
 codegen-units = 1
 lto = true
+
