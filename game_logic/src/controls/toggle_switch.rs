@@ -5,7 +5,7 @@ pub enum ToggleSwitch {
 }
 
 impl ToggleSwitch {
-    pub fn generate_other(self) -> ToggleSwitch {
+    pub fn random_other(self) -> ToggleSwitch {
         match self {
             ToggleSwitch::Disabled => ToggleSwitch::Enabled,
             ToggleSwitch::Enabled => ToggleSwitch::Disabled,
@@ -25,13 +25,7 @@ mod tests {
 
     #[test]
     fn can_select_new_toggle_switch() {
-        assert_eq!(
-            ToggleSwitch::Enabled.generate_other(),
-            ToggleSwitch::Disabled
-        );
-        assert_eq!(
-            ToggleSwitch::Disabled.generate_other(),
-            ToggleSwitch::Enabled
-        );
+        assert_eq!(ToggleSwitch::Enabled.random_other(), ToggleSwitch::Disabled);
+        assert_eq!(ToggleSwitch::Disabled.random_other(), ToggleSwitch::Enabled);
     }
 }
