@@ -1,30 +1,12 @@
-use crate::messages::{Action, ToggleSwitch, VentControl};
+use crate::messages::{Action, FourSwitch, ToggleSwitch, VentControl};
 use rand::Rng;
-
-fn generate_random(current: ToggleSwitch) -> ToggleSwitch {
-    match current {
-        ToggleSwitch::Disabled => ToggleSwitch::Enabled,
-        ToggleSwitch::Enabled => ToggleSwitch::Disabled,
-    }
-}
-
-fn generate_new<T>(rng: &mut T) -> VentControl
-where
-    T: Rng,
-{
-    match rng.gen_range(1, 5) {
-        1 => VentControl::Hydrogen,
-        2 => VentControl::WaterVapor,
-        3 => VentControl::Waste,
-        4 => VentControl::Frustrations,
-        _ => unreachable!(),
-    }
-}
 
 #[derive(Default)]
 pub struct ShipState {
     eigenthrottle: ToggleSwitch,
     // vent_control also here, but carries no state
+    gelatinous_darkbucket: ToggleSwitch,
+    newtonian_fibermist: FourSwitch,
 }
 
 impl ShipState {
@@ -32,6 +14,8 @@ impl ShipState {
         match action {
             Action::Eigenthrottle(v) => self.eigenthrottle = v,
             Action::VentControl(_) => (),
+            Action::GelatinousDarkbucket(v) => self.gelatinous_darkbucket = v,
+            Action::NewtonianFibermist(v) => self.newtonian_fibermist = v,
         }
     }
 
@@ -39,9 +23,15 @@ impl ShipState {
     where
         T: Rng,
     {
-        match rng.gen_range(1, 3) {
-            1 => Action::Eigenthrottle(generate_random(self.eigenthrottle)),
-            2 => Action::VentControl(generate_new(rng)),
+        match rng.gen_range(1, 5) {
+            1 => Action::Eigenthrottle(ToggleSwitch::generate_new(self.eigenthrottle)),
+            2 => Action::VentControl(VentControl::generate_new(rng)),
+            3 => {
+                Action::GelatinousDarkbucket(ToggleSwitch::generate_new(self.gelatinous_darkbucket))
+            }
+            4 => {
+                Action::NewtonianFibermist(FourSwitch::generate_new(self.newtonian_fibermist, rng))
+            }
             _ => unreachable!(),
         }
     }
