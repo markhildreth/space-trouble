@@ -36,3 +36,9 @@ pub struct Directive {
     pub action: Action,
     pub time_ms: u32,
 }
+
+impl Default for ToggleSwitch {
+    fn default() -> Self {
+        ToggleSwitch::Disabled
+    }
+}

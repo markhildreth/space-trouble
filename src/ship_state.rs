@@ -1,80 +1,37 @@
 use crate::messages::{Action, ToggleSwitch, VentControl};
 use rand::Rng;
 
-impl Default for ToggleSwitch {
-    fn default() -> Self {
-        ToggleSwitch::Disabled
+fn generate_random(current: ToggleSwitch) -> ToggleSwitch {
+    match current {
+        ToggleSwitch::Disabled => ToggleSwitch::Enabled,
+        ToggleSwitch::Enabled => ToggleSwitch::Disabled,
     }
 }
 
-trait StatefulRandom {
-    fn new_random_value(&self) -> Self;
-}
-
-trait StatelessRandom {
-    fn random_value<T: Rng>(rng: &mut T) -> Self;
-}
-
-impl StatefulRandom for ToggleSwitch {
-    fn new_random_value(&self) -> ToggleSwitch {
-        if *self == ToggleSwitch::Disabled {
-            ToggleSwitch::Enabled
-        } else {
-            ToggleSwitch::Disabled
-        }
-    }
-}
-
-impl StatelessRandom for VentControl {
-    fn random_value<TRng: Rng>(rng: &mut TRng) -> VentControl {
-        VentControl::Hydrogen
-    }
-}
-
-#[derive(Default)]
-struct Stateful<T: StatefulRandom> {
-    current_value: T,
-}
-
-impl<T: StatefulRandom> Stateful<T> {
-    pub fn update(&mut self, new_value: T) {
-        self.current_value = new_value;
-    }
-
-    pub fn generate_new_value<TRng: Rng>(&self, rng: &mut TRng) -> T {
-        self.current_value.new_random_value()
-    }
-}
-
-struct Stateless<T>
+fn generate_new<T>(rng: &mut T) -> VentControl
 where
-    T: StatelessRandom,
+    T: Rng,
 {
-    _phantom: core::marker::PhantomData<T>,
-}
-
-impl<T> Default for Stateless<T>
-where
-    T: StatelessRandom,
-{
-    fn default() -> Self {
-        Stateless {
-            _phantom: core::marker::PhantomData,
-        }
+    match rng.gen_range(1, 5) {
+        1 => VentControl::Hydrogen,
+        2 => VentControl::WaterVapor,
+        3 => VentControl::Waste,
+        4 => VentControl::Frustrations,
+        _ => unreachable!(),
     }
 }
 
 #[derive(Default)]
 pub struct ShipState {
-    eigenthrottle: Stateful<ToggleSwitch>,
-    vent_control: Stateless<VentControl>,
+    eigenthrottle: ToggleSwitch,
+    // vent_control also here, but carries no state
 }
 
 impl ShipState {
     pub fn update(&mut self, action: Action) {
         match action {
-            Action::Eigenthrottle(v) => self.eigenthrottle.update(v),
-            Action::VentControl(v) => (),
+            Action::Eigenthrottle(v) => self.eigenthrottle = v,
+            Action::VentControl(_) => (),
         }
     }
 
@@ -82,6 +39,10 @@ impl ShipState {
     where
         T: Rng,
     {
-        Action::Eigenthrottle(self.eigenthrottle.generate_new_value(rng))
+        match rng.gen_range(1, 3) {
+            1 => Action::Eigenthrottle(generate_random(self.eigenthrottle)),
+            2 => Action::VentControl(generate_new(rng)),
+            _ => unreachable!(),
+        }
     }
 }
