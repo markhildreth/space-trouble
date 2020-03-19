@@ -4,3 +4,13 @@ https://cdn-learn.adafruit.com/assets/assets/000/046/196/original/Feather_M0_Bas
 Microprocessor (ATSAMD21) Datasheet:
 https://www.adafruit.com/images/product-files/2772/atmel-42181-sam-d21_datasheet.pdf
 
+Reserved Logic Pins:
+* SDA/SCL: I2C (LCD)
+* SCK/MOSI/MISO: SPI (Wireless)
+
+Usable Pins:
+* RX / TX (2 pins)
+* A0 - A5 (6 pins)
+* D pins 5, 6, 9 - 13  (7)
+
+Total: 15
