@@ -1,5 +1,5 @@
 [package]
-name = "space_team_irl"
+name = "space_trouble"
 version = "0.1.0"
 authors = ["Mark Hildreth <mark.k.hildreth@gmail.com>"]
 edition = "2018"
@@ -16,8 +16,8 @@ cortex-m-rt = "0.6.12"
 cortex-m = "0.6.2"
 heapless = "0.5.3"
 rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
+game_logic = { path = "game_logic" }
 
 [profile.release]
 codegen-units = 1
-debug = true
 lto = true
