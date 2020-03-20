@@ -1,4 +1,4 @@
-use crate::controls::{FourSwitch, ToggleSwitch, VentControl};
+use crate::options::{FourSwitch, ToggleSwitch, VentControl};
 use crate::Action;
 use rand::Rng;
 

@@ -1,9 +1,9 @@
 #![cfg_attr(not(test), no_std)]
 
-pub mod controls;
+pub mod options;
 mod ship_state;
 
-use controls::{FourSwitch, ToggleSwitch, VentControl};
+use options::{FourSwitch, ToggleSwitch, VentControl};
 pub use ship_state::ShipState;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
