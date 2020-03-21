@@ -1,4 +1,4 @@
-use crate::controls::{Stateful, Stateless};
+use crate::controls::{Control, Stateful, Stateless};
 use crate::options::{FourSwitch, ToggleSwitch, VentControl};
 use crate::{Action, GenerateFailReason};
 use core::fmt::Debug;
