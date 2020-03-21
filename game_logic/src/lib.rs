@@ -13,3 +13,10 @@ pub enum Action {
     VentControl(VentControl),
     NewtonianFibermist(FourSwitch),
 }
+
+trait EnumFill
+where
+    Self: core::marker::Sized,
+{
+    fn fill(vec: &mut heapless::Vec<Self, heapless::consts::U4>);
+}

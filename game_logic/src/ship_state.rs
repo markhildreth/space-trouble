@@ -1,40 +1,152 @@
 use crate::options::{FourSwitch, ToggleSwitch, VentControl};
-use crate::Action;
-use rand::Rng;
+use crate::{Action, EnumFill};
+use core::fmt::Debug;
+use heapless::consts::*;
 
-#[derive(Default)]
+pub enum GenerateFailReason {
+    NoActionsAvailable,
+}
+
+#[derive(Debug)]
+struct Stateful<T> {
+    current: T,
+    available: heapless::Vec<T, U4>,
+}
+
+impl<T> Stateful<T>
+where
+    T: Copy + Debug,
+{
+    fn perform(&mut self, option: T) {
+        self.available.push(self.current).unwrap();
+        self.current = option;
+    }
+
+    fn actions_available(&self) -> bool {
+        self.available.len() > 0
+    }
+
+    fn generate(&mut self, rng: &mut impl rand::Rng) -> T {
+        let i = rng.gen_range(0, self.available.len());
+        self.available.swap_remove(i)
+    }
+}
+
+impl<T> Default for Stateful<T>
+where
+    T: EnumFill + Debug,
+{
+    fn default() -> Stateful<T> {
+        let mut available = heapless::Vec::new();
+        T::fill(&mut available);
+
+        let current = available.swap_remove(0);
+
+        Stateful { current, available }
+    }
+}
+
+#[derive(Debug)]
+struct Stateless<T>
+where
+    T: EnumFill,
+{
+    available: heapless::Vec<T, U4>,
+}
+
+impl<T> Stateless<T>
+where
+    T: EnumFill,
+{
+    fn perform(&mut self, _option: T) {}
+
+    fn actions_available(&self) -> bool {
+        self.available.len() > 0
+    }
+
+    fn generate(&mut self, rng: &mut impl rand::Rng) -> T {
+        let i = rng.gen_range(0, self.available.len());
+        self.available.swap_remove(i)
+    }
+}
+
+impl<T> Default for Stateless<T>
+where
+    T: EnumFill,
+{
+    fn default() -> Stateless<T> {
+        let mut available = heapless::Vec::new();
+        T::fill(&mut available);
+        Stateless { available }
+    }
+}
+
+#[derive(Default, Debug)]
 pub struct ShipState {
-    eigenthrottle: ToggleSwitch,
-    // vent_control also here, but carries no state.
-    gelatinous_darkbucket: ToggleSwitch,
-    newtonian_fibermist: FourSwitch,
+    eigenthrottle: Stateful<ToggleSwitch>,
+    vent_control: Stateless<VentControl>,
+    gelatinous_darkbucket: Stateful<ToggleSwitch>,
+    newtonian_fibermist: Stateful<FourSwitch>,
 }
 
 impl ShipState {
     pub fn perform(&mut self, action: Action) {
         match action {
-            Action::Eigenthrottle(v) => self.eigenthrottle = v,
-            Action::VentControl(_) => (),
-            Action::GelatinousDarkbucket(v) => self.gelatinous_darkbucket = v,
-            Action::NewtonianFibermist(v) => self.newtonian_fibermist = v,
+            Action::Eigenthrottle(v) => self.eigenthrottle.perform(v),
+            Action::VentControl(v) => self.vent_control.perform(v),
+            Action::GelatinousDarkbucket(v) => self.gelatinous_darkbucket.perform(v),
+            Action::NewtonianFibermist(v) => self.newtonian_fibermist.perform(v),
         }
     }
 
-    pub fn generate_action_needed<T>(&self, rng: &mut T) -> Action
-    where
-        T: Rng,
-    {
-        match rng.gen_range(1, 5) {
-            1 => Action::Eigenthrottle(self.eigenthrottle.random_other()),
-            2 => Action::VentControl(VentControl::random(rng)),
-            3 => {
-                Action::GelatinousDarkbucket(ToggleSwitch::random_other(self.gelatinous_darkbucket))
-            }
-            4 => {
-                Action::NewtonianFibermist(FourSwitch::random_other(self.newtonian_fibermist, rng))
-            }
-            _ => unreachable!(),
+    pub fn generate_action(
+        &mut self,
+        rng: &mut impl rand::Rng,
+    ) -> Result<Action, GenerateFailReason> {
+        let total_available = self.eigenthrottle.actions_available() as u8
+            + self.vent_control.actions_available() as u8
+            + self.gelatinous_darkbucket.actions_available() as u8
+            + self.newtonian_fibermist.actions_available() as u8;
+
+        if total_available == 0 {
+            return Err(GenerateFailReason::NoActionsAvailable);
         }
+
+        let r = rng.gen_range(0, total_available);
+        let mut i = 0;
+
+        if self.eigenthrottle.actions_available() {
+            if r == i {
+                return Ok(Action::Eigenthrottle(self.eigenthrottle.generate(rng)));
+            }
+            i += 1;
+        }
+
+        if self.vent_control.actions_available() {
+            if r == i {
+                return Ok(Action::VentControl(self.vent_control.generate(rng)));
+            }
+            i += 1;
+        }
+
+        if self.gelatinous_darkbucket.actions_available() {
+            if r == i {
+                return Ok(Action::GelatinousDarkbucket(
+                    self.gelatinous_darkbucket.generate(rng),
+                ));
+            }
+            i += 1;
+        }
+
+        if self.newtonian_fibermist.actions_available() {
+            if r == i {
+                return Ok(Action::NewtonianFibermist(
+                    self.newtonian_fibermist.generate(rng),
+                ));
+            }
+        }
+
+        unreachable!();
     }
 }
 
@@ -42,84 +154,67 @@ impl ShipState {
 mod test {
     use super::*;
 
-    fn assert_generates<'a>(state: &ShipState, actions: impl Iterator<Item = &'a Action>) {
+    fn generate_all_actions(ship_state: &mut ShipState) -> Vec<Action> {
         let mut rng = rand::thread_rng();
-        let gen: Vec<Action> = (0..1000)
-            .map(|_| state.generate_action_needed(&mut rng))
-            .collect();
+        let mut results = Vec::with_capacity(16);
+        let mut i = 0;
+        loop {
+            match ship_state.generate_action(&mut rng) {
+                Ok(a) => results.push(a),
+                Err(GenerateFailReason::NoActionsAvailable) => break,
+            }
 
-        for action in actions {
-            assert!(gen.contains(action), "Did not generate {:?}", action);
+            i += 1;
+            if i == 100 {
+                panic!("Generating actions hit 100 items. Stopping");
+            }
         }
-    }
-
-    fn assert_does_not_generate<'a>(state: &ShipState, actions: impl Iterator<Item = &'a Action>) {
-        let mut rng = rand::thread_rng();
-        let gen: Vec<Action> = (0..1000)
-            .map(|_| state.generate_action_needed(&mut rng))
-            .collect();
-
-        for action in actions {
-            assert!(!gen.contains(action), "Did not generate {:?}", action);
-        }
+        results
     }
 
     #[test]
-    fn generates_all_available_actions() {
-        let state = ShipState::default();
+    fn can_generate_actions_from_default_state() {
+        let mut ship = ShipState::default();
+        println!("{:?}", ship);
+        let actions = generate_all_actions(&mut ship);
 
-        assert_generates(
-            &state,
-            [
-                Action::Eigenthrottle(ToggleSwitch::Enabled),
-                Action::VentControl(VentControl::Hydrogen),
-                Action::VentControl(VentControl::WaterVapor),
-                Action::VentControl(VentControl::Waste),
-                Action::VentControl(VentControl::Frustrations),
-                Action::GelatinousDarkbucket(ToggleSwitch::Enabled),
-                Action::NewtonianFibermist(FourSwitch::One),
-                Action::NewtonianFibermist(FourSwitch::Two),
-                Action::NewtonianFibermist(FourSwitch::Three),
-            ]
-            .iter(),
-        );
-
-        assert_does_not_generate(
-            &state,
-            [
-                Action::Eigenthrottle(ToggleSwitch::Disabled),
-                Action::GelatinousDarkbucket(ToggleSwitch::Disabled),
-                Action::NewtonianFibermist(FourSwitch::Zero),
-            ]
-            .iter(),
-        );
+        let items = [
+            Action::Eigenthrottle(ToggleSwitch::Disabled),
+            Action::GelatinousDarkbucket(ToggleSwitch::Disabled),
+            Action::NewtonianFibermist(FourSwitch::Zero),
+        ];
+        items.iter().for_each(|default_action| {
+            assert!(
+                !actions.contains(default_action),
+                "Action {:?} was generated",
+                default_action
+            );
+        });
     }
 
     #[test]
-    fn generates_after_perform() {
-        let mut state = ShipState::default();
-        state.perform(Action::Eigenthrottle(ToggleSwitch::Enabled));
-        state.perform(Action::GelatinousDarkbucket(ToggleSwitch::Enabled));
-        state.perform(Action::NewtonianFibermist(FourSwitch::One));
+    fn can_generate_other_actions_from_default_state() {
+        let mut ship = ShipState::default();
+        let actions = generate_all_actions(&mut ship);
 
-        assert_generates(
-            &state,
-            [
-                Action::Eigenthrottle(ToggleSwitch::Disabled),
-                Action::GelatinousDarkbucket(ToggleSwitch::Disabled),
-                Action::NewtonianFibermist(FourSwitch::Zero),
-            ]
-            .iter(),
-        );
+        let items = [
+            Action::Eigenthrottle(ToggleSwitch::Enabled),
+            Action::VentControl(VentControl::Hydrogen),
+            Action::VentControl(VentControl::WaterVapor),
+            Action::VentControl(VentControl::Waste),
+            Action::VentControl(VentControl::Frustrations),
+            Action::GelatinousDarkbucket(ToggleSwitch::Enabled),
+            Action::NewtonianFibermist(FourSwitch::One),
+            Action::NewtonianFibermist(FourSwitch::Two),
+            Action::NewtonianFibermist(FourSwitch::Three),
+        ];
 
-        assert_does_not_generate(
-            &state,
-            [
-                Action::Eigenthrottle(ToggleSwitch::Enabled),
-                Action::GelatinousDarkbucket(ToggleSwitch::Enabled),
-                Action::NewtonianFibermist(FourSwitch::One),
-            ]
-            .iter(),
-        );
+        items.iter().for_each(|action| {
+            assert!(
+                actions.contains(action),
+                "Action {:?} was not generated",
+                action
+            );
+        });
     }
 }
