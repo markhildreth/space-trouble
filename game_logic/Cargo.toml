@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 rand = { version = "0.7.3", default-features = false }
+heapless = "0.5.3"
 
 [dev-dependencies]
 # While testing on native computer, we will use more features
