@@ -21,6 +21,7 @@ pub enum GenerateFailReason {
     NoActionsAvailable,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Directive {
     pub action: Action,
     pub expiration: u32,
@@ -32,7 +33,8 @@ pub type GameMessageQueue = Queue<GameMessage, U4>;
 pub type GameMessageProducer<'a> = Producer<'a, GameMessage, U4>;
 pub type GameMessageConsumer<'a> = Consumer<'a, GameMessage, U4>;
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum GameMessage {
     NewDirective(Directive),
-    HullHealthUpdated(u32),
+    HullHealthUpdated(u8),
 }

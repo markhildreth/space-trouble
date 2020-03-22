@@ -21,6 +21,15 @@ impl ShipState {
         }
     }
 
+    pub fn clear(&mut self, action: Action) {
+        match action {
+            Action::Eigenthrottle(v) => self.eigenthrottle.clear(v),
+            Action::VentControl(v) => self.vent_control.clear(v),
+            Action::GelatinousDarkbucket(v) => self.gelatinous_darkbucket.clear(v),
+            Action::NewtonianFibermist(v) => self.newtonian_fibermist.clear(v),
+        }
+    }
+
     pub fn generate_action(
         &mut self,
         rng: &mut impl rand::Rng,
