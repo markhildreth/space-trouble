@@ -1,4 +1,4 @@
-use crate::EnumFill;
+use crate::options::EnumFill;
 use heapless::consts::*;
 use heapless::Vec;
 

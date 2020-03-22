@@ -1,9 +1,10 @@
-use crate::messages::{ClientMessages, Messages};
+use game_logic::Action;
 use heapless::consts::*;
 use heapless::spsc::{Producer, Queue};
 
-pub type IncomingQueue = Queue<Messages, U4>;
-pub type IncomingProducer<'a> = Producer<'a, Messages, U4>;
-
-pub type OutgoingQueue = Queue<ClientMessages, U4>;
-pub type OutgoingProducer<'a> = Producer<'a, ClientMessages, U4>;
+#[derive(Debug, PartialEq, Eq)]
+pub enum ClientMessage {
+    ActionPerformed(Action),
+}
+pub type ClientMessageQueue = Queue<ClientMessage, U4>;
+pub type ClientMessageProducer<'a> = Producer<'a, ClientMessage, U4>;

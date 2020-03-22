@@ -6,7 +6,7 @@ mod options;
 mod ship_state;
 
 pub use game::Game;
-use options::{EnumFill, FourSwitch, ToggleSwitch, VentControl};
+pub use options::{FourSwitch, ToggleSwitch, VentControl};
 pub use ship_state::ShipState;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

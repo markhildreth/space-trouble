@@ -1,4 +1,4 @@
-use crate::EnumFill;
+use crate::options::EnumFill;
 use core::fmt::Debug;
 use heapless::consts::*;
 

@@ -5,54 +5,48 @@ extern crate panic_halt;
 
 mod data;
 mod device;
-mod game;
 mod game_screen;
 mod lcd;
-mod messages;
 mod queue;
-mod ship_state;
 mod states;
 mod timing;
 
 use crate::device::Device;
-use crate::game::Game;
-use crate::queue::{IncomingQueue, OutgoingQueue};
+use crate::queue::ClientMessageQueue;
 use crate::states::GameState;
 use feather_m0::entry;
+use game_logic::{Game, GameMessageQueue};
+use rand::rngs::SmallRng;
+use rand::SeedableRng;
 
 #[entry]
 fn main() -> ! {
-    // Messages sent from the game "client" -> "server"
-    let mut outgoing_queue = OutgoingQueue::new();
-    let (out_producer, mut out_consumer) = outgoing_queue.split();
+    // Messages coming from the game server
+    let mut game_msg_queue = GameMessageQueue::new();
+    let (game_msg_producer, mut game_msg_consumer) = game_msg_queue.split();
 
-    // Messages sent from the game "server" -> "client"
-    let mut incoming_queue = IncomingQueue::new();
-    let (in_producer, mut in_consumer) = incoming_queue.split();
+    // Messages coming from the client
+    let mut client_msg_queue = ClientMessageQueue::new();
+    let (client_msg_producer, mut _client_msg_consumer) = client_msg_queue.split();
 
     // The game "server".
-    let mut game = Game::new(in_producer);
+    let mut game = Game::new(game_msg_producer);
 
     // The game "client"
     let mut device = Device::new();
-    let mut state = GameState::new(out_producer, &mut device);
+    let mut state = GameState::new(client_msg_producer, &mut device);
+
+    let mut rng = SmallRng::seed_from_u64(0x12345678);
 
     loop {
         device.update();
 
         state.update(&mut device);
-        game.update(device.ms());
+        game.update(device.ms(), &mut rng);
 
         loop {
-            match in_consumer.dequeue() {
+            match game_msg_consumer.dequeue() {
                 Some(msg) => state.handle(device.ms(), msg),
-                None => break,
-            }
-        }
-
-        loop {
-            match out_consumer.dequeue() {
-                Some(msg) => game.handle(device.ms(), msg),
                 None => break,
             }
         }

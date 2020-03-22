@@ -1,4 +1,4 @@
-use crate::messages::{Action, FourSwitch, ToggleSwitch, VentControl};
+use game_logic::{Action, FourSwitch, ToggleSwitch, VentControl};
 
 const EMPTY: &str = "";
 const ENABLE: &str = "      Enable";
@@ -21,11 +21,11 @@ const NEWTONIAN_FIBERMIST: &str = "Newtonian Fibermist";
 
 pub fn get_action_text(action: Action) -> (&'static str, &'static str) {
     match action {
-        Action::Eigenthrottle(eigenthrottle) => match eigenthrottle {
+        Action::Eigenthrottle(et) => match et {
             ToggleSwitch::Enabled => (ENABLE, EIGENTHROTTLE),
             ToggleSwitch::Disabled => (DISABLE, EIGENTHROTTLE),
         },
-        Action::VentControl(vent_control) => match vent_control {
+        Action::VentControl(vc) => match vc {
             VentControl::Hydrogen => (VENT_HYDROGEN, EMPTY),
             VentControl::WaterVapor => (VENT_WATER_VAPOR, EMPTY),
             VentControl::Waste => (VENT_WASTE, EMPTY),
@@ -35,7 +35,7 @@ pub fn get_action_text(action: Action) -> (&'static str, &'static str) {
             ToggleSwitch::Enabled => (ENABLE, GELATINOUS_DARK_BUCKET),
             ToggleSwitch::Disabled => (DISABLE, GELATINOUS_DARK_BUCKET),
         },
-        Action::NewtonianFibermist(gdb) => match gdb {
+        Action::NewtonianFibermist(nwt) => match nwt {
             FourSwitch::Zero => (NEWTONIAN_FIBERMIST, TO_ZERO),
             FourSwitch::One => (NEWTONIAN_FIBERMIST, TO_ONE),
             FourSwitch::Two => (NEWTONIAN_FIBERMIST, TO_TWO),

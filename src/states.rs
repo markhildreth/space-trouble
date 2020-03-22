@@ -1,10 +1,10 @@
 use crate::data::get_action_text;
 use crate::device::Device;
 use crate::game_screen::GameScreen;
-use crate::messages::{Action, ClientMessages, Messages, ToggleSwitch};
-use crate::queue::OutgoingProducer;
+use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
 use embedded_hal::digital::v2::InputPin;
+use game_logic::{Action, GameMessage, ToggleSwitch};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     // +1 ensures that the time will run out with one
@@ -14,14 +14,14 @@ fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
 }
 
 pub struct GameState<'a> {
-    producer: OutgoingProducer<'a>,
+    producer: ClientMessageProducer<'a>,
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
     button_is_down: bool,
 }
 
 impl<'a> GameState<'a> {
-    pub fn new(producer: OutgoingProducer<'a>, device: &mut Device) -> Self {
+    pub fn new(producer: ClientMessageProducer<'a>, device: &mut Device) -> Self {
         let mut screen = GameScreen::new();
         screen.init(&mut device.lcd);
         GameState {
@@ -56,7 +56,7 @@ impl<'a> GameState<'a> {
             (false, true) => {
                 self.button_is_down = true;
                 self.producer
-                    .enqueue(ClientMessages::ActionPerformed(Action::Eigenthrottle(
+                    .enqueue(ClientMessage::ActionPerformed(Action::Eigenthrottle(
                         ToggleSwitch::Enabled,
                     )))
                     .unwrap();
@@ -64,7 +64,7 @@ impl<'a> GameState<'a> {
             (true, false) => {
                 self.button_is_down = false;
                 self.producer
-                    .enqueue(ClientMessages::ActionPerformed(Action::Eigenthrottle(
+                    .enqueue(ClientMessage::ActionPerformed(Action::Eigenthrottle(
                         ToggleSwitch::Disabled,
                     )))
                     .unwrap();
@@ -73,26 +73,29 @@ impl<'a> GameState<'a> {
         }
     }
 
-    pub fn handle(&mut self, ms: u32, msg: Messages) {
+    pub fn handle(&mut self, ms: u32, msg: GameMessage) {
         match msg {
-            Messages::UpdateDistance(distance) => {
+            /*
+            GameMessage::UpdateDistance(distance) => {
                 self.screen.update_distance(distance);
             }
-            Messages::UpdateHullHealth(health) => {
+            */
+            GameMessage::HullHealthUpdated(health) => {
                 self.screen.update_hull_health(health);
             }
-            Messages::NewDirective(directive) => {
+            GameMessage::NewDirective(directive) => {
                 let (text_1, text_2) = get_action_text(directive.action);
                 self.screen.update_command_text(Some(text_1), Some(text_2));
-                let blocks = calc_blocks(0, directive.time_ms as u32);
+                let blocks = calc_blocks(0, directive.expiration);
                 self.screen.update_timer(blocks);
-                self.directive_time_span = Some(TimeSpan::new(ms, directive.time_ms as u32));
-            }
-            Messages::DirectiveComplete => {
-                self.screen.update_command_text(None, None);
-                self.screen.update_timer(0);
-                self.directive_time_span = None;
-            }
+                self.directive_time_span = Some(TimeSpan::new(ms, directive.expiration as u32));
+            } /*
+              GameMessage::DirectiveComplete => {
+                  self.screen.update_command_text(None, None);
+                  self.screen.update_timer(0);
+                  self.directive_time_span = None;
+              }
+              */
         }
     }
 }
