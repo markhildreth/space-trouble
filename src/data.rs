@@ -15,7 +15,9 @@ const VENT_WATER_VAPOR: &str = "  Vent Water Vapor";
 const VENT_WASTE: &str = "     Vent Waste";
 const VENT_FRUSTRATIONS: &str = "  Vent Frustrations";
 
-const GELATINOUS_DARK_BUCKET: &str = "Gelatinous Darkbucket";
+const ENABLE_GELATINOUS_DARK_BUCKET: &str = " Enable Gelatinous";
+const DISABLE_GELATINOUS_DARK_BUCKET: &str = " Disable Gelatinous";
+const GELATINOUS_DARK_BUCKET: &str = "     Darkbucket";
 
 const NEWTONIAN_FIBERMIST: &str = "Newtonian Fibermist";
 
@@ -32,8 +34,8 @@ pub fn get_action_text(action: Action) -> (&'static str, &'static str) {
             VentControl::Frustrations => (VENT_FRUSTRATIONS, EMPTY),
         },
         Action::GelatinousDarkbucket(gdb) => match gdb {
-            ToggleSwitch::Enabled => (ENABLE, GELATINOUS_DARK_BUCKET),
-            ToggleSwitch::Disabled => (DISABLE, GELATINOUS_DARK_BUCKET),
+            ToggleSwitch::Enabled => (ENABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
+            ToggleSwitch::Disabled => (DISABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
         },
         Action::NewtonianFibermist(nwt) => match nwt {
             FourSwitch::Zero => (NEWTONIAN_FIBERMIST, TO_ZERO),
