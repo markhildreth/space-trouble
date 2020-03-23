@@ -1,5 +1,6 @@
 use crate::data::get_action_text;
 use crate::device::Device;
+use crate::game_pin::{GamePin, PinResult, PinValue};
 use crate::game_screen::GameScreen;
 use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
@@ -17,7 +18,7 @@ pub struct GameState<'a> {
     producer: ClientMessageProducer<'a>,
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
-    button_is_down: bool,
+    eigenthrottle_pin: GamePin,
 }
 
 impl<'a> GameState<'a> {
@@ -28,7 +29,7 @@ impl<'a> GameState<'a> {
             producer,
             screen,
             directive_time_span: None,
-            button_is_down: device.button_pin.is_high().unwrap(),
+            eigenthrottle_pin: GamePin::new(device.button_pin.is_high().unwrap().into()),
         }
     }
 
@@ -52,24 +53,16 @@ impl<'a> GameState<'a> {
             }
         }
 
-        match (self.button_is_down, device.button_pin.is_high().unwrap()) {
-            (false, true) => {
-                self.button_is_down = true;
-                self.producer
-                    .enqueue(ClientMessage::ActionPerformed(Action::Eigenthrottle(
-                        ToggleSwitch::Enabled,
-                    )))
-                    .unwrap();
-            }
-            (true, false) => {
-                self.button_is_down = false;
-                self.producer
-                    .enqueue(ClientMessage::ActionPerformed(Action::Eigenthrottle(
-                        ToggleSwitch::Disabled,
-                    )))
-                    .unwrap();
-            }
-            _ => (),
+        if let PinResult::Change(new_value) = self
+            .eigenthrottle_pin
+            .update(device.ms(), &device.button_pin)
+        {
+            let switch = match new_value {
+                PinValue::Low => ToggleSwitch::Disabled,
+                PinValue::High => ToggleSwitch::Enabled,
+            };
+            let msg = ClientMessage::ActionPerformed(Action::Eigenthrottle(switch));
+            self.producer.enqueue(msg).unwrap();
         }
     }
 

@@ -5,6 +5,7 @@ extern crate panic_halt;
 
 mod data;
 mod device;
+mod game_pin;
 mod game_screen;
 mod lcd;
 mod queue;
