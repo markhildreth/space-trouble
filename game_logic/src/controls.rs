@@ -22,6 +22,21 @@ where
     fn perform(&mut self, option: T) {
         self.available.push(self.current).unwrap();
         self.current = option;
+
+        // See if the option being performed is available. If so, remove it.
+        let index = self
+            .available
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &v)| if v == option { Some(i) } else { None })
+            .nth(0);
+        match index {
+            Some(i) => {
+                self.available.swap_remove(i);
+                ()
+            }
+            None => (),
+        }
     }
 
     fn clear(&mut self, option: T) {
@@ -163,6 +178,15 @@ mod test_stateful {
 
             let options = generate_all_options(&mut control);
             assert!(options.contains(&generated_option));
+        }
+
+        #[test]
+        fn test_can_flip_flop() {
+            let mut control = Stateful::<MyEnum>::default();
+            control.perform(MyEnum::First);
+            control.perform(MyEnum::Second);
+            control.perform(MyEnum::First);
+            control.perform(MyEnum::Second);
         }
     }
 
