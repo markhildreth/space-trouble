@@ -104,7 +104,7 @@ impl GameScreen {
             for _ in 0..new {
                 lcd.write_char(BLOCK);
             }
-            for _ in new..=20 {
+            for _ in new..20 {
                 lcd.write_char(' ');
             }
         });

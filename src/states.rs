@@ -8,10 +8,7 @@ use embedded_hal::digital::v2::InputPin;
 use game_logic::{Action, FourSwitch, GameMessage, ToggleSwitch, VentControl};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
-    // +1 ensures that the time will run out with one
-    // block left, and the time will start with all blocks
-    // showing.
-    return (20 * remaining_ms / total_ms + 1) as u8;
+    return (20 * remaining_ms / total_ms) as u8;
 }
 
 pub struct GameState<'a> {
