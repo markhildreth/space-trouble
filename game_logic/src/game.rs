@@ -2,7 +2,8 @@ use crate::ship_distance::{ShipDistance, ShipDistanceResult};
 use crate::{Action, Directive, GameMessage, GameMessageProducer, ShipState};
 use rand::Rng;
 
-const DIRECTIVE_WAIT: u32 = 2_000;
+const DIRECTIVE_WAIT: u32 = 500;
+const DIRECTIVE_EXPIRATION: u32 = 7_000;
 
 pub struct Game<'a> {
     producer: GameMessageProducer<'a>,
@@ -24,7 +25,9 @@ impl<'a> Game<'a> {
             ship_state: ShipState::default(),
             ship_distance: ShipDistance::new(),
             hull_health: 100,
-            directive: CurrentDirective::WaitingForDirective { wait_until: 2_000 },
+            directive: CurrentDirective::WaitingForDirective {
+                wait_until: DIRECTIVE_WAIT,
+            },
         }
     }
 
@@ -66,7 +69,7 @@ impl<'a> Game<'a> {
         if let Ok(action) = self.ship_state.generate_action(rng) {
             let directive = Directive {
                 action,
-                expiration: 10_000,
+                expiration: DIRECTIVE_EXPIRATION,
             };
             self.producer
                 .enqueue(GameMessage::NewDirective(directive))
