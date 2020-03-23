@@ -4,7 +4,6 @@ use crate::game_pin::{GamePin, PinResult, PinValue};
 use crate::game_screen::GameScreen;
 use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
-use embedded_hal::digital::v2::InputPin;
 use game_logic::{Action, FourSwitch, GameMessage, ToggleSwitch, VentControl};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
@@ -34,22 +33,23 @@ impl<'a> GameState<'a> {
             producer,
             screen,
             directive_time_span: None,
-            eigenthrottle_pin: GamePin::new(device.pin_d5.is_high().unwrap().into()),
-            gelatinous_darkbucket_pin: GamePin::new(device.pin_d6.is_high().unwrap().into()),
-            vent_hydrogen_pin: GamePin::new(device.pin_a2.is_high().unwrap().into()),
-            vent_water_vapor_pin: GamePin::new(device.pin_a3.is_high().unwrap().into()),
-            vent_waste_pin: GamePin::new(device.pin_a4.is_high().unwrap().into()),
-            vent_frustrations_pin: GamePin::new(device.pin_a5.is_high().unwrap().into()),
-            newtonian_fibermist_one_pin: GamePin::new(device.pin_d10.is_high().unwrap().into()),
-            newtonian_fibermist_two_pin: GamePin::new(device.pin_d11.is_high().unwrap().into()),
-            newtonian_fibermist_three_pin: GamePin::new(device.pin_d12.is_high().unwrap().into()),
+            eigenthrottle_pin: GamePin::new(&device.pin_d5),
+            gelatinous_darkbucket_pin: GamePin::new(&device.pin_d6),
+            vent_hydrogen_pin: GamePin::new(&device.pin_a2),
+            vent_water_vapor_pin: GamePin::new(&device.pin_a3),
+            vent_waste_pin: GamePin::new(&device.pin_a4),
+            vent_frustrations_pin: GamePin::new(&device.pin_a5),
+            newtonian_fibermist_one_pin: GamePin::new(&device.pin_d10),
+            newtonian_fibermist_two_pin: GamePin::new(&device.pin_d11),
+            newtonian_fibermist_three_pin: GamePin::new(&device.pin_d12),
         }
     }
 
     pub fn update(&mut self, device: &mut Device) {
+        let ms = device.ms();
         self.screen.update(&mut device.lcd);
         if let Some(span) = &self.directive_time_span {
-            let status = span.status(device.ms());
+            let status = span.status(ms);
             match status {
                 SpanStatus::Ongoing {
                     remaining_ms,
@@ -66,101 +66,60 @@ impl<'a> GameState<'a> {
             }
         }
 
-        if let PinResult::Change(new_value) =
-            self.eigenthrottle_pin.update(device.ms(), &device.pin_d5)
-        {
-            let switch = match new_value {
+        if let PinResult::Change(value) = self.eigenthrottle_pin.update(ms, &device.pin_d5) {
+            let toggle_switch = match value {
                 PinValue::Low => ToggleSwitch::Disabled,
                 PinValue::High => ToggleSwitch::Enabled,
             };
-            let msg = ClientMessage::ActionPerformed(Action::Eigenthrottle(switch));
-            self.producer.enqueue(msg).unwrap();
+            self.send_action_performed(Action::Eigenthrottle(toggle_switch));
         }
 
-        if let PinResult::Change(new_value) = self
-            .gelatinous_darkbucket_pin
-            .update(device.ms(), &device.pin_d6)
+        if let PinResult::Change(value) = self.gelatinous_darkbucket_pin.update(ms, &device.pin_d6)
         {
-            let switch = match new_value {
+            let toggle_switch = match value {
                 PinValue::Low => ToggleSwitch::Disabled,
                 PinValue::High => ToggleSwitch::Enabled,
             };
-            let msg = ClientMessage::ActionPerformed(Action::GelatinousDarkbucket(switch));
-            self.producer.enqueue(msg).unwrap();
+            self.send_action_performed(Action::GelatinousDarkbucket(toggle_switch));
         }
 
-        if let PinResult::Change(new_value) =
-            self.vent_hydrogen_pin.update(device.ms(), &device.pin_a2)
-        {
-            if new_value == PinValue::High {
-                let msg =
-                    ClientMessage::ActionPerformed(Action::VentControl(VentControl::Hydrogen));
-                self.producer.enqueue(msg).unwrap();
-            }
+        if PinResult::Change(PinValue::High) == self.vent_hydrogen_pin.update(ms, &device.pin_a2) {
+            self.send_action_performed(Action::VentControl(VentControl::Hydrogen));
         }
 
-        if let PinResult::Change(new_value) = self
-            .vent_water_vapor_pin
-            .update(device.ms(), &device.pin_a3)
+        if PinResult::Change(PinValue::High) == self.vent_water_vapor_pin.update(ms, &device.pin_a3)
         {
-            if new_value == PinValue::High {
-                let msg =
-                    ClientMessage::ActionPerformed(Action::VentControl(VentControl::WaterVapor));
-                self.producer.enqueue(msg).unwrap();
-            }
+            self.send_action_performed(Action::VentControl(VentControl::WaterVapor));
         }
 
-        if let PinResult::Change(new_value) =
-            self.vent_waste_pin.update(device.ms(), &device.pin_a4)
-        {
-            if new_value == PinValue::High {
-                let msg = ClientMessage::ActionPerformed(Action::VentControl(VentControl::Waste));
-                self.producer.enqueue(msg).unwrap();
-            }
+        if PinResult::Change(PinValue::High) == self.vent_waste_pin.update(ms, &device.pin_a4) {
+            self.send_action_performed(Action::VentControl(VentControl::Waste));
         }
 
-        if let PinResult::Change(new_value) = self
-            .vent_frustrations_pin
-            .update(device.ms(), &device.pin_a5)
+        if PinResult::Change(PinValue::High)
+            == self.vent_frustrations_pin.update(ms, &device.pin_a5)
         {
-            if new_value == PinValue::High {
-                let msg =
-                    ClientMessage::ActionPerformed(Action::VentControl(VentControl::Frustrations));
-                self.producer.enqueue(msg).unwrap();
-            }
+            self.send_action_performed(Action::VentControl(VentControl::Frustrations));
         }
 
-        if let PinResult::Change(new_value) = self
-            .newtonian_fibermist_one_pin
-            .update(device.ms(), &device.pin_d10)
+        if PinResult::Change(PinValue::High)
+            == self.newtonian_fibermist_one_pin.update(ms, &device.pin_d10)
         {
-            if new_value == PinValue::High {
-                let msg =
-                    ClientMessage::ActionPerformed(Action::NewtonianFibermist(FourSwitch::One));
-                self.producer.enqueue(msg).unwrap();
-            }
+            self.send_action_performed(Action::NewtonianFibermist(FourSwitch::One));
         }
 
-        if let PinResult::Change(new_value) = self
-            .newtonian_fibermist_two_pin
-            .update(device.ms(), &device.pin_d11)
+        if PinResult::Change(PinValue::High)
+            == self.newtonian_fibermist_two_pin.update(ms, &device.pin_d11)
         {
-            if new_value == PinValue::High {
-                let msg =
-                    ClientMessage::ActionPerformed(Action::NewtonianFibermist(FourSwitch::Two));
-                self.producer.enqueue(msg).unwrap();
-            }
+            self.send_action_performed(Action::NewtonianFibermist(FourSwitch::Two));
         }
 
-        if let PinResult::Change(new_value) = self
-            .newtonian_fibermist_three_pin
-            .update(device.ms(), &device.pin_d12)
+        if PinResult::Change(PinValue::High)
+            == self
+                .newtonian_fibermist_three_pin
+                .update(ms, &device.pin_d12)
         {
-            if new_value == PinValue::High {
-                let msg =
-                    ClientMessage::ActionPerformed(Action::NewtonianFibermist(FourSwitch::Three));
-                self.producer.enqueue(msg).unwrap();
-            }
+            self.send_action_performed(Action::NewtonianFibermist(FourSwitch::Three));
         }
     }
 
@@ -185,5 +144,10 @@ impl<'a> GameState<'a> {
                 self.directive_time_span = None;
             }
         }
+    }
+
+    fn send_action_performed(&mut self, action: Action) {
+        let msg = ClientMessage::ActionPerformed(action);
+        self.producer.enqueue(msg).unwrap();
     }
 }

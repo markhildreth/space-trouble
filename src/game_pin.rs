@@ -20,9 +20,9 @@ pub struct GamePin {
 }
 
 impl GamePin {
-    pub fn new(initial_value: PinValue) -> GamePin {
+    pub fn new(pin: &impl InputPin) -> GamePin {
         GamePin {
-            current_value: initial_value,
+            current_value: pin.is_high().ok().unwrap().into(),
             debounce_finishes: None,
         }
     }
