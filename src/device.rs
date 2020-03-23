@@ -1,7 +1,7 @@
 use feather_m0 as hal;
 use hal::clock::GenericClockController;
 use hal::delay::Delay;
-use hal::gpio::{Input, OpenDrain, Output, Pa15, Pa17, Pa20, PullDown};
+use hal::gpio::{Input, OpenDrain, Output, Pa15, Pa17, Pa20, Pa4, Pa5, Pb2, Pb9, PullDown};
 use hal::pac::{CorePeripherals, Peripherals, TC3};
 use hal::prelude::*;
 use hal::timer::TimerCounter;
@@ -14,6 +14,10 @@ pub struct Device {
     pub led_pin: Pa17<Output<OpenDrain>>,
     pub pin_d5: Pa15<Input<PullDown>>,
     pub pin_d6: Pa20<Input<PullDown>>,
+    pub pin_a2: Pb9<Input<PullDown>>,
+    pub pin_a3: Pa4<Input<PullDown>>,
+    pub pin_a4: Pa5<Input<PullDown>>,
+    pub pin_a5: Pb2<Input<PullDown>>,
     pub lcd: LCD,
     pub timer: TimerCounter<TC3>,
     ms: u32,
@@ -36,6 +40,10 @@ impl Device {
 
         let pin_d5 = pins.d5.into_pull_down_input(&mut pins.port);
         let pin_d6 = pins.d6.into_pull_down_input(&mut pins.port);
+        let pin_a2 = pins.a2.into_pull_down_input(&mut pins.port);
+        let pin_a3 = pins.a3.into_pull_down_input(&mut pins.port);
+        let pin_a4 = pins.a4.into_pull_down_input(&mut pins.port);
+        let pin_a5 = pins.a5.into_pull_down_input(&mut pins.port);
 
         let i2c = hal::i2c_master(
             &mut clocks,
@@ -59,6 +67,10 @@ impl Device {
             led_pin,
             pin_d5,
             pin_d6,
+            pin_a2,
+            pin_a3,
+            pin_a4,
+            pin_a5,
             lcd,
             timer,
             ms: 0,

@@ -5,7 +5,7 @@ use crate::game_screen::GameScreen;
 use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
 use embedded_hal::digital::v2::InputPin;
-use game_logic::{Action, GameMessage, ToggleSwitch};
+use game_logic::{Action, GameMessage, ToggleSwitch, VentControl};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     // +1 ensures that the time will run out with one
@@ -20,6 +20,10 @@ pub struct GameState<'a> {
     directive_time_span: Option<TimeSpan>,
     eigenthrottle_pin: GamePin,
     gelatinous_darkbucket_pin: GamePin,
+    vent_hydrogen_pin: GamePin,
+    vent_water_vapor_pin: GamePin,
+    vent_waste_pin: GamePin,
+    vent_frustrations_pin: GamePin,
 }
 
 impl<'a> GameState<'a> {
@@ -32,6 +36,10 @@ impl<'a> GameState<'a> {
             directive_time_span: None,
             eigenthrottle_pin: GamePin::new(device.pin_d5.is_high().unwrap().into()),
             gelatinous_darkbucket_pin: GamePin::new(device.pin_d6.is_high().unwrap().into()),
+            vent_hydrogen_pin: GamePin::new(device.pin_a2.is_high().unwrap().into()),
+            vent_water_vapor_pin: GamePin::new(device.pin_a3.is_high().unwrap().into()),
+            vent_waste_pin: GamePin::new(device.pin_a4.is_high().unwrap().into()),
+            vent_frustrations_pin: GamePin::new(device.pin_a5.is_high().unwrap().into()),
         }
     }
 
@@ -76,6 +84,47 @@ impl<'a> GameState<'a> {
             };
             let msg = ClientMessage::ActionPerformed(Action::GelatinousDarkbucket(switch));
             self.producer.enqueue(msg).unwrap();
+        }
+
+        if let PinResult::Change(new_value) =
+            self.vent_hydrogen_pin.update(device.ms(), &device.pin_a2)
+        {
+            if new_value == PinValue::High {
+                let msg =
+                    ClientMessage::ActionPerformed(Action::VentControl(VentControl::Hydrogen));
+                self.producer.enqueue(msg).unwrap();
+            }
+        }
+
+        if let PinResult::Change(new_value) = self
+            .vent_water_vapor_pin
+            .update(device.ms(), &device.pin_a3)
+        {
+            if new_value == PinValue::High {
+                let msg =
+                    ClientMessage::ActionPerformed(Action::VentControl(VentControl::WaterVapor));
+                self.producer.enqueue(msg).unwrap();
+            }
+        }
+
+        if let PinResult::Change(new_value) =
+            self.vent_waste_pin.update(device.ms(), &device.pin_a4)
+        {
+            if new_value == PinValue::High {
+                let msg = ClientMessage::ActionPerformed(Action::VentControl(VentControl::Waste));
+                self.producer.enqueue(msg).unwrap();
+            }
+        }
+
+        if let PinResult::Change(new_value) = self
+            .vent_frustrations_pin
+            .update(device.ms(), &device.pin_a5)
+        {
+            if new_value == PinValue::High {
+                let msg =
+                    ClientMessage::ActionPerformed(Action::VentControl(VentControl::Frustrations));
+                self.producer.enqueue(msg).unwrap();
+            }
         }
     }
 
