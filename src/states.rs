@@ -75,11 +75,9 @@ impl<'a> GameState<'a> {
 
     pub fn handle(&mut self, ms: u32, msg: GameMessage) {
         match msg {
-            /*
-            GameMessage::UpdateDistance(distance) => {
+            GameMessage::ShipDistanceUpdated(distance) => {
                 self.screen.update_distance(distance);
             }
-            */
             GameMessage::HullHealthUpdated(health) => {
                 self.screen.update_hull_health(health);
             }
