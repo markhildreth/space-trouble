@@ -3,6 +3,7 @@
 mod controls;
 mod game;
 mod options;
+mod ship_distance;
 mod ship_state;
 
 pub use game::Game;
