@@ -12,7 +12,7 @@ mod states;
 mod timing;
 
 use crate::device::Device;
-use crate::queue::ClientMessageQueue;
+use crate::queue::{ClientMessage, ClientMessageQueue};
 use crate::states::GameState;
 use feather_m0::entry;
 use game_logic::{Game, GameMessageQueue};
@@ -27,7 +27,7 @@ fn main() -> ! {
 
     // Messages coming from the client
     let mut client_msg_queue = ClientMessageQueue::new();
-    let (client_msg_producer, mut _client_msg_consumer) = client_msg_queue.split();
+    let (client_msg_producer, mut client_msg_consumer) = client_msg_queue.split();
 
     // The game "server".
     let mut game = Game::new(game_msg_producer);
@@ -47,6 +47,17 @@ fn main() -> ! {
         loop {
             match game_msg_consumer.dequeue() {
                 Some(msg) => state.handle(device.ms(), msg),
+                None => break,
+            }
+        }
+
+        loop {
+            match client_msg_consumer.dequeue() {
+                Some(msg) => match msg {
+                    ClientMessage::ActionPerformed(action) => {
+                        game.perform(device.ms(), action);
+                    }
+                },
                 None => break,
             }
         }

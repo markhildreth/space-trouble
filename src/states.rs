@@ -87,13 +87,12 @@ impl<'a> GameState<'a> {
                 let blocks = calc_blocks(0, directive.expiration);
                 self.screen.update_timer(blocks);
                 self.directive_time_span = Some(TimeSpan::new(ms, directive.expiration as u32));
-            } /*
-              GameMessage::DirectiveComplete => {
-                  self.screen.update_command_text(None, None);
-                  self.screen.update_timer(0);
-                  self.directive_time_span = None;
-              }
-              */
+            }
+            GameMessage::DirectiveCompleted => {
+                self.screen.update_command_text(None, None);
+                self.screen.update_timer(0);
+                self.directive_time_span = None;
+            }
         }
     }
 }

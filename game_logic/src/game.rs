@@ -56,6 +56,8 @@ impl<'a> Game<'a> {
                 self.directive = CurrentDirective::WaitingForDirective {
                     wait_until: ms + DIRECTIVE_WAIT,
                 }
+            } else {
+                self.update_hull_health(-2);
             }
         }
     }
