@@ -3,10 +3,10 @@ use game_logic::{Action, FourSwitch, ToggleSwitch, VentControl};
 const EMPTY: &str = "";
 const ENABLE: &str = "      Enable";
 const DISABLE: &str = "     Disable";
-const TO_ZERO: &str = "      to Zero";
 const TO_ONE: &str = "      to One";
 const TO_TWO: &str = "      to Two";
 const TO_THREE: &str = "     to Three";
+const TURN_OFF: &str = "      Turn off";
 
 const EIGENTHROTTLE: &str = "   Eigenthrottle";
 
@@ -38,7 +38,7 @@ pub fn get_action_text(action: Action) -> (&'static str, &'static str) {
             ToggleSwitch::Disabled => (DISABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
         },
         Action::NewtonianFibermist(nwt) => match nwt {
-            FourSwitch::Zero => (NEWTONIAN_FIBERMIST, TO_ZERO),
+            FourSwitch::Zero => (TURN_OFF, NEWTONIAN_FIBERMIST),
             FourSwitch::One => (NEWTONIAN_FIBERMIST, TO_ONE),
             FourSwitch::Two => (NEWTONIAN_FIBERMIST, TO_TWO),
             FourSwitch::Three => (NEWTONIAN_FIBERMIST, TO_THREE),
