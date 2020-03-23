@@ -19,6 +19,7 @@ pub struct GameState<'a> {
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
     eigenthrottle_pin: GamePin,
+    gelatinous_darkbucket_pin: GamePin,
 }
 
 impl<'a> GameState<'a> {
@@ -29,7 +30,8 @@ impl<'a> GameState<'a> {
             producer,
             screen,
             directive_time_span: None,
-            eigenthrottle_pin: GamePin::new(device.button_pin.is_high().unwrap().into()),
+            eigenthrottle_pin: GamePin::new(device.pin_d5.is_high().unwrap().into()),
+            gelatinous_darkbucket_pin: GamePin::new(device.pin_d6.is_high().unwrap().into()),
         }
     }
 
@@ -53,15 +55,26 @@ impl<'a> GameState<'a> {
             }
         }
 
-        if let PinResult::Change(new_value) = self
-            .eigenthrottle_pin
-            .update(device.ms(), &device.button_pin)
+        if let PinResult::Change(new_value) =
+            self.eigenthrottle_pin.update(device.ms(), &device.pin_d5)
         {
             let switch = match new_value {
                 PinValue::Low => ToggleSwitch::Disabled,
                 PinValue::High => ToggleSwitch::Enabled,
             };
             let msg = ClientMessage::ActionPerformed(Action::Eigenthrottle(switch));
+            self.producer.enqueue(msg).unwrap();
+        }
+
+        if let PinResult::Change(new_value) = self
+            .gelatinous_darkbucket_pin
+            .update(device.ms(), &device.pin_d6)
+        {
+            let switch = match new_value {
+                PinValue::Low => ToggleSwitch::Disabled,
+                PinValue::High => ToggleSwitch::Enabled,
+            };
+            let msg = ClientMessage::ActionPerformed(Action::GelatinousDarkbucket(switch));
             self.producer.enqueue(msg).unwrap();
         }
     }
