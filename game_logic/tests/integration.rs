@@ -18,6 +18,16 @@ fn find_directives(msgs: &Vec<GameMessage>) -> Vec<Directive> {
         .collect()
 }
 
+fn find_distance_updates(msgs: &Vec<GameMessage>) -> Vec<u32> {
+    msgs.iter()
+        .filter_map(|msg| match msg {
+            GameMessage::ShipDistanceUpdated(new_d) => Some(new_d),
+            _ => None,
+        })
+        .cloned()
+        .collect()
+}
+
 #[test]
 fn integration() {
     let mut rng = rand::thread_rng();
@@ -31,12 +41,18 @@ fn integration() {
     game.update(clock, &mut rng);
     assert_eq!(consumer.ready(), false);
 
-    // Advance to when a directive is given
+    // Advance to when a directive is given & ship distance updates
     clock += 2_000;
     game.update(clock, &mut rng);
     let msgs = drain(&mut consumer);
     let directives = find_directives(&msgs);
-    assert_eq!(directives.len(), 1, "No directives found in {:?}", msgs);
+    assert!(directives.len() == 1, "No directives found in {:?}", msgs);
+    let distance_updates = find_distance_updates(&msgs);
+    assert!(
+        distance_updates.len() == 1,
+        "No distance updates found in {:?}",
+        msgs
+    );
 
     // Perform the action that we were directed to perform
     clock += 1_000;
@@ -49,7 +65,7 @@ fn integration() {
     game.update(clock, &mut rng);
     let msgs = drain(&mut consumer);
     let directives = find_directives(&msgs);
-    assert_eq!(directives.len(), 1, "No directives found in {:?}", msgs);
+    assert!(directives.len() == 1, "No directives found in {:?}", msgs);
     let directive = directives[0];
 
     // And we should fail it.

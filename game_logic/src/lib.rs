@@ -38,4 +38,5 @@ pub type GameMessageConsumer<'a> = Consumer<'a, GameMessage, U4>;
 pub enum GameMessage {
     NewDirective(Directive),
     HullHealthUpdated(u8),
+    ShipDistanceUpdated(u32),
 }

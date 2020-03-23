@@ -1,3 +1,4 @@
+use crate::ship_distance::{ShipDistance, ShipDistanceResult};
 use crate::{Action, Directive, GameMessage, GameMessageProducer, ShipState};
 use rand::Rng;
 
@@ -6,6 +7,7 @@ const DIRECTIVE_WAIT: u32 = 2_000;
 pub struct Game<'a> {
     producer: GameMessageProducer<'a>,
     ship_state: ShipState,
+    ship_distance: ShipDistance,
     hull_health: u8,
     directive: CurrentDirective,
 }
@@ -19,8 +21,9 @@ impl<'a> Game<'a> {
     pub fn new(producer: GameMessageProducer<'a>) -> Game {
         Game {
             producer,
-            hull_health: 100,
             ship_state: ShipState::default(),
+            ship_distance: ShipDistance::new(),
+            hull_health: 100,
             directive: CurrentDirective::WaitingForDirective { wait_until: 2_000 },
         }
     }
@@ -37,6 +40,11 @@ impl<'a> Game<'a> {
                     self.fail_directive(ms, action);
                 }
             }
+        }
+
+        if let ShipDistanceResult::DistanceUpdated(new_distance) = self.ship_distance.update(ms) {
+            let message = GameMessage::ShipDistanceUpdated(new_distance);
+            self.producer.enqueue(message);
         }
     }
 
