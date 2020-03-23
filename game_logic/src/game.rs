@@ -48,14 +48,11 @@ impl<'a> Game<'a> {
         }
     }
 
-    pub fn perform(&mut self, ms: u32, action: Action) {
-        self.ship_state.perform(action);
-        if let CurrentDirective::OutstandingDirective {
-            action: outstanding_action,
-            ..
-        } = self.directive
-        {
-            if outstanding_action == action {
+    pub fn perform(&mut self, ms: u32, performed_action: Action) {
+        self.ship_state.perform(performed_action);
+        if let CurrentDirective::OutstandingDirective { action, .. } = self.directive {
+            if action == performed_action {
+                self.producer.enqueue(GameMessage::DirectiveCompleted);
                 self.directive = CurrentDirective::WaitingForDirective {
                     wait_until: ms + DIRECTIVE_WAIT,
                 }

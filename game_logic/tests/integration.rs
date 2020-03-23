@@ -58,7 +58,8 @@ fn integration() {
     clock += 1_000;
     let directive = directives[0];
     game.perform(clock, directive.action);
-    assert_eq!(consumer.ready(), false);
+    let msgs = drain(&mut consumer);
+    assert_eq!(msgs, [GameMessage::DirectiveCompleted]);
 
     // Let's generate another action.
     clock += 2_000;

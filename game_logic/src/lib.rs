@@ -39,4 +39,5 @@ pub enum GameMessage {
     NewDirective(Directive),
     HullHealthUpdated(u8),
     ShipDistanceUpdated(u32),
+    DirectiveCompleted,
 }
