@@ -5,7 +5,7 @@ use crate::game_screen::GameScreen;
 use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
 use embedded_hal::digital::v2::InputPin;
-use game_logic::{Action, GameMessage, ToggleSwitch, VentControl};
+use game_logic::{Action, FourSwitch, GameMessage, ToggleSwitch, VentControl};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     // +1 ensures that the time will run out with one
@@ -24,6 +24,9 @@ pub struct GameState<'a> {
     vent_water_vapor_pin: GamePin,
     vent_waste_pin: GamePin,
     vent_frustrations_pin: GamePin,
+    newtonian_fibermist_one_pin: GamePin,
+    newtonian_fibermist_two_pin: GamePin,
+    newtonian_fibermist_three_pin: GamePin,
 }
 
 impl<'a> GameState<'a> {
@@ -40,6 +43,9 @@ impl<'a> GameState<'a> {
             vent_water_vapor_pin: GamePin::new(device.pin_a3.is_high().unwrap().into()),
             vent_waste_pin: GamePin::new(device.pin_a4.is_high().unwrap().into()),
             vent_frustrations_pin: GamePin::new(device.pin_a5.is_high().unwrap().into()),
+            newtonian_fibermist_one_pin: GamePin::new(device.pin_d10.is_high().unwrap().into()),
+            newtonian_fibermist_two_pin: GamePin::new(device.pin_d11.is_high().unwrap().into()),
+            newtonian_fibermist_three_pin: GamePin::new(device.pin_d12.is_high().unwrap().into()),
         }
     }
 
@@ -123,6 +129,39 @@ impl<'a> GameState<'a> {
             if new_value == PinValue::High {
                 let msg =
                     ClientMessage::ActionPerformed(Action::VentControl(VentControl::Frustrations));
+                self.producer.enqueue(msg).unwrap();
+            }
+        }
+
+        if let PinResult::Change(new_value) = self
+            .newtonian_fibermist_one_pin
+            .update(device.ms(), &device.pin_d10)
+        {
+            if new_value == PinValue::High {
+                let msg =
+                    ClientMessage::ActionPerformed(Action::NewtonianFibermist(FourSwitch::One));
+                self.producer.enqueue(msg).unwrap();
+            }
+        }
+
+        if let PinResult::Change(new_value) = self
+            .newtonian_fibermist_two_pin
+            .update(device.ms(), &device.pin_d11)
+        {
+            if new_value == PinValue::High {
+                let msg =
+                    ClientMessage::ActionPerformed(Action::NewtonianFibermist(FourSwitch::Two));
+                self.producer.enqueue(msg).unwrap();
+            }
+        }
+
+        if let PinResult::Change(new_value) = self
+            .newtonian_fibermist_three_pin
+            .update(device.ms(), &device.pin_d12)
+        {
+            if new_value == PinValue::High {
+                let msg =
+                    ClientMessage::ActionPerformed(Action::NewtonianFibermist(FourSwitch::Three));
                 self.producer.enqueue(msg).unwrap();
             }
         }
