@@ -1,23 +1,19 @@
 #![no_std]
 #![no_main]
 
-extern crate panic_halt;
-
 mod data;
-mod device;
-mod game_pin;
 mod game_screen;
-mod lcd;
 mod queue;
 mod states;
 mod timing;
 
-use crate::device::Device;
 use crate::queue::{ClientMessage, ClientMessageQueue};
 use crate::states::GameState;
+use core::panic::PanicInfo;
 use feather_m0::entry;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
+use st_device::Device;
 use st_logic::{Game, GameMessageQueue};
 
 #[entry]
@@ -63,4 +59,10 @@ fn main() -> ! {
             }
         }
     }
+}
+
+#[inline(never)]
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    loop {}
 }

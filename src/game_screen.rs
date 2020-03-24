@@ -1,6 +1,6 @@
-use crate::lcd::{Cursor, CursorBlink, DisplayAddress, LCD};
 use core::fmt;
 use core::fmt::Write;
+use st_device::lcd::{Cursor, CursorBlink, DisplayAddress, LCD};
 
 type StaticStrRef = &'static str;
 

@@ -1,11 +1,11 @@
 use crate::data::get_action_text;
-use crate::device::Device;
-use crate::game_pin::{GamePin, PinResult, PinValue};
 use crate::game_screen::GameScreen;
 use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
 use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
 use st_data::{Action, GameMessage};
+use st_device::game_pin::{GamePin, PinResult, PinValue};
+use st_device::Device;
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     return (20 * remaining_ms / total_ms) as u8;
