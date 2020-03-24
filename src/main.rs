@@ -1,9 +1,9 @@
 #![no_std]
 #![no_main]
 
-mod data;
 mod game_screen;
 mod states;
+mod strings;
 mod timing;
 
 use crate::states::GameState;

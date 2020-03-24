@@ -1,5 +1,5 @@
-use crate::data::get_action_text;
 use crate::game_screen::GameScreen;
+use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
 use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
 use st_data::{Action, ClientMessage, ClientMessageProducer, GameMessage};
