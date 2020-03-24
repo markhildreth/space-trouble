@@ -16,9 +16,9 @@ use crate::device::Device;
 use crate::queue::{ClientMessage, ClientMessageQueue};
 use crate::states::GameState;
 use feather_m0::entry;
-use game_logic::{Game, GameMessageQueue};
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
+use st_logic::{Game, GameMessageQueue};
 
 #[entry]
 fn main() -> ! {

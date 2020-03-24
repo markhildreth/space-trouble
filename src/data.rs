@@ -1,4 +1,4 @@
-use game_logic::{Action, FourSwitch, ToggleSwitch, VentControl};
+use st_logic::{Action, FourSwitch, ToggleSwitch, VentControl};
 
 const EMPTY: &str = "";
 const ENABLE: &str = "      Enable";

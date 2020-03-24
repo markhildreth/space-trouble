@@ -115,14 +115,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "game_logic"
-version = "0.1.0"
-dependencies = [
- "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -301,10 +293,18 @@ dependencies = [
  "cortex-m-rt 0.6.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "embedded-hal 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "game_logic 0.1.0",
  "hd44780-driver 0.3.0 (git+https://github.com/JohnDoneth/hd44780-driver)",
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "panic-halt 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "st_logic 0.1.0",
+]
+
+[[package]]
+name = "st_logic"
+version = "0.1.0"
+dependencies = [
+ "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

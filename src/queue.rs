@@ -1,6 +1,6 @@
-use game_logic::Action;
 use heapless::consts::*;
 use heapless::spsc::{Producer, Queue};
+use st_logic::Action;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ClientMessage {

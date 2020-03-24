@@ -4,7 +4,7 @@ use crate::game_pin::{GamePin, PinResult, PinValue};
 use crate::game_screen::GameScreen;
 use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
-use game_logic::{Action, FourSwitch, GameMessage, ToggleSwitch, VentControl};
+use st_logic::{Action, FourSwitch, GameMessage, ToggleSwitch, VentControl};
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     return (20 * remaining_ms / total_ms) as u8;
