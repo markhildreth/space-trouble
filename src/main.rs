@@ -3,18 +3,17 @@
 
 mod data;
 mod game_screen;
-mod queue;
 mod states;
 mod timing;
 
-use crate::queue::{ClientMessage, ClientMessageQueue};
 use crate::states::GameState;
 use core::panic::PanicInfo;
 use feather_m0::entry;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
+use st_data::{ClientMessage, ClientMessageQueue, GameMessageQueue};
 use st_device::Device;
-use st_logic::{Game, GameMessageQueue};
+use st_logic::Game;
 
 #[entry]
 fn main() -> ! {

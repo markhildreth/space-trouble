@@ -1,9 +1,8 @@
 use crate::data::get_action_text;
 use crate::game_screen::GameScreen;
-use crate::queue::{ClientMessage, ClientMessageProducer};
 use crate::timing::{SpanStatus, TimeSpan};
 use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
-use st_data::{Action, GameMessage};
+use st_data::{Action, ClientMessage, ClientMessageProducer, GameMessage};
 use st_device::game_pin::{GamePin, PinResult, PinValue};
 use st_device::Device;
 

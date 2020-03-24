@@ -1,7 +1,7 @@
 use crate::ship_distance::{ShipDistance, ShipDistanceResult};
-use crate::{GameMessageProducer, ShipState};
+use crate::ShipState;
 use rand::Rng;
-use st_data::{Action, Directive, GameMessage};
+use st_data::{Action, Directive, GameMessage, GameMessageProducer};
 
 const DIRECTIVE_WAIT: u32 = 500;
 const DIRECTIVE_EXPIRATION: u32 = 7_000;
