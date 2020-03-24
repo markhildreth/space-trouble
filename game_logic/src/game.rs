@@ -47,21 +47,29 @@ impl<'a> Game<'a> {
 
         if let ShipDistanceResult::DistanceUpdated(new_distance) = self.ship_distance.update(ms) {
             let message = GameMessage::ShipDistanceUpdated(new_distance);
-            self.producer.enqueue(message);
+            self.producer.enqueue(message).unwrap();
         }
     }
 
     pub fn perform(&mut self, ms: u32, performed_action: Action) {
         self.ship_state.perform(performed_action);
+
+        let mut valid = false;
+
         if let CurrentDirective::OutstandingDirective { action, .. } = self.directive {
             if action == performed_action {
-                self.producer.enqueue(GameMessage::DirectiveCompleted);
+                valid = true;
+                self.producer
+                    .enqueue(GameMessage::DirectiveCompleted)
+                    .unwrap();
                 self.directive = CurrentDirective::WaitingForDirective {
                     wait_until: ms + DIRECTIVE_WAIT,
                 }
-            } else {
-                self.update_hull_health(-2);
             }
+        }
+
+        if !valid {
+            self.update_hull_health(-2);
         }
     }
 

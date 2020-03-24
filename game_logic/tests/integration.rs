@@ -1,4 +1,6 @@
-use game_logic::{Directive, Game, GameMessage, GameMessageConsumer, GameMessageQueue};
+use game_logic::{
+    Action, Directive, Game, GameMessage, GameMessageConsumer, GameMessageQueue, ToggleSwitch,
+};
 
 fn drain(queue: &mut GameMessageConsumer) -> Vec<GameMessage> {
     let mut v = Vec::new();
@@ -28,6 +30,16 @@ fn find_distance_updates(msgs: &Vec<GameMessage>) -> Vec<u32> {
         .collect()
 }
 
+fn find_hull_health_updates(msgs: &Vec<GameMessage>) -> Vec<u8> {
+    msgs.iter()
+        .filter_map(|msg| match msg {
+            GameMessage::HullHealthUpdated(new_h) => Some(new_h),
+            _ => None,
+        })
+        .cloned()
+        .collect()
+}
+
 #[test]
 fn integration() {
     let mut rng = rand::thread_rng();
@@ -40,6 +52,16 @@ fn integration() {
     // At time zero, nothing of importance should be happening.
     game.update(clock, &mut rng);
     assert_eq!(consumer.ready(), false);
+
+    game.perform(clock, Action::Eigenthrottle(ToggleSwitch::Disabled));
+    let msgs = drain(&mut consumer);
+    let hull_health_msgs = find_hull_health_updates(&msgs);
+    assert_eq!(
+        hull_health_msgs,
+        [98],
+        "No hull health msgs found in {:?}",
+        msgs
+    );
 
     // Advance to when a directive is given & ship distance updates
     clock += 2_000;
@@ -74,7 +96,7 @@ fn integration() {
     game.update(clock, &mut rng);
     let msgs = drain(&mut consumer);
     assert!(
-        msgs.contains(&GameMessage::HullHealthUpdated(96)),
+        msgs.contains(&GameMessage::HullHealthUpdated(94)),
         "Messages: {:?}",
         msgs
     );
