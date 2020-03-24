@@ -1,6 +1,6 @@
-use crate::options::EnumFill;
 use core::fmt::Debug;
 use heapless::consts::*;
+use st_data::controls::EnumFill;
 
 pub(crate) trait Control<T> {
     fn perform(&mut self, option: T);

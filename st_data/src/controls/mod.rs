@@ -6,7 +6,7 @@ pub use four_switch::FourSwitch;
 pub use toggle_switch::ToggleSwitch;
 pub use vent_control::VentControl;
 
-pub(crate) trait EnumFill
+pub trait EnumFill
 where
     Self: core::marker::Sized,
 {

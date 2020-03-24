@@ -1,4 +1,5 @@
-use st_logic::{Action, FourSwitch, ToggleSwitch, VentControl};
+use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
+use st_data::Action;
 
 const EMPTY: &str = "";
 const ENABLE: &str = "      Enable";
