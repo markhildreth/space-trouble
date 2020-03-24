@@ -1,7 +1,5 @@
 use embedded_hal::digital::v2::InputPin;
 
-const DEBOUNCE_TIME: u32 = 5;
-
 #[derive(Eq, PartialEq, Debug, Copy, Clone)]
 pub enum PinResult {
     NoChange,
@@ -17,13 +15,15 @@ pub enum PinValue {
 pub struct GamePin {
     current_value: PinValue,
     debounce_finishes: Option<u32>,
+    debounce_time: u32,
 }
 
 impl GamePin {
-    pub fn new(pin: &impl InputPin) -> GamePin {
+    pub fn new(pin: &impl InputPin, debounce_time: u32) -> GamePin {
         GamePin {
             current_value: pin.is_high().ok().unwrap().into(),
             debounce_finishes: None,
+            debounce_time,
         }
     }
 
@@ -36,7 +36,7 @@ impl GamePin {
 
         match self.debounce_finishes {
             None => {
-                self.debounce_finishes = Some(ms + DEBOUNCE_TIME);
+                self.debounce_finishes = Some(ms + self.debounce_time);
                 PinResult::NoChange
             }
             Some(finish) => {
