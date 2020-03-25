@@ -15,3 +15,9 @@ impl EnumFill for ToggleSwitchValue {
         vec.extend(&ALL);
     }
 }
+
+impl Default for ToggleSwitchValue {
+    fn default() -> ToggleSwitchValue {
+        ToggleSwitchValue::Disabled
+    }
+}

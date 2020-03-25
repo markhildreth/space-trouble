@@ -22,3 +22,9 @@ impl EnumFill for FourSwitchValue {
         vec.extend(&ALL);
     }
 }
+
+impl Default for FourSwitchValue {
+    fn default() -> FourSwitchValue {
+        FourSwitchValue::Zero
+    }
+}
