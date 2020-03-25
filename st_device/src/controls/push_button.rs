@@ -1,5 +1,7 @@
 use crate::controls::Control;
-use crate::Pin;
+use crate::Device;
+use crate::{Pin, PinValue};
+use st_data::control_values::PushButtonValue;
 
 pub struct PushButton {
     pin: Pin,
@@ -11,4 +13,11 @@ impl PushButton {
     }
 }
 
-impl Control for PushButton {}
+impl Control<PushButtonValue> for PushButton {
+    fn read(&self, device: &Device) -> PushButtonValue {
+        match self.pin.read(device) {
+            PinValue::Low => PushButtonValue::NotPushed,
+            PinValue::High => PushButtonValue::Pushed,
+        }
+    }
+}

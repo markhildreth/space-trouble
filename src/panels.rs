@@ -1,8 +1,13 @@
-use st_data::control_values::{FourSwitchValue, PushButtonValue, ToggleSwitchValue};
-use st_device::controls::{Control, FourSwitch, PushButton, StatefulControl, ToggleSwitch};
-use st_device::Pin;
+use st_data::control_values::{
+    FourSwitchValue, PushButtonValue, ToggleSwitchValue, VentControlValue,
+};
+use st_data::{Action, ClientMessage, ClientMessageProducer};
+use st_device::controls::{
+    Control, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
+};
+use st_device::{Device, Pin};
 
-pub struct PanelOneControls {
+pub struct Panel {
     eigenthrottle: StatefulControl<ToggleSwitch, ToggleSwitchValue>,
     gelatinous_darkbucket: StatefulControl<ToggleSwitch, ToggleSwitchValue>,
     vent_hydrogen: StatefulControl<PushButton, PushButtonValue>,
@@ -12,9 +17,9 @@ pub struct PanelOneControls {
     newtonian_fibermist: StatefulControl<FourSwitch, FourSwitchValue>,
 }
 
-impl Default for PanelOneControls {
-    fn default() -> PanelOneControls {
-        PanelOneControls {
+impl Default for Panel {
+    fn default() -> Panel {
+        Panel {
             eigenthrottle: ToggleSwitch::new(Pin::D5).stateful(),
             gelatinous_darkbucket: ToggleSwitch::new(Pin::D6).stateful(),
             vent_hydrogen: PushButton::new(Pin::A2).stateful(),
@@ -26,60 +31,48 @@ impl Default for PanelOneControls {
     }
 }
 
-/*
-impl PanelOneControls {
-    fn update(&mut self, device: &Device) -> PanelOneReadResult {}
-}
-*/
+impl Panel {
+    pub fn update(&mut self, producer: &mut ClientMessageProducer, device: &Device) {
+        if let UpdateResult::Change(value) = self.eigenthrottle.update(device) {
+            let action = Action::Eigenthrottle(value);
+            self.perform(producer, action);
+        }
 
-pub struct PanelOneResult {
-    eigenthrottle: ToggleSwitch,
-    gelatinous_darkbucket: ToggleSwitch,
-    vent_hydrogen: PushButton,
-    vent_water_vapor: PushButton,
-    vent_waste: PushButton,
-    vent_frustrations: PushButton,
-    newtonian_fibermist: FourSwitch,
-}
+        if let UpdateResult::Change(value) = self.gelatinous_darkbucket.update(device) {
+            let action = Action::GelatinousDarkbucket(value);
+            self.perform(producer, action);
+        }
 
-/*
-impl<T> DeviceReader<T>
-    where T: Device
-{
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_hydrogen.update(device) {
+            let action = Action::VentControl(VentControlValue::Hydrogen);
+            self.perform(producer, action);
+        }
 
-    fn new(device: &mut T) -> Self {
-        PanelOneControls {
-            eigenthrottle: self.eigenthrottle.update(device),
-            ...
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_water_vapor.update(device)
+        {
+            let action = Action::VentControl(VentControlValue::WaterVapor);
+            self.perform(producer, action);
+        }
+
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_waste.update(device) {
+            let action = Action::VentControl(VentControlValue::Waste);
+            self.perform(producer, action);
+        }
+
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_frustrations.update(device)
+        {
+            let action = Action::VentControl(VentControlValue::Frustrations);
+            self.perform(producer, action);
+        }
+
+        if let UpdateResult::Change(value) = self.newtonian_fibermist.update(device) {
+            let action = Action::NewtonianFibermist(value);
+            self.perform(producer, action);
+        }
+    }
+
+    fn perform(&self, producer: &mut ClientMessageProducer, action: Action) {
+        let msg = ClientMessage::ActionPerformed(action);
+        producer.enqueue(msg).unwrap();
     }
 }
-
-
-struct ToggleSwitch {
-    pin: Pin
-}
-
-trait Control<TP: PinSource, TC: Control> {
-    fn update(&mut self, &mut TP) -> PinChange<TC>;
-
-    fn debounce(self: TC) -> Debounce<TC> {
-        Debounce::new(self)
-    }
-}
-
-impl<T> Control<T> for ToggleSwitch
-    where T: PinSource
-{
-    fn update(&mut T) -> PinChange<ToggleSwitch>
-
-    }
-}
-
-struct Debounce<TP: PinSource, TC: Control<TP>> {
-    inner: TC
-}
-
-impl<TP: PinSource, TC: Control<TP>> Control<TP> for Debounce {
-
-}
-*/

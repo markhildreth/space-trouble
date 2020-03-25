@@ -33,3 +33,15 @@ pub enum Pin {
     D12,
     D13,
 }
+
+enum PinValue {
+    Low,
+    High,
+}
+
+impl Pin {
+    fn read(&self, _device: &Device) -> PinValue {
+        // TODO
+        PinValue::Low
+    }
+}

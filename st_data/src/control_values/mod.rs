@@ -8,13 +8,13 @@ pub use vent_control::VentControlValue;
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum PushButtonValue {
-    NotPressed,
-    Pressed,
+    NotPushed,
+    Pushed,
 }
 
 impl Default for PushButtonValue {
     fn default() -> PushButtonValue {
-        PushButtonValue::NotPressed
+        PushButtonValue::NotPushed
     }
 }
 

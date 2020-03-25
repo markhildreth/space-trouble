@@ -10,7 +10,7 @@ mod timing;
 use crate::states::GameState;
 use core::panic::PanicInfo;
 use feather_m0::entry;
-use panels::PanelOneControls;
+use panels::Panel;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
 use st_data::{ClientMessage, ClientMessageQueue, GameMessageQueue};
@@ -32,8 +32,8 @@ fn main() -> ! {
 
     // The game "client"
     let mut device = Device::new();
-    let mut panel = PanelOneControls::default();
-    let mut state = GameState::new(client_msg_producer, &mut device);
+    let panel = Panel::default();
+    let mut state = GameState::new(client_msg_producer, panel, &mut device);
 
     let mut rng = SmallRng::seed_from_u64(0x12345678);
 

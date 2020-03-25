@@ -1,5 +1,7 @@
 use crate::controls::Control;
-use crate::Pin;
+use crate::Device;
+use crate::{Pin, PinValue};
+use st_data::control_values::FourSwitchValue;
 
 pub struct FourSwitch {
     pin_one: Pin,
@@ -17,4 +19,18 @@ impl FourSwitch {
     }
 }
 
-impl Control for FourSwitch {}
+impl Control<FourSwitchValue> for FourSwitch {
+    fn read(&self, device: &Device) -> FourSwitchValue {
+        let one = self.pin_one.read(device);
+        let two = self.pin_two.read(device);
+        let three = self.pin_three.read(device);
+
+        match (one, two, three) {
+            (PinValue::Low, PinValue::Low, PinValue::Low) => FourSwitchValue::Zero,
+            (PinValue::High, PinValue::Low, PinValue::Low) => FourSwitchValue::One,
+            (PinValue::Low, PinValue::High, PinValue::Low) => FourSwitchValue::Two,
+            (PinValue::Low, PinValue::Low, PinValue::High) => FourSwitchValue::Three,
+            _ => unreachable!(),
+        }
+    }
+}

@@ -1,9 +1,8 @@
 use crate::game_screen::GameScreen;
+use crate::panels::Panel;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
-use st_data::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
-use st_data::{Action, ClientMessage, ClientMessageProducer, GameMessage};
-use st_device::game_pin::{GamePin, PinResult, PinValue};
+use st_data::{ClientMessageProducer, GameMessage};
 use st_device::Device;
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
@@ -12,36 +11,20 @@ fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
 
 pub struct GameState<'a> {
     producer: ClientMessageProducer<'a>,
+    panel: Panel,
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
-    eigenthrottle_pin: GamePin,
-    gelatinous_darkbucket_pin: GamePin,
-    vent_hydrogen_pin: GamePin,
-    vent_water_vapor_pin: GamePin,
-    vent_waste_pin: GamePin,
-    vent_frustrations_pin: GamePin,
-    newtonian_fibermist_one_pin: GamePin,
-    newtonian_fibermist_two_pin: GamePin,
-    newtonian_fibermist_three_pin: GamePin,
 }
 
 impl<'a> GameState<'a> {
-    pub fn new(producer: ClientMessageProducer<'a>, device: &mut Device) -> Self {
+    pub fn new(producer: ClientMessageProducer<'a>, panel: Panel, device: &mut Device) -> Self {
         let mut screen = GameScreen::new();
         screen.init(&mut device.lcd);
         GameState {
             producer,
+            panel,
             screen,
             directive_time_span: None,
-            eigenthrottle_pin: GamePin::new(&device.pin_d5, 0),
-            gelatinous_darkbucket_pin: GamePin::new(&device.pin_d6, 0),
-            vent_hydrogen_pin: GamePin::new(&device.pin_a2, 0),
-            vent_water_vapor_pin: GamePin::new(&device.pin_a3, 0),
-            vent_waste_pin: GamePin::new(&device.pin_a4, 0),
-            vent_frustrations_pin: GamePin::new(&device.pin_a5, 0),
-            newtonian_fibermist_one_pin: GamePin::new(&device.pin_d10, 800),
-            newtonian_fibermist_two_pin: GamePin::new(&device.pin_d11, 800),
-            newtonian_fibermist_three_pin: GamePin::new(&device.pin_d12, 800),
         }
     }
 
@@ -66,61 +49,7 @@ impl<'a> GameState<'a> {
             }
         }
 
-        if let PinResult::Change(value) = self.eigenthrottle_pin.update(ms, &device.pin_d5) {
-            let toggle_switch = match value {
-                PinValue::Low => ToggleSwitchValue::Disabled,
-                PinValue::High => ToggleSwitchValue::Enabled,
-            };
-            self.send_action_performed(Action::Eigenthrottle(toggle_switch));
-        }
-
-        if let PinResult::Change(value) = self.gelatinous_darkbucket_pin.update(ms, &device.pin_d6)
-        {
-            let toggle_switch = match value {
-                PinValue::Low => ToggleSwitchValue::Disabled,
-                PinValue::High => ToggleSwitchValue::Enabled,
-            };
-            self.send_action_performed(Action::GelatinousDarkbucket(toggle_switch));
-        }
-
-        if PinResult::Change(PinValue::High) == self.vent_hydrogen_pin.update(ms, &device.pin_a2) {
-            self.send_action_performed(Action::VentControl(VentControlValue::Hydrogen));
-        }
-
-        if PinResult::Change(PinValue::High) == self.vent_water_vapor_pin.update(ms, &device.pin_a3)
-        {
-            self.send_action_performed(Action::VentControl(VentControlValue::WaterVapor));
-        }
-
-        if PinResult::Change(PinValue::High) == self.vent_waste_pin.update(ms, &device.pin_a4) {
-            self.send_action_performed(Action::VentControl(VentControlValue::Waste));
-        }
-
-        if PinResult::Change(PinValue::High)
-            == self.vent_frustrations_pin.update(ms, &device.pin_a5)
-        {
-            self.send_action_performed(Action::VentControl(VentControlValue::Frustrations));
-        }
-
-        if PinResult::Change(PinValue::High)
-            == self.newtonian_fibermist_one_pin.update(ms, &device.pin_d10)
-        {
-            self.send_action_performed(Action::NewtonianFibermist(FourSwitchValue::One));
-        }
-
-        if PinResult::Change(PinValue::High)
-            == self.newtonian_fibermist_two_pin.update(ms, &device.pin_d11)
-        {
-            self.send_action_performed(Action::NewtonianFibermist(FourSwitchValue::Two));
-        }
-
-        if PinResult::Change(PinValue::High)
-            == self
-                .newtonian_fibermist_three_pin
-                .update(ms, &device.pin_d12)
-        {
-            self.send_action_performed(Action::NewtonianFibermist(FourSwitchValue::Three));
-        }
+        self.panel.update(&mut self.producer, device);
     }
 
     pub fn handle(&mut self, ms: u32, msg: GameMessage) {
@@ -144,10 +73,5 @@ impl<'a> GameState<'a> {
                 self.directive_time_span = None;
             }
         }
-    }
-
-    fn send_action_performed(&mut self, action: Action) {
-        let msg = ClientMessage::ActionPerformed(action);
-        self.producer.enqueue(msg).unwrap();
     }
 }
