@@ -1,15 +1,15 @@
 use crate::controls::{Control, Stateful, Stateless};
 use crate::GenerateFailReason;
 use core::fmt::Debug;
-use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
+use st_data::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use st_data::Action;
 
 #[derive(Default, Debug)]
 pub struct ShipState {
-    eigenthrottle: Stateful<ToggleSwitch>,
-    vent_control: Stateless<VentControl>,
-    gelatinous_darkbucket: Stateful<ToggleSwitch>,
-    newtonian_fibermist: Stateful<FourSwitch>,
+    eigenthrottle: Stateful<ToggleSwitchValue>,
+    vent_control: Stateless<VentControlValue>,
+    gelatinous_darkbucket: Stateful<ToggleSwitchValue>,
+    newtonian_fibermist: Stateful<FourSwitchValue>,
 }
 
 impl ShipState {
@@ -111,9 +111,9 @@ mod test {
         let actions = generate_all_actions(&mut ship);
 
         let items = [
-            Action::Eigenthrottle(ToggleSwitch::Disabled),
-            Action::GelatinousDarkbucket(ToggleSwitch::Disabled),
-            Action::NewtonianFibermist(FourSwitch::Zero),
+            Action::Eigenthrottle(ToggleSwitchValue::Disabled),
+            Action::GelatinousDarkbucket(ToggleSwitchValue::Disabled),
+            Action::NewtonianFibermist(FourSwitchValue::Zero),
         ];
         items.iter().for_each(|default_action| {
             assert!(
@@ -130,15 +130,15 @@ mod test {
         let actions = generate_all_actions(&mut ship);
 
         let items = [
-            Action::Eigenthrottle(ToggleSwitch::Enabled),
-            Action::VentControl(VentControl::Hydrogen),
-            Action::VentControl(VentControl::WaterVapor),
-            Action::VentControl(VentControl::Waste),
-            Action::VentControl(VentControl::Frustrations),
-            Action::GelatinousDarkbucket(ToggleSwitch::Enabled),
-            Action::NewtonianFibermist(FourSwitch::One),
-            Action::NewtonianFibermist(FourSwitch::Two),
-            Action::NewtonianFibermist(FourSwitch::Three),
+            Action::Eigenthrottle(ToggleSwitchValue::Enabled),
+            Action::VentControl(VentControlValue::Hydrogen),
+            Action::VentControl(VentControlValue::WaterVapor),
+            Action::VentControl(VentControlValue::Waste),
+            Action::VentControl(VentControlValue::Frustrations),
+            Action::GelatinousDarkbucket(ToggleSwitchValue::Enabled),
+            Action::NewtonianFibermist(FourSwitchValue::One),
+            Action::NewtonianFibermist(FourSwitchValue::Two),
+            Action::NewtonianFibermist(FourSwitchValue::Three),
         ];
 
         items.iter().for_each(|action| {

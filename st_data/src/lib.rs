@@ -1,17 +1,17 @@
 #![cfg_attr(not(test), no_std)]
 
-pub mod controls;
+pub mod control_values;
 
-use crate::controls::{FourSwitch, ToggleSwitch, VentControl};
+use crate::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use heapless::consts::U4;
 use heapless::spsc::{Consumer, Producer, Queue};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Action {
-    Eigenthrottle(ToggleSwitch),
-    GelatinousDarkbucket(ToggleSwitch),
-    VentControl(VentControl),
-    NewtonianFibermist(FourSwitch),
+    Eigenthrottle(ToggleSwitchValue),
+    GelatinousDarkbucket(ToggleSwitchValue),
+    VentControl(VentControlValue),
+    NewtonianFibermist(FourSwitchValue),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

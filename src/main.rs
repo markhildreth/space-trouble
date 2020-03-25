@@ -2,6 +2,7 @@
 #![no_main]
 
 mod game_screen;
+mod panels;
 mod states;
 mod strings;
 mod timing;

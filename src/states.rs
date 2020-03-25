@@ -1,7 +1,7 @@
 use crate::game_screen::GameScreen;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
-use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
+use st_data::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use st_data::{Action, ClientMessage, ClientMessageProducer, GameMessage};
 use st_device::game_pin::{GamePin, PinResult, PinValue};
 use st_device::Device;
@@ -68,8 +68,8 @@ impl<'a> GameState<'a> {
 
         if let PinResult::Change(value) = self.eigenthrottle_pin.update(ms, &device.pin_d5) {
             let toggle_switch = match value {
-                PinValue::Low => ToggleSwitch::Disabled,
-                PinValue::High => ToggleSwitch::Enabled,
+                PinValue::Low => ToggleSwitchValue::Disabled,
+                PinValue::High => ToggleSwitchValue::Enabled,
             };
             self.send_action_performed(Action::Eigenthrottle(toggle_switch));
         }
@@ -77,41 +77,41 @@ impl<'a> GameState<'a> {
         if let PinResult::Change(value) = self.gelatinous_darkbucket_pin.update(ms, &device.pin_d6)
         {
             let toggle_switch = match value {
-                PinValue::Low => ToggleSwitch::Disabled,
-                PinValue::High => ToggleSwitch::Enabled,
+                PinValue::Low => ToggleSwitchValue::Disabled,
+                PinValue::High => ToggleSwitchValue::Enabled,
             };
             self.send_action_performed(Action::GelatinousDarkbucket(toggle_switch));
         }
 
         if PinResult::Change(PinValue::High) == self.vent_hydrogen_pin.update(ms, &device.pin_a2) {
-            self.send_action_performed(Action::VentControl(VentControl::Hydrogen));
+            self.send_action_performed(Action::VentControl(VentControlValue::Hydrogen));
         }
 
         if PinResult::Change(PinValue::High) == self.vent_water_vapor_pin.update(ms, &device.pin_a3)
         {
-            self.send_action_performed(Action::VentControl(VentControl::WaterVapor));
+            self.send_action_performed(Action::VentControl(VentControlValue::WaterVapor));
         }
 
         if PinResult::Change(PinValue::High) == self.vent_waste_pin.update(ms, &device.pin_a4) {
-            self.send_action_performed(Action::VentControl(VentControl::Waste));
+            self.send_action_performed(Action::VentControl(VentControlValue::Waste));
         }
 
         if PinResult::Change(PinValue::High)
             == self.vent_frustrations_pin.update(ms, &device.pin_a5)
         {
-            self.send_action_performed(Action::VentControl(VentControl::Frustrations));
+            self.send_action_performed(Action::VentControl(VentControlValue::Frustrations));
         }
 
         if PinResult::Change(PinValue::High)
             == self.newtonian_fibermist_one_pin.update(ms, &device.pin_d10)
         {
-            self.send_action_performed(Action::NewtonianFibermist(FourSwitch::One));
+            self.send_action_performed(Action::NewtonianFibermist(FourSwitchValue::One));
         }
 
         if PinResult::Change(PinValue::High)
             == self.newtonian_fibermist_two_pin.update(ms, &device.pin_d11)
         {
-            self.send_action_performed(Action::NewtonianFibermist(FourSwitch::Two));
+            self.send_action_performed(Action::NewtonianFibermist(FourSwitchValue::Two));
         }
 
         if PinResult::Change(PinValue::High)
@@ -119,7 +119,7 @@ impl<'a> GameState<'a> {
                 .newtonian_fibermist_three_pin
                 .update(ms, &device.pin_d12)
         {
-            self.send_action_performed(Action::NewtonianFibermist(FourSwitch::Three));
+            self.send_action_performed(Action::NewtonianFibermist(FourSwitchValue::Three));
         }
     }
 

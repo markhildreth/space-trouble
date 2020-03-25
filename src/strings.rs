@@ -1,4 +1,4 @@
-use st_data::controls::{FourSwitch, ToggleSwitch, VentControl};
+use st_data::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use st_data::Action;
 
 const EMPTY: &str = "";
@@ -25,24 +25,24 @@ const NEWTONIAN_FIBERMIST: &str = "Newtonian Fibermist";
 pub fn get_action_text(action: Action) -> (&'static str, &'static str) {
     match action {
         Action::Eigenthrottle(et) => match et {
-            ToggleSwitch::Enabled => (ENABLE, EIGENTHROTTLE),
-            ToggleSwitch::Disabled => (DISABLE, EIGENTHROTTLE),
+            ToggleSwitchValue::Enabled => (ENABLE, EIGENTHROTTLE),
+            ToggleSwitchValue::Disabled => (DISABLE, EIGENTHROTTLE),
         },
         Action::VentControl(vc) => match vc {
-            VentControl::Hydrogen => (VENT_HYDROGEN, EMPTY),
-            VentControl::WaterVapor => (VENT_WATER_VAPOR, EMPTY),
-            VentControl::Waste => (VENT_WASTE, EMPTY),
-            VentControl::Frustrations => (VENT_FRUSTRATIONS, EMPTY),
+            VentControlValue::Hydrogen => (VENT_HYDROGEN, EMPTY),
+            VentControlValue::WaterVapor => (VENT_WATER_VAPOR, EMPTY),
+            VentControlValue::Waste => (VENT_WASTE, EMPTY),
+            VentControlValue::Frustrations => (VENT_FRUSTRATIONS, EMPTY),
         },
         Action::GelatinousDarkbucket(gdb) => match gdb {
-            ToggleSwitch::Enabled => (ENABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
-            ToggleSwitch::Disabled => (DISABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
+            ToggleSwitchValue::Enabled => (ENABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
+            ToggleSwitchValue::Disabled => (DISABLE_GELATINOUS_DARK_BUCKET, GELATINOUS_DARK_BUCKET),
         },
         Action::NewtonianFibermist(nwt) => match nwt {
-            FourSwitch::Zero => (TURN_OFF, NEWTONIAN_FIBERMIST),
-            FourSwitch::One => (NEWTONIAN_FIBERMIST, TO_ONE),
-            FourSwitch::Two => (NEWTONIAN_FIBERMIST, TO_TWO),
-            FourSwitch::Three => (NEWTONIAN_FIBERMIST, TO_THREE),
+            FourSwitchValue::Zero => (TURN_OFF, NEWTONIAN_FIBERMIST),
+            FourSwitchValue::One => (NEWTONIAN_FIBERMIST, TO_ONE),
+            FourSwitchValue::Two => (NEWTONIAN_FIBERMIST, TO_TWO),
+            FourSwitchValue::Three => (NEWTONIAN_FIBERMIST, TO_THREE),
         },
     }
 }

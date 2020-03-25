@@ -5,8 +5,6 @@ mod game;
 mod ship_distance;
 mod ship_state;
 
-use st_data::GameMessage;
-
 pub use game::Game;
 pub use ship_state::ShipState;
 
