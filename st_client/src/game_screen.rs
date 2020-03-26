@@ -41,6 +41,7 @@ impl<T: Copy + PartialEq + Eq> core::convert::From<T> for Dirtiable<T> {
 }
 
 pub struct GameScreen {
+    lcd: LCD,
     distance: Dirtiable<u32>,
     hull_health: Dirtiable<u8>,
     timer: Dirtiable<u8>,
@@ -51,8 +52,13 @@ pub struct GameScreen {
 const BLOCK: char = 0xff as char;
 
 impl GameScreen {
-    pub fn new() -> GameScreen {
+    pub fn new(mut lcd: LCD) -> GameScreen {
+        lcd.reset();
+        lcd.set_cursor_visibility(Cursor::Invisible);
+        lcd.set_cursor_blink(CursorBlink::Off);
+
         GameScreen {
+            lcd,
             distance: 0.into(),
             hull_health: 100.into(),
             timer: 0.into(),
@@ -82,13 +88,8 @@ impl GameScreen {
         self.timer.update(n);
     }
 
-    pub fn init(&mut self, lcd: &mut LCD) {
-        lcd.reset();
-        lcd.set_cursor_visibility(Cursor::Invisible);
-        lcd.set_cursor_blink(CursorBlink::Off);
-    }
-
-    pub fn update(&mut self, lcd: &mut LCD) {
+    pub fn update(&mut self) {
+        /*
         self.distance.clean(|new| {
             lcd.set_cursor_pos(DisplayAddress::from_row_col(0, 0).bits());
             fmt::write(lcd, format_args!("{} km", new)).unwrap();
@@ -126,5 +127,6 @@ impl GameScreen {
                 lcd.write_str(BLANK_LINE).unwrap();
             }
         });
+        */
     }
 }

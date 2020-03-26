@@ -27,21 +27,20 @@ fn main() -> ! {
     let mut game = Game::new(game_msg_producer);
 
     // The game "client"
-    let mut device = Device::new();
+    let device = Device::new();
     let panel = Panel::default();
-    let mut state = GameState::new(client_msg_producer, panel, &mut device);
+    let mut state = GameState::new(client_msg_producer, panel, device.lcd);
 
     let mut rng = SmallRng::seed_from_u64(0x12345678);
 
+    let ms = 0;
     loop {
-        device.update();
-
-        state.update(&mut device);
-        game.update(device.ms(), &mut rng);
+        state.update(ms);
+        game.update(ms, &mut rng);
 
         loop {
             match game_msg_consumer.dequeue() {
-                Some(msg) => state.handle(device.ms(), msg),
+                Some(msg) => state.handle(ms, msg),
                 None => break,
             }
         }
@@ -50,7 +49,7 @@ fn main() -> ! {
             match client_msg_consumer.dequeue() {
                 Some(msg) => match msg {
                     ClientMessage::ActionPerformed(action) => {
-                        game.perform(device.ms(), action);
+                        game.perform(ms, action);
                     }
                 },
                 None => break,

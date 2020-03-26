@@ -3,6 +3,7 @@ use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
 use crate::Panel;
 use st_data::{ClientMessageProducer, GameMessage};
+use st_device::lcd::LCD;
 use st_device::Device;
 
 fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
@@ -23,9 +24,8 @@ impl<'a, TPanel> GameState<'a, TPanel>
 where
     TPanel: Panel,
 {
-    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, device: &mut Device) -> Self {
-        let mut screen = GameScreen::new();
-        screen.init(&mut device.lcd);
+    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: LCD) -> Self {
+        let screen = GameScreen::new(lcd);
         GameState {
             producer,
             panel,
@@ -34,9 +34,10 @@ where
         }
     }
 
-    pub fn update(&mut self, device: &mut Device) {
-        let ms = device.ms();
-        self.screen.update(&mut device.lcd);
+    pub fn update(&mut self, ms: u32) {
+        self.screen.update();
+        self.panel.update(&mut self.producer, ms);
+
         if let Some(span) = &self.directive_time_span {
             let status = span.status(ms);
             match status {
@@ -54,8 +55,6 @@ where
                 }
             }
         }
-
-        self.panel.update(&mut self.producer, device);
     }
 
     pub fn handle(&mut self, ms: u32, msg: GameMessage) {

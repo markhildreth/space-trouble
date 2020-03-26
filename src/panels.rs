@@ -39,7 +39,8 @@ impl Panel {
 }
 
 impl st_client::Panel for Panel {
-    fn update(&mut self, producer: &mut ClientMessageProducer, device: &Device) {
+    fn update(&mut self, producer: &mut ClientMessageProducer, ms: u32) {
+        /*
         if let UpdateResult::Change(value) = self.eigenthrottle.update(device) {
             let action = Action::Eigenthrottle(value);
             self.perform(producer, action);
@@ -76,5 +77,6 @@ impl st_client::Panel for Panel {
             let action = Action::NewtonianFibermist(value);
             self.perform(producer, action);
         }
+        */
     }
 }
