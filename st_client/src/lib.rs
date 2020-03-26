@@ -10,3 +10,5 @@ use st_data::ClientMessageProducer;
 pub trait Panel {
     fn update(&mut self, producer: &mut ClientMessageProducer, ms: u32);
 }
+
+pub trait LCD: Sized {}

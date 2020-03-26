@@ -1,6 +1,6 @@
+use crate::LCD;
 use core::fmt;
 use core::fmt::Write;
-use st_device::lcd::{Cursor, CursorBlink, DisplayAddress, LCD};
 
 type StaticStrRef = &'static str;
 
@@ -40,8 +40,8 @@ impl<T: Copy + PartialEq + Eq> core::convert::From<T> for Dirtiable<T> {
     }
 }
 
-pub struct GameScreen {
-    lcd: LCD,
+pub struct GameScreen<T: LCD> {
+    lcd: T,
     distance: Dirtiable<u32>,
     hull_health: Dirtiable<u8>,
     timer: Dirtiable<u8>,
@@ -51,12 +51,8 @@ pub struct GameScreen {
 
 const BLOCK: char = 0xff as char;
 
-impl GameScreen {
-    pub fn new(mut lcd: LCD) -> GameScreen {
-        lcd.reset();
-        lcd.set_cursor_visibility(Cursor::Invisible);
-        lcd.set_cursor_blink(CursorBlink::Off);
-
+impl<T: LCD> GameScreen<T> {
+    pub fn new(mut lcd: T) -> GameScreen<T> {
         GameScreen {
             lcd,
             distance: 0.into(),

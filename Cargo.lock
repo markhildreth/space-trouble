@@ -302,7 +302,6 @@ name = "st_client"
 version = "0.1.0"
 dependencies = [
  "st_data 0.1.0",
- "st_device 0.1.0",
 ]
 
 [[package]]

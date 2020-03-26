@@ -1,10 +1,12 @@
 #![no_std]
 #![no_main]
 
+mod lcd;
 mod panels;
 
 use core::panic::PanicInfo;
 use feather_m0::entry;
+use lcd::LCD;
 use panels::Panel;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
@@ -29,7 +31,8 @@ fn main() -> ! {
     // The game "client"
     let device = Device::new();
     let panel = Panel::default();
-    let mut state = GameState::new(client_msg_producer, panel, device.lcd);
+    let lcd = LCD::new();
+    let mut state = GameState::new(client_msg_producer, panel, lcd);
 
     let mut rng = SmallRng::seed_from_u64(0x12345678);
 
