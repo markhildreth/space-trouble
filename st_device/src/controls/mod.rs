@@ -6,8 +6,6 @@ pub use four_switch::FourSwitch;
 pub use push_button::PushButton;
 pub use toggle_switch::ToggleSwitch;
 
-use crate::device::Device;
-
 pub enum UpdateResult<T> {
     NoChange,
     Change(T),
@@ -26,7 +24,7 @@ where
         DebounceControl::new(self, ms)
     }
 
-    fn read(&self, device: &Device) -> T;
+    fn read(&self) -> T;
 }
 
 pub struct StatefulControl<TCon, TVal>
@@ -50,8 +48,8 @@ where
         }
     }
 
-    pub fn update(&mut self, device: &Device) -> UpdateResult<TVal> {
-        let value = self.control.read(device);
+    pub fn update(&mut self, _ms: u32) -> UpdateResult<TVal> {
+        let value = self.control.read();
         if value == self.current_value {
             UpdateResult::NoChange
         } else {
@@ -92,12 +90,12 @@ where
         }
     }
 
-    pub fn update(&mut self, device: &Device) -> UpdateResult<TVal> {
-        let new_value = self.control.read(device);
+    pub fn update(&mut self, ms: u32) -> UpdateResult<TVal> {
+        let new_value = self.control.read();
         match (self.debounce_status, self.current_value == new_value) {
             (DebounceStatus::Neutral, true) => UpdateResult::NoChange,
             (DebounceStatus::Neutral, false) => {
-                self.start_debounce(device.ms(), new_value);
+                self.start_debounce(ms, new_value);
                 UpdateResult::NoChange
             }
             (DebounceStatus::Debouncing { .. }, true) => {
@@ -106,9 +104,9 @@ where
             }
             (DebounceStatus::Debouncing { de_value, ends_at }, false) => {
                 if de_value != new_value {
-                    self.start_debounce(device.ms(), new_value);
+                    self.start_debounce(ms, new_value);
                     UpdateResult::NoChange
-                } else if device.ms() > ends_at {
+                } else if ms > ends_at {
                     self.current_value = de_value;
                     self.stop_debouncing();
                     UpdateResult::Change(self.current_value)

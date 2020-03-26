@@ -1,12 +1,14 @@
 use crate::ship_distance::{ShipDistance, ShipDistanceResult};
 use crate::ShipState;
-use rand::Rng;
+use rand::rngs::SmallRng;
+use rand::SeedableRng;
 use st_data::{Action, Directive, GameMessage, GameMessageProducer};
 
 const DIRECTIVE_WAIT: u32 = 500;
 const DIRECTIVE_EXPIRATION: u32 = 7_000;
 
 pub struct Game<'a> {
+    rng: SmallRng,
     producer: GameMessageProducer<'a>,
     ship_state: ShipState,
     ship_distance: ShipDistance,
@@ -22,6 +24,7 @@ enum CurrentDirective {
 impl<'a> Game<'a> {
     pub fn new(producer: GameMessageProducer<'a>) -> Game {
         Game {
+            rng: SmallRng::seed_from_u64(0x12345678),
             producer,
             ship_state: ShipState::default(),
             ship_distance: ShipDistance::new(),
@@ -32,11 +35,11 @@ impl<'a> Game<'a> {
         }
     }
 
-    pub fn update(&mut self, ms: u32, rng: &mut impl Rng) {
+    pub fn update(&mut self, ms: u32) {
         match self.directive {
             CurrentDirective::WaitingForDirective { wait_until } => {
                 if ms >= wait_until {
-                    self.generate_directive(ms, rng);
+                    self.generate_directive(ms);
                 }
             }
             CurrentDirective::OutstandingDirective { expires_at, action } => {
@@ -74,8 +77,8 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn generate_directive(&mut self, ms: u32, rng: &mut impl Rng) {
-        if let Ok(action) = self.ship_state.generate_action(rng) {
+    fn generate_directive(&mut self, ms: u32) {
+        if let Ok(action) = self.ship_state.generate_action(&mut self.rng) {
             let directive = Directive {
                 action,
                 expiration: DIRECTIVE_EXPIRATION,

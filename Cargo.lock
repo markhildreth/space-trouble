@@ -288,6 +288,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "space_trouble"
 version = "0.1.0"
 dependencies = [
+ "embedded-hal 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",

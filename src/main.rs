@@ -1,22 +1,21 @@
 #![no_std]
 #![no_main]
 
+mod device;
 mod lcd;
 mod panels;
 
 use core::panic::PanicInfo;
+use embedded_hal::timer::CountDown;
 use feather_m0::entry;
-use lcd::LCD;
-use panels::Panel;
-use rand::rngs::SmallRng;
-use rand::SeedableRng;
 use st_client::states::GameState;
 use st_data::{ClientMessage, ClientMessageQueue, GameMessageQueue};
-use st_device::Device;
 use st_logic::Game;
 
 #[entry]
 fn main() -> ! {
+    let mut device = device::initialize_device();
+
     // Messages coming from the game server
     let mut game_msg_queue = GameMessageQueue::new();
     let (game_msg_producer, mut game_msg_consumer) = game_msg_queue.split();
@@ -29,17 +28,16 @@ fn main() -> ! {
     let mut game = Game::new(game_msg_producer);
 
     // The game "client"
-    let device = Device::new();
-    let panel = Panel::default();
-    let lcd = LCD::new();
-    let mut state = GameState::new(client_msg_producer, panel, lcd);
+    let mut state = GameState::new(client_msg_producer, device.panel, device.lcd);
 
-    let mut rng = SmallRng::seed_from_u64(0x12345678);
-
-    let ms = 0;
+    let mut ms = 0;
     loop {
+        if let Ok(_) = device.timer.wait() {
+            ms += 1;
+        }
+
         state.update(ms);
-        game.update(ms, &mut rng);
+        game.update(ms);
 
         loop {
             match game_msg_consumer.dequeue() {

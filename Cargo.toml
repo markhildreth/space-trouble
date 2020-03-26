@@ -10,6 +10,7 @@ edition = "2018"
 feather_m0 = { version = "0.6.0" }
 heapless = "0.5.3"
 rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
+embedded-hal = { version = "0.2.3" }
 st_logic = { path = "st_logic" }
 st_data = { path = "st_data" }
 st_device = { path = "st_device" }

@@ -1,5 +1,4 @@
 use crate::controls::Control;
-use crate::Device;
 use crate::{Pin, PinValue};
 use st_data::control_values::ToggleSwitchValue;
 
@@ -14,10 +13,13 @@ impl ToggleSwitch {
 }
 
 impl Control<ToggleSwitchValue> for ToggleSwitch {
-    fn read(&self, device: &Device) -> ToggleSwitchValue {
+    fn read(&self) -> ToggleSwitchValue {
+        /*
         match self.pin.read(device) {
             PinValue::Low => ToggleSwitchValue::Disabled,
             PinValue::High => ToggleSwitchValue::Enabled,
         }
+        */
+        ToggleSwitchValue::Disabled
     }
 }

@@ -1,5 +1,4 @@
 use crate::controls::Control;
-use crate::Device;
 use crate::{Pin, PinValue};
 use st_data::control_values::PushButtonValue;
 
@@ -14,10 +13,13 @@ impl PushButton {
 }
 
 impl Control<PushButtonValue> for PushButton {
-    fn read(&self, device: &Device) -> PushButtonValue {
+    fn read(&self) -> PushButtonValue {
+        /*
         match self.pin.read(device) {
             PinValue::Low => PushButtonValue::NotPushed,
             PinValue::High => PushButtonValue::Pushed,
         }
+        */
+        PushButtonValue::NotPushed
     }
 }
