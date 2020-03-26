@@ -8,6 +8,6 @@ pub use game_screen::GameScreen;
 use st_data::ClientMessageProducer;
 use st_device::Device;
 
-pub trait Panel: Default {
+pub trait Panel {
     fn update(&mut self, producer: &mut ClientMessageProducer, device: &Device);
 }
