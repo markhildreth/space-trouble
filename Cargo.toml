@@ -13,6 +13,7 @@ rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
 st_logic = { path = "st_logic" }
 st_data = { path = "st_data" }
 st_device = { path = "st_device" }
+st_client = { path = "st_client" }
 
 [profile.release]
 codegen-units = 1

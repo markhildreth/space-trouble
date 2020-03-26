@@ -291,9 +291,18 @@ dependencies = [
  "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "st_client 0.1.0",
  "st_data 0.1.0",
  "st_device 0.1.0",
  "st_logic 0.1.0",
+]
+
+[[package]]
+name = "st_client"
+version = "0.1.0"
+dependencies = [
+ "st_data 0.1.0",
+ "st_device 0.1.0",
 ]
 
 [[package]]
