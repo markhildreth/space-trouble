@@ -1,7 +1,7 @@
 use crate::game_screen::GameScreen;
-use crate::panels::Panel;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
+use crate::Panel;
 use st_data::{ClientMessageProducer, GameMessage};
 use st_device::Device;
 
@@ -9,15 +9,21 @@ fn calc_blocks(remaining_ms: u32, total_ms: u32) -> u8 {
     return (20 * remaining_ms / total_ms) as u8;
 }
 
-pub struct GameState<'a> {
+pub struct GameState<'a, TPanel>
+where
+    TPanel: Panel,
+{
     producer: ClientMessageProducer<'a>,
-    panel: Panel,
+    panel: TPanel,
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
 }
 
-impl<'a> GameState<'a> {
-    pub fn new(producer: ClientMessageProducer<'a>, panel: Panel, device: &mut Device) -> Self {
+impl<'a, TPanel> GameState<'a, TPanel>
+where
+    TPanel: Panel,
+{
+    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, device: &mut Device) -> Self {
         let mut screen = GameScreen::new();
         screen.init(&mut device.lcd);
         GameState {

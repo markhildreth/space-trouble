@@ -1,12 +1,14 @@
 #![no_std]
 #![no_main]
 
+mod panels;
+
 use core::panic::PanicInfo;
 use feather_m0::entry;
+use panels::Panel;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
 use st_client::states::GameState;
-use st_client::Panel;
 use st_data::{ClientMessage, ClientMessageQueue, GameMessageQueue};
 use st_device::Device;
 use st_logic::Game;
