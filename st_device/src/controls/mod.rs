@@ -22,6 +22,10 @@ where
         StatefulControl::new(self)
     }
 
+    fn debounce(self, ms: u32) -> DebounceControl<Self, T> {
+        DebounceControl::new(self, ms)
+    }
+
     fn read(&self, device: &Device) -> T;
 }
 
@@ -54,5 +58,75 @@ where
             self.current_value = value;
             UpdateResult::Change(self.current_value)
         }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum DebounceStatus<TVal> {
+    Neutral,
+    Debouncing { ends_at: u32, de_value: TVal },
+}
+
+pub struct DebounceControl<TCon, TVal>
+where
+    TCon: Control<TVal>,
+    TVal: Eq + Copy + Default,
+{
+    control: TCon,
+    debounce_time: u32,
+    current_value: TVal,
+    debounce_status: DebounceStatus<TVal>,
+}
+
+impl<TCon, TVal> DebounceControl<TCon, TVal>
+where
+    TCon: Control<TVal>,
+    TVal: Eq + Copy + Default,
+{
+    fn new(control: TCon, debounce_time: u32) -> DebounceControl<TCon, TVal> {
+        DebounceControl {
+            control,
+            debounce_time,
+            current_value: TVal::default(),
+            debounce_status: DebounceStatus::Neutral,
+        }
+    }
+
+    pub fn update(&mut self, device: &Device) -> UpdateResult<TVal> {
+        let new_value = self.control.read(device);
+        match (self.debounce_status, self.current_value == new_value) {
+            (DebounceStatus::Neutral, true) => UpdateResult::NoChange,
+            (DebounceStatus::Neutral, false) => {
+                self.start_debounce(device.ms(), new_value);
+                UpdateResult::NoChange
+            }
+            (DebounceStatus::Debouncing { .. }, true) => {
+                self.stop_debouncing();
+                UpdateResult::NoChange
+            }
+            (DebounceStatus::Debouncing { de_value, ends_at }, false) => {
+                if de_value != new_value {
+                    self.start_debounce(device.ms(), new_value);
+                    UpdateResult::NoChange
+                } else if device.ms() > ends_at {
+                    self.current_value = de_value;
+                    self.stop_debouncing();
+                    UpdateResult::Change(self.current_value)
+                } else {
+                    UpdateResult::NoChange
+                }
+            }
+        }
+    }
+
+    fn start_debounce(&mut self, ms: u32, value: TVal) {
+        self.debounce_status = DebounceStatus::Debouncing {
+            de_value: value,
+            ends_at: ms + self.debounce_time,
+        };
+    }
+
+    fn stop_debouncing(&mut self) {
+        self.debounce_status = DebounceStatus::Neutral;
     }
 }

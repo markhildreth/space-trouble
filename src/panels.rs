@@ -3,7 +3,7 @@ use st_data::control_values::{
 };
 use st_data::{Action, ClientMessage, ClientMessageProducer};
 use st_device::controls::{
-    Control, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
+    Control, DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
 use st_device::{Device, Pin};
 
@@ -14,7 +14,7 @@ pub struct Panel {
     vent_water_vapor: StatefulControl<PushButton, PushButtonValue>,
     vent_waste: StatefulControl<PushButton, PushButtonValue>,
     vent_frustrations: StatefulControl<PushButton, PushButtonValue>,
-    newtonian_fibermist: StatefulControl<FourSwitch, FourSwitchValue>,
+    newtonian_fibermist: DebounceControl<FourSwitch, FourSwitchValue>,
 }
 
 impl Default for Panel {
@@ -26,7 +26,7 @@ impl Default for Panel {
             vent_water_vapor: PushButton::new(Pin::A3).stateful(),
             vent_waste: PushButton::new(Pin::A4).stateful(),
             vent_frustrations: PushButton::new(Pin::A5).stateful(),
-            newtonian_fibermist: FourSwitch::new(Pin::D10, Pin::D11, Pin::D12).stateful(),
+            newtonian_fibermist: FourSwitch::new(Pin::D10, Pin::D11, Pin::D12).debounce(400),
         }
     }
 }
