@@ -11,7 +11,6 @@ feather_m0 = { version = "0.6.0", features = ["unproven"] }
 panic-halt = "0.2.0"
 atsamd-hal = "0.8.2"
 embedded-hal = "0.2.3"
-hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
 cortex-m-rt = "0.6.12"
 cortex-m = "0.6.2"
 st_data = { path = "../st_data" }

@@ -1,24 +1,49 @@
-use st_device::lcd::{DisplayAddress, LCD as LCDImpl};
+use feather_m0::delay::Delay;
+use feather_m0::gpio::{Pa22, Pa23, PfC};
+use feather_m0::sercom::{I2CMaster3, Sercom3Pad0, Sercom3Pad1};
+use hd44780_driver::bus::I2CBus;
+use hd44780_driver::HD44780;
+use st_client;
 
-pub struct LCD {
-    lcd: LCDImpl,
-}
+use hd44780_driver::{Cursor, CursorBlink, Direction, Display, DisplayMode};
+
+const DISPLAY_ADDRESS_ROWS: [u8; 4] = [0, 0x40, 0x14, 0x54];
+
+pub type LCDImpl =
+    HD44780<Delay, I2CBus<I2CMaster3<Sercom3Pad0<Pa22<PfC>>, Sercom3Pad1<Pa23<PfC>>>>>;
+pub struct LCD(LCDImpl);
 
 impl LCD {
-    pub fn new(lcd: LCDImpl) -> LCD {
-        LCD { lcd }
-    }
-}
-
-impl st_client::LCD for LCD {
-    fn set_cursor_pos(&mut self, row: u8, col: u8) {
-        self.lcd
-            .set_cursor_pos(DisplayAddress::from_row_col(row, col).bits())
+    pub fn new(inner: LCDImpl) -> LCD {
+        LCD(inner)
     }
 }
 
 impl core::fmt::Write for LCD {
     fn write_str(&mut self, s: &str) -> Result<(), core::fmt::Error> {
-        self.lcd.write_str(s)
+        self.0.write_str(s)
+    }
+}
+
+pub struct DisplayAddress {
+    address: u8,
+}
+
+impl DisplayAddress {
+    pub fn from_row_col(row: u8, col: u8) -> DisplayAddress {
+        DisplayAddress {
+            address: DISPLAY_ADDRESS_ROWS[row as usize] + col,
+        }
+    }
+
+    pub fn bits(&self) -> u8 {
+        self.address
+    }
+}
+
+impl st_client::LCD for LCD {
+    fn set_cursor_pos(&mut self, row: u8, col: u8) {
+        self.0
+            .set_cursor_pos(DisplayAddress::from_row_col(row, col).bits())
     }
 }

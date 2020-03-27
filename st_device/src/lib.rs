@@ -1,6 +1,5 @@
 #![no_std]
 pub mod controls;
-pub mod lcd;
 use embedded_hal::digital::v2::InputPin;
 
 pub trait Pin {

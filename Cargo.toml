@@ -9,8 +9,8 @@ edition = "2018"
 [dependencies]
 feather_m0 = { version = "0.6.0" }
 heapless = "0.5.3"
-rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
 embedded-hal = { version = "0.2.3" }
+hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
 st_logic = { path = "st_logic" }
 st_data = { path = "st_data" }
 st_device = { path = "st_device" }

@@ -1,4 +1,4 @@
-use crate::lcd::LCD;
+use crate::lcd::{LCDImpl, LCD};
 use crate::panels::Panel;
 use feather_m0 as hal;
 use hal::clock::GenericClockController;
@@ -39,8 +39,7 @@ pub fn initialize_device() -> DeviceComponents {
         );
 
         let lcd_delay = Delay::new(core.SYST, &mut clocks);
-        let lcd = st_device::lcd::LCD::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay);
-        LCD::new(lcd)
+        LCD::new(LCDImpl::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay))
     };
 
     let timer = {
