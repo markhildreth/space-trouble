@@ -1,34 +1,29 @@
-use st_data::control_values::{
-    FourSwitchValue, PushButtonValue, ToggleSwitchValue, VentControlValue,
-};
+use feather_m0::gpio::*;
+use st_data::control_values::{PushButtonValue, VentControlValue};
 use st_data::{Action, ClientMessage, ClientMessageProducer};
 use st_device::controls::{
-    Control, DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
+    DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
-use st_device::Pin;
+
+type D5 = Pa15<Input<PullDown>>;
+type D6 = Pa20<Input<PullDown>>;
+type D10 = Pa18<Input<PullDown>>;
+type D11 = Pa16<Input<PullDown>>;
+type D12 = Pa19<Input<PullDown>>;
+
+type A2 = Pb9<Input<PullDown>>;
+type A3 = Pa4<Input<PullDown>>;
+type A4 = Pa5<Input<PullDown>>;
+type A5 = Pb2<Input<PullDown>>;
 
 pub struct Panel {
-    eigenthrottle: StatefulControl<ToggleSwitch, ToggleSwitchValue>,
-    gelatinous_darkbucket: StatefulControl<ToggleSwitch, ToggleSwitchValue>,
-    vent_hydrogen: StatefulControl<PushButton, PushButtonValue>,
-    vent_water_vapor: StatefulControl<PushButton, PushButtonValue>,
-    vent_waste: StatefulControl<PushButton, PushButtonValue>,
-    vent_frustrations: StatefulControl<PushButton, PushButtonValue>,
-    newtonian_fibermist: DebounceControl<FourSwitch, FourSwitchValue>,
-}
-
-impl Default for Panel {
-    fn default() -> Panel {
-        Panel {
-            eigenthrottle: ToggleSwitch::new(Pin::D5).stateful(),
-            gelatinous_darkbucket: ToggleSwitch::new(Pin::D6).stateful(),
-            vent_hydrogen: PushButton::new(Pin::A2).stateful(),
-            vent_water_vapor: PushButton::new(Pin::A3).stateful(),
-            vent_waste: PushButton::new(Pin::A4).stateful(),
-            vent_frustrations: PushButton::new(Pin::A5).stateful(),
-            newtonian_fibermist: FourSwitch::new(Pin::D10, Pin::D11, Pin::D12).debounce(400),
-        }
-    }
+    pub eigenthrottle: StatefulControl<ToggleSwitch<D5>>,
+    pub gelatinous_darkbucket: StatefulControl<ToggleSwitch<D6>>,
+    pub vent_hydrogen: StatefulControl<PushButton<A2>>,
+    pub vent_water_vapor: StatefulControl<PushButton<A3>>,
+    pub vent_waste: StatefulControl<PushButton<A4>>,
+    pub vent_frustrations: StatefulControl<PushButton<A5>>,
+    pub newtonian_fibermist: DebounceControl<FourSwitch<D10, D11, D12>>,
 }
 
 impl Panel {

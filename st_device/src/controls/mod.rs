@@ -11,44 +11,45 @@ pub enum UpdateResult<T> {
     Change(T),
 }
 
-pub trait Control<T>
+pub trait Control
 where
-    T: Eq + Copy + Default,
     Self: Sized,
+    <Self as Control>::Value: Default + PartialEq + Clone + Copy,
 {
-    fn stateful(self) -> StatefulControl<Self, T> {
+    type Value;
+
+    fn stateful(self) -> StatefulControl<Self> {
         StatefulControl::new(self)
     }
 
-    fn debounce(self, ms: u32) -> DebounceControl<Self, T> {
+    fn debounce(self, ms: u32) -> DebounceControl<Self> {
         DebounceControl::new(self, ms)
     }
 
-    fn read(&self) -> T;
+    fn read(&self) -> Self::Value;
 }
 
-pub struct StatefulControl<TCon, TVal>
+pub struct StatefulControl<T>
 where
-    TCon: Control<TVal>,
-    TVal: Eq + Copy + Default,
+    T: Control,
+    T::Value: Default,
 {
-    control: TCon,
-    current_value: TVal,
+    control: T,
+    current_value: T::Value,
 }
 
-impl<TCon, TVal> StatefulControl<TCon, TVal>
+impl<T> StatefulControl<T>
 where
-    TCon: Control<TVal>,
-    TVal: Eq + Copy + Default,
+    T: Control,
 {
-    fn new(control: TCon) -> StatefulControl<TCon, TVal> {
+    fn new(control: T) -> StatefulControl<T> {
         StatefulControl {
             control,
-            current_value: TVal::default(),
+            current_value: T::Value::default(),
         }
     }
 
-    pub fn update(&mut self, _ms: u32) -> UpdateResult<TVal> {
+    pub fn update(&mut self, _ms: u32) -> UpdateResult<T::Value> {
         let value = self.control.read();
         if value == self.current_value {
             UpdateResult::NoChange
@@ -60,37 +61,35 @@ where
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-enum DebounceStatus<TVal> {
+enum DebounceStatus<T> {
     Neutral,
-    Debouncing { ends_at: u32, de_value: TVal },
+    Debouncing { ends_at: u32, de_value: T },
 }
 
-pub struct DebounceControl<TCon, TVal>
+pub struct DebounceControl<T>
 where
-    TCon: Control<TVal>,
-    TVal: Eq + Copy + Default,
+    T: Control,
 {
-    control: TCon,
+    control: T,
     debounce_time: u32,
-    current_value: TVal,
-    debounce_status: DebounceStatus<TVal>,
+    current_value: T::Value,
+    debounce_status: DebounceStatus<T::Value>,
 }
 
-impl<TCon, TVal> DebounceControl<TCon, TVal>
+impl<T> DebounceControl<T>
 where
-    TCon: Control<TVal>,
-    TVal: Eq + Copy + Default,
+    T: Control,
 {
-    fn new(control: TCon, debounce_time: u32) -> DebounceControl<TCon, TVal> {
+    fn new(control: T, debounce_time: u32) -> DebounceControl<T> {
         DebounceControl {
             control,
             debounce_time,
-            current_value: TVal::default(),
+            current_value: T::Value::default(),
             debounce_status: DebounceStatus::Neutral,
         }
     }
 
-    pub fn update(&mut self, ms: u32) -> UpdateResult<TVal> {
+    pub fn update(&mut self, ms: u32) -> UpdateResult<T::Value> {
         let new_value = self.control.read();
         match (self.debounce_status, self.current_value == new_value) {
             (DebounceStatus::Neutral, true) => UpdateResult::NoChange,
@@ -117,7 +116,7 @@ where
         }
     }
 
-    fn start_debounce(&mut self, ms: u32, value: TVal) {
+    fn start_debounce(&mut self, ms: u32, value: T::Value) {
         self.debounce_status = DebounceStatus::Debouncing {
             de_value: value,
             ends_at: ms + self.debounce_time,

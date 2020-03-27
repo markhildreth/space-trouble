@@ -2,24 +2,23 @@ use crate::controls::Control;
 use crate::{Pin, PinValue};
 use st_data::control_values::ToggleSwitchValue;
 
-pub struct ToggleSwitch {
-    pin: Pin,
+pub struct ToggleSwitch<P: Pin> {
+    pin: P,
 }
 
-impl ToggleSwitch {
-    pub fn new(pin: Pin) -> ToggleSwitch {
+impl<P: Pin> ToggleSwitch<P> {
+    pub fn new(pin: P) -> ToggleSwitch<P> {
         ToggleSwitch { pin }
     }
 }
 
-impl Control<ToggleSwitchValue> for ToggleSwitch {
-    fn read(&self) -> ToggleSwitchValue {
-        /*
-        match self.pin.read(device) {
+impl<P: Pin> Control for ToggleSwitch<P> {
+    type Value = ToggleSwitchValue;
+
+    fn read(&self) -> Self::Value {
+        match self.pin.read() {
             PinValue::Low => ToggleSwitchValue::Disabled,
             PinValue::High => ToggleSwitchValue::Enabled,
         }
-        */
-        ToggleSwitchValue::Disabled
     }
 }

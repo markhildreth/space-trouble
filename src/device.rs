@@ -6,6 +6,7 @@ use hal::delay::Delay;
 use hal::pac::{CorePeripherals, Peripherals, TC3};
 use hal::prelude::*;
 use hal::timer::TimerCounter;
+use st_device::controls::{Control, FourSwitch, PushButton, ToggleSwitch};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
@@ -50,7 +51,28 @@ pub fn initialize_device() -> DeviceComponents {
         timer
     };
 
-    let panel = { Panel::default() };
+    let panel = {
+        let d5 = pins.d5.into_pull_down_input(&mut pins.port);
+        let d6 = pins.d6.into_pull_down_input(&mut pins.port);
+        let d10 = pins.d10.into_pull_down_input(&mut pins.port);
+        let d11 = pins.d11.into_pull_down_input(&mut pins.port);
+        let d12 = pins.d12.into_pull_down_input(&mut pins.port);
+
+        let a2 = pins.a2.into_pull_down_input(&mut pins.port);
+        let a3 = pins.a3.into_pull_down_input(&mut pins.port);
+        let a4 = pins.a4.into_pull_down_input(&mut pins.port);
+        let a5 = pins.a5.into_pull_down_input(&mut pins.port);
+
+        Panel {
+            eigenthrottle: ToggleSwitch::new(d5).stateful(),
+            gelatinous_darkbucket: ToggleSwitch::new(d6).stateful(),
+            vent_hydrogen: PushButton::new(a2).stateful(),
+            vent_water_vapor: PushButton::new(a3).stateful(),
+            vent_waste: PushButton::new(a4).stateful(),
+            vent_frustrations: PushButton::new(a5).stateful(),
+            newtonian_fibermist: FourSwitch::new(d10, d11, d12).debounce(600),
+        }
+    };
 
     DeviceComponents { panel, lcd, timer }
 }

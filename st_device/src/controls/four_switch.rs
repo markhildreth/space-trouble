@@ -2,14 +2,24 @@ use crate::controls::Control;
 use crate::{Pin, PinValue};
 use st_data::control_values::FourSwitchValue;
 
-pub struct FourSwitch {
-    pin_one: Pin,
-    pin_two: Pin,
-    pin_three: Pin,
+pub struct FourSwitch<P1, P2, P3>
+where
+    P1: Pin,
+    P2: Pin,
+    P3: Pin,
+{
+    pin_one: P1,
+    pin_two: P2,
+    pin_three: P3,
 }
 
-impl FourSwitch {
-    pub fn new(pin_one: Pin, pin_two: Pin, pin_three: Pin) -> FourSwitch {
+impl<P1, P2, P3> FourSwitch<P1, P2, P3>
+where
+    P1: Pin,
+    P2: Pin,
+    P3: Pin,
+{
+    pub fn new(pin_one: P1, pin_two: P2, pin_three: P3) -> FourSwitch<P1, P2, P3> {
         FourSwitch {
             pin_one,
             pin_two,
@@ -18,21 +28,24 @@ impl FourSwitch {
     }
 }
 
-impl Control<FourSwitchValue> for FourSwitch {
-    fn read(&self) -> FourSwitchValue {
-        /*
-        let one = self.pin_one.read(device);
-        let two = self.pin_two.read(device);
-        let three = self.pin_three.read(device);
+impl<P1, P2, P3> Control for FourSwitch<P1, P2, P3>
+where
+    P1: Pin,
+    P2: Pin,
+    P3: Pin,
+{
+    type Value = FourSwitchValue;
+
+    fn read(&self) -> Self::Value {
+        let one = self.pin_one.read();
+        let two = self.pin_two.read();
+        let three = self.pin_three.read();
 
         match (one, two, three) {
-            (PinValue::Low, PinValue::Low, PinValue::Low) => FourSwitchValue::Zero,
             (PinValue::High, PinValue::Low, PinValue::Low) => FourSwitchValue::One,
             (PinValue::Low, PinValue::High, PinValue::Low) => FourSwitchValue::Two,
             (PinValue::Low, PinValue::Low, PinValue::High) => FourSwitchValue::Three,
-            _ => unreachable!(),
+            _ => FourSwitchValue::Zero,
         }
-        */
-        FourSwitchValue::Zero
     }
 }
