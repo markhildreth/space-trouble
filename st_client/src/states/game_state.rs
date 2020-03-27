@@ -1,44 +1,30 @@
 use crate::game_screen::GameScreen;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
-use crate::{Panel, LCD};
+use crate::{ComponentDef, Components, Panel};
 use st_data::time::*;
-use st_data::{ClientMessageProducer, GameMessage};
+use st_data::GameMessage;
 
 fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
     return (20 * remaining.as_millis() / total.as_millis()) as u8;
 }
 
-pub struct GameState<'a, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    producer: ClientMessageProducer<'a>,
-    panel: TPanel,
-    lcd: TLCD,
+pub(crate) struct GameState {
     screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
 }
 
-impl<'a, TPanel, TLCD> GameState<'a, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: TLCD) -> Self {
+impl GameState {
+    pub fn new() -> Self {
         GameState {
-            producer,
-            panel,
-            lcd,
             screen: GameScreen::new(),
             directive_time_span: None,
         }
     }
 
-    pub fn update(&mut self, now: Instant) {
-        self.screen.update(&mut self.lcd);
-        self.panel.update(&mut self.producer, now);
+    pub fn update<CDef: ComponentDef>(&mut self, c: &mut Components<CDef>, now: Instant) {
+        self.screen.update(&mut c.lcd);
+        c.panel.update(&mut c.producer, now);
 
         if let Some(span) = &self.directive_time_span {
             let status = span.status(now);
@@ -56,7 +42,7 @@ where
         }
     }
 
-    pub fn handle(&mut self, now: Instant, msg: GameMessage) {
+    pub(crate) fn handle(&mut self, now: Instant, msg: GameMessage) {
         match msg {
             GameMessage::ShipDistanceUpdated(distance) => {
                 self.screen.update_distance(distance);

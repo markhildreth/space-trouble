@@ -8,7 +8,7 @@ mod panels;
 use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
-use st_client::Client;
+use st_client::{build, Client, ClientComponents};
 use st_data::*;
 use st_server::Game;
 
@@ -30,7 +30,12 @@ fn main() -> ! {
     let mut game = Game::new(game_msg_producer);
 
     // The game "client"
-    let mut client = Client::new(client_msg_producer, device.panel, device.lcd);
+    let components = ClientComponents {
+        producer: client_msg_producer,
+        panel: device.panel,
+        lcd: device.lcd,
+    };
+    let mut client = build(components);
 
     let mut now = Instant::from_millis(0);
     loop {

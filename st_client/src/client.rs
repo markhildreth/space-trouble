@@ -1,42 +1,31 @@
 use crate::states::GameState;
+use crate::{ClientComponents, ComponentDef, Components};
 use crate::{Panel, LCD};
 use st_data::time::Instant;
-use st_data::{ClientMessageProducer, GameMessage};
+use st_data::GameMessage;
 
-enum ClientState<'a, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    GameState(GameState<'a, TPanel, TLCD>),
+enum ClientState {
+    GameState(GameState),
 }
 
-pub struct Client<'a, TPanel: Panel, TLCD: LCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    state: ClientState<'a, TPanel, TLCD>,
+pub struct Client<'a, CDef: ComponentDef> {
+    components: Components<'a, CDef>,
+    state: ClientState,
 }
 
-impl<'a, TPanel: Panel, TLCD: LCD> Client<'_, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
+impl<'a, TPanel: Panel, TLCD: LCD, CDef: ComponentDef<Panel = TPanel, LCD = TLCD>>
+    Client<'_, CDef>
 {
-    pub fn new(
-        producer: ClientMessageProducer<'a>,
-        panel: TPanel,
-        lcd: TLCD,
-    ) -> Client<TPanel, TLCD> {
+    pub fn new(components: ClientComponents<'a, TPanel, TLCD>) -> Client<'a, CDef> {
         Client {
-            state: ClientState::GameState(GameState::new(producer, panel, lcd)),
+            components: components.into(),
+            state: ClientState::GameState(GameState::new()),
         }
     }
 
     pub fn update(&mut self, now: Instant) {
         match &mut self.state {
-            ClientState::GameState(state) => state.update(now),
+            ClientState::GameState(state) => state.update(&mut self.components, now),
         }
     }
 
