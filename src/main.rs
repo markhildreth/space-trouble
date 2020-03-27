@@ -9,8 +9,10 @@ use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
 use st_client::states::GameState;
-use st_data::{ClientMessage, ClientMessageQueue, GameMessageQueue};
+use st_data::*;
 use st_server::Game;
+
+const TICK: Duration = Duration::from_millis(1);
 
 #[entry]
 fn main() -> ! {
@@ -30,10 +32,10 @@ fn main() -> ! {
     // The game "client"
     let mut state = GameState::new(client_msg_producer, device.panel, device.lcd);
 
-    let mut ms = 0;
+    let mut ms = Instant::from_millis(0);
     loop {
         if let Ok(_) = device.timer.wait() {
-            ms += 1;
+            ms += TICK;
         }
 
         state.update(ms);

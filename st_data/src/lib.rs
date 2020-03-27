@@ -1,6 +1,9 @@
 #![cfg_attr(not(test), no_std)]
 
 pub mod control_values;
+pub mod time;
+
+pub use time::*;
 
 use crate::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use heapless::consts::U4;
@@ -17,7 +20,7 @@ pub enum Action {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Directive {
     pub action: Action,
-    pub expiration: u32,
+    pub time_limit: Duration,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

@@ -6,6 +6,7 @@ use hal::delay::Delay;
 use hal::pac::{CorePeripherals, Peripherals, TC3};
 use hal::prelude::*;
 use hal::timer::TimerCounter;
+use st_data::time::*;
 use st_panels::controls::{Control, FourSwitch, PushButton, ToggleSwitch};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
@@ -69,7 +70,8 @@ pub fn initialize_device() -> DeviceComponents {
             vent_water_vapor: PushButton::new(a3).stateful(),
             vent_waste: PushButton::new(a4).stateful(),
             vent_frustrations: PushButton::new(a5).stateful(),
-            newtonian_fibermist: FourSwitch::new(d10, d11, d12).debounce(600),
+            newtonian_fibermist: FourSwitch::new(d10, d11, d12)
+                .debounce(Duration::from_millis(600)),
         }
     };
 

@@ -1,6 +1,7 @@
-use game_logic::{
-    Action, Directive, Game, GameMessage, GameMessageConsumer, GameMessageQueue, ToggleSwitch,
-};
+use st_data::control_values::ToggleSwitchValue;
+use st_data::time::*;
+use st_data::{Action, Directive, GameMessage, GameMessageConsumer, GameMessageQueue};
+use st_server::Game;
 
 fn drain(queue: &mut GameMessageConsumer) -> Vec<GameMessage> {
     let mut v = Vec::new();
@@ -42,18 +43,17 @@ fn find_hull_health_updates(msgs: &Vec<GameMessage>) -> Vec<u8> {
 
 #[test]
 fn integration() {
-    let mut rng = rand::thread_rng();
     let mut queue = GameMessageQueue::new();
     let (producer, mut consumer) = queue.split();
     let mut game = Game::new(producer);
 
-    let mut clock = 0;
+    let mut clock = Instant::ZERO;
 
     // At time zero, nothing of importance should be happening.
-    game.update(clock, &mut rng);
+    game.update(clock);
     assert_eq!(consumer.ready(), false);
 
-    game.perform(clock, Action::Eigenthrottle(ToggleSwitch::Disabled));
+    game.perform(clock, Action::Eigenthrottle(ToggleSwitchValue::Disabled));
     let msgs = drain(&mut consumer);
     let hull_health_msgs = find_hull_health_updates(&msgs);
     assert_eq!(
@@ -64,8 +64,8 @@ fn integration() {
     );
 
     // Advance to when a directive is given & ship distance updates
-    clock += 2_000;
-    game.update(clock, &mut rng);
+    clock += Duration::from_secs(2);
+    game.update(clock);
     let msgs = drain(&mut consumer);
     let directives = find_directives(&msgs);
     assert!(directives.len() == 1, "No directives found in {:?}", msgs);
@@ -77,23 +77,23 @@ fn integration() {
     );
 
     // Perform the action that we were directed to perform
-    clock += 1_000;
+    clock += Duration::from_secs(1);
     let directive = directives[0];
     game.perform(clock, directive.action);
     let msgs = drain(&mut consumer);
     assert_eq!(msgs, [GameMessage::DirectiveCompleted]);
 
     // Let's generate another action.
-    clock += 2_000;
-    game.update(clock, &mut rng);
+    clock += Duration::from_secs(2);
+    game.update(clock);
     let msgs = drain(&mut consumer);
     let directives = find_directives(&msgs);
     assert!(directives.len() == 1, "No directives found in {:?}", msgs);
     let directive = directives[0];
 
     // And we should fail it.
-    clock += directive.expiration;
-    game.update(clock, &mut rng);
+    clock += directive.time_limit;
+    game.update(clock);
     let msgs = drain(&mut consumer);
     assert!(
         msgs.contains(&GameMessage::HullHealthUpdated(94)),

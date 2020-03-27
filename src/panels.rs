@@ -1,5 +1,6 @@
 use feather_m0::gpio::*;
 use st_data::control_values::{PushButtonValue, VentControlValue};
+use st_data::time::*;
 use st_data::{Action, ClientMessage, ClientMessageProducer};
 use st_panels::controls::{
     DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
@@ -34,38 +35,38 @@ impl Panel {
 }
 
 impl st_client::Panel for Panel {
-    fn update(&mut self, producer: &mut ClientMessageProducer, ms: u32) {
-        if let UpdateResult::Change(value) = self.eigenthrottle.update(ms) {
+    fn update(&mut self, producer: &mut ClientMessageProducer, now: Instant) {
+        if let UpdateResult::Change(value) = self.eigenthrottle.update(now) {
             let action = Action::Eigenthrottle(value);
             self.perform(producer, action);
         }
 
-        if let UpdateResult::Change(value) = self.gelatinous_darkbucket.update(ms) {
+        if let UpdateResult::Change(value) = self.gelatinous_darkbucket.update(now) {
             let action = Action::GelatinousDarkbucket(value);
             self.perform(producer, action);
         }
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_hydrogen.update(ms) {
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_hydrogen.update(now) {
             let action = Action::VentControl(VentControlValue::Hydrogen);
             self.perform(producer, action);
         }
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_water_vapor.update(ms) {
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_water_vapor.update(now) {
             let action = Action::VentControl(VentControlValue::WaterVapor);
             self.perform(producer, action);
         }
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_waste.update(ms) {
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_waste.update(now) {
             let action = Action::VentControl(VentControlValue::Waste);
             self.perform(producer, action);
         }
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_frustrations.update(ms) {
+        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_frustrations.update(now) {
             let action = Action::VentControl(VentControlValue::Frustrations);
             self.perform(producer, action);
         }
 
-        if let UpdateResult::Change(value) = self.newtonian_fibermist.update(ms) {
+        if let UpdateResult::Change(value) = self.newtonian_fibermist.update(now) {
             let action = Action::NewtonianFibermist(value);
             self.perform(producer, action);
         }

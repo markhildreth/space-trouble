@@ -50,13 +50,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "st_client"
-version = "0.1.0"
-dependencies = [
- "st_data 0.1.0",
-]
-
-[[package]]
 name = "st_data"
 version = "0.1.0"
 dependencies = [

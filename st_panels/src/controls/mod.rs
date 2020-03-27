@@ -4,6 +4,7 @@ mod toggle_switch;
 
 pub use four_switch::FourSwitch;
 pub use push_button::PushButton;
+use st_data::time::*;
 pub use toggle_switch::ToggleSwitch;
 
 pub enum UpdateResult<T> {
@@ -22,8 +23,8 @@ where
         StatefulControl::new(self)
     }
 
-    fn debounce(self, ms: u32) -> DebounceControl<Self> {
-        DebounceControl::new(self, ms)
+    fn debounce(self, duration: Duration) -> DebounceControl<Self> {
+        DebounceControl::new(self, duration)
     }
 
     fn read(&self) -> Self::Value;
@@ -49,7 +50,7 @@ where
         }
     }
 
-    pub fn update(&mut self, _ms: u32) -> UpdateResult<T::Value> {
+    pub fn update(&mut self, _now: Instant) -> UpdateResult<T::Value> {
         let value = self.control.read();
         if value == self.current_value {
             UpdateResult::NoChange
@@ -63,7 +64,7 @@ where
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum DebounceStatus<T> {
     Neutral,
-    Debouncing { ends_at: u32, de_value: T },
+    Debouncing { ends_at: Instant, de_value: T },
 }
 
 pub struct DebounceControl<T>
@@ -71,7 +72,7 @@ where
     T: Control,
 {
     control: T,
-    debounce_time: u32,
+    debounce_time: Duration,
     current_value: T::Value,
     debounce_status: DebounceStatus<T::Value>,
 }
@@ -80,7 +81,7 @@ impl<T> DebounceControl<T>
 where
     T: Control,
 {
-    fn new(control: T, debounce_time: u32) -> DebounceControl<T> {
+    fn new(control: T, debounce_time: Duration) -> DebounceControl<T> {
         DebounceControl {
             control,
             debounce_time,
@@ -89,12 +90,12 @@ where
         }
     }
 
-    pub fn update(&mut self, ms: u32) -> UpdateResult<T::Value> {
+    pub fn update(&mut self, now: Instant) -> UpdateResult<T::Value> {
         let new_value = self.control.read();
         match (self.debounce_status, self.current_value == new_value) {
             (DebounceStatus::Neutral, true) => UpdateResult::NoChange,
             (DebounceStatus::Neutral, false) => {
-                self.start_debounce(ms, new_value);
+                self.start_debounce(now, new_value);
                 UpdateResult::NoChange
             }
             (DebounceStatus::Debouncing { .. }, true) => {
@@ -103,9 +104,9 @@ where
             }
             (DebounceStatus::Debouncing { de_value, ends_at }, false) => {
                 if de_value != new_value {
-                    self.start_debounce(ms, new_value);
+                    self.start_debounce(now, new_value);
                     UpdateResult::NoChange
-                } else if ms > ends_at {
+                } else if now > ends_at {
                     self.current_value = de_value;
                     self.stop_debouncing();
                     UpdateResult::Change(self.current_value)
@@ -116,10 +117,10 @@ where
         }
     }
 
-    fn start_debounce(&mut self, ms: u32, value: T::Value) {
+    fn start_debounce(&mut self, now: Instant, value: T::Value) {
         self.debounce_status = DebounceStatus::Debouncing {
             de_value: value,
-            ends_at: ms + self.debounce_time,
+            ends_at: now + self.debounce_time,
         };
     }
 

@@ -6,10 +6,11 @@ mod timing;
 
 use core::fmt::Write;
 pub use game_screen::GameScreen;
+use st_data::time::*;
 use st_data::ClientMessageProducer;
 
 pub trait Panel {
-    fn update(&mut self, producer: &mut ClientMessageProducer, ms: u32);
+    fn update(&mut self, producer: &mut ClientMessageProducer, now: Instant);
 }
 
 pub trait LCD: Sized + Write {
