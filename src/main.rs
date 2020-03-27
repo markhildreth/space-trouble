@@ -8,7 +8,7 @@ mod panels;
 use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
-use st_client::states::GameState;
+use st_client::Client;
 use st_data::*;
 use st_server::Game;
 
@@ -30,20 +30,20 @@ fn main() -> ! {
     let mut game = Game::new(game_msg_producer);
 
     // The game "client"
-    let mut state = GameState::new(client_msg_producer, device.panel, device.lcd);
+    let mut client = Client::new(client_msg_producer, device.panel, device.lcd);
 
-    let mut ms = Instant::from_millis(0);
+    let mut now = Instant::from_millis(0);
     loop {
         if let Ok(_) = device.timer.wait() {
-            ms += TICK;
+            now += TICK;
         }
 
-        state.update(ms);
-        game.update(ms);
+        client.update(now);
+        game.update(now);
 
         loop {
             match game_msg_consumer.dequeue() {
-                Some(msg) => state.handle(ms, msg),
+                Some(msg) => client.handle(now, msg),
                 None => break,
             }
         }
@@ -52,7 +52,7 @@ fn main() -> ! {
             match client_msg_consumer.dequeue() {
                 Some(msg) => match msg {
                     ClientMessage::ActionPerformed(action) => {
-                        game.perform(ms, action);
+                        game.perform(now, action);
                     }
                 },
                 None => break,

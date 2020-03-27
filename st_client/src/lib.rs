@@ -16,3 +16,6 @@ pub trait Panel {
 pub trait LCD: Sized + Write {
     fn set_cursor_pos(&mut self, row: u8, col: u8);
 }
+
+mod client;
+pub use client::Client;
