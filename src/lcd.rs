@@ -5,7 +5,7 @@ use hd44780_driver::bus::I2CBus;
 use hd44780_driver::HD44780;
 use st_client;
 
-use hd44780_driver::{Cursor, CursorBlink, Direction, Display, DisplayMode};
+use hd44780_driver::{Cursor, CursorBlink};
 
 const DISPLAY_ADDRESS_ROWS: [u8; 4] = [0, 0x40, 0x14, 0x54];
 
@@ -14,8 +14,11 @@ pub type LCDImpl =
 pub struct LCD(LCDImpl);
 
 impl LCD {
-    pub fn new(inner: LCDImpl) -> LCD {
-        LCD(inner)
+    pub fn new(mut lcd: LCDImpl) -> LCD {
+        lcd.reset();
+        lcd.set_cursor_visibility(Cursor::Invisible);
+        lcd.set_cursor_blink(CursorBlink::Off);
+        LCD(lcd)
     }
 }
 

@@ -1,7 +1,7 @@
 use feather_m0::gpio::*;
 use st_data::control_values::{PushButtonValue, VentControlValue};
 use st_data::{Action, ClientMessage, ClientMessageProducer};
-use st_device::controls::{
+use st_panels::controls::{
     DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
 

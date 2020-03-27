@@ -13,7 +13,7 @@ embedded-hal = { version = "0.2.3" }
 hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
 st_logic = { path = "st_logic" }
 st_data = { path = "st_data" }
-st_device = { path = "st_device" }
+st_panels = { path = "st_panels" }
 st_client = { path = "st_client" }
 
 [profile.release]

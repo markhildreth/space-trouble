@@ -1,5 +1,5 @@
 [package]
-name = "st_device"
+name = "st_panels"
 version = "0.1.0"
 authors = ["Mark Hildreth <mark.k.hildreth@gmail.com>"]
 edition = "2018"
@@ -8,9 +8,5 @@ edition = "2018"
 
 [dependencies]
 feather_m0 = { version = "0.6.0", features = ["unproven"] }
-panic-halt = "0.2.0"
-atsamd-hal = "0.8.2"
-embedded-hal = "0.2.3"
-cortex-m-rt = "0.6.12"
-cortex-m = "0.6.2"
 st_data = { path = "../st_data" }
+embedded-hal = "0.2.3"

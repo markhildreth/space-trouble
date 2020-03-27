@@ -294,8 +294,8 @@ dependencies = [
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "st_client 0.1.0",
  "st_data 0.1.0",
- "st_device 0.1.0",
  "st_logic 0.1.0",
+ "st_panels 0.1.0",
 ]
 
 [[package]]
@@ -313,24 +313,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "st_device"
-version = "0.1.0"
-dependencies = [
- "atsamd-hal 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "cortex-m 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "cortex-m-rt 0.6.12 (registry+https://github.com/rust-lang/crates.io-index)",
- "embedded-hal 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "panic-halt 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "st_data 0.1.0",
-]
-
-[[package]]
 name = "st_logic"
 version = "0.1.0"
 dependencies = [
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "st_data 0.1.0",
+]
+
+[[package]]
+name = "st_panels"
+version = "0.1.0"
+dependencies = [
+ "embedded-hal 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "st_data 0.1.0",
 ]
 
