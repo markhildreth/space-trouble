@@ -45,8 +45,7 @@ impl<T: Copy + PartialEq + Eq> core::convert::From<T> for Dirtiable<T> {
     }
 }
 
-pub struct GameScreen<T: LCD> {
-    lcd: T,
+pub struct GameScreen {
     distance: Dirtiable<u32>,
     hull_health: Dirtiable<u8>,
     timer: Dirtiable<u8>,
@@ -56,10 +55,9 @@ pub struct GameScreen<T: LCD> {
 
 const BLOCK: char = 0xff as char;
 
-impl<T: LCD> GameScreen<T> {
-    pub fn new(lcd: T) -> GameScreen<T> {
+impl GameScreen {
+    pub fn new() -> GameScreen {
         GameScreen {
-            lcd,
             distance: 0.into(),
             hull_health: 100.into(),
             timer: 0.into(),
@@ -89,42 +87,42 @@ impl<T: LCD> GameScreen<T> {
         self.timer.update(n);
     }
 
-    pub fn update(&mut self) {
+    pub fn update<T: LCD>(&mut self, lcd: &mut T) {
         if let DirtyState::Dirty(new) = self.distance.clean() {
-            self.lcd.set_cursor_pos(0, 0);
-            self.lcd.write_fmt(format_args!("{} km", new)).unwrap();
+            lcd.set_cursor_pos(0, 0);
+            lcd.write_fmt(format_args!("{} km", new)).unwrap();
         }
 
         if let DirtyState::Dirty(new) = self.hull_health.clean() {
-            self.lcd.set_cursor_pos(0, 16);
-            self.lcd.write_fmt(format_args!("{: >3}%", new)).unwrap();
+            lcd.set_cursor_pos(0, 16);
+            lcd.write_fmt(format_args!("{: >3}%", new)).unwrap();
         }
 
         if let DirtyState::Dirty(new) = self.timer.clean() {
-            self.lcd.set_cursor_pos(1, 0);
+            lcd.set_cursor_pos(1, 0);
             for _ in 0..new {
-                self.lcd.write_char(BLOCK).unwrap();
+                lcd.write_char(BLOCK).unwrap();
             }
             for _ in new..20 {
-                self.lcd.write_char(' ').unwrap();
+                lcd.write_char(' ').unwrap();
             }
         }
 
         if let DirtyState::Dirty(new) = self.command_text_1.clean() {
-            self.lcd.set_cursor_pos(2, 0);
+            lcd.set_cursor_pos(2, 0);
             if let Some(command_text_1) = new {
-                self.lcd.write_str(command_text_1).unwrap();
+                lcd.write_str(command_text_1).unwrap();
             } else {
-                self.lcd.write_str(BLANK_LINE).unwrap();
+                lcd.write_str(BLANK_LINE).unwrap();
             }
         }
 
         if let DirtyState::Dirty(new) = self.command_text_2.clean() {
-            self.lcd.set_cursor_pos(3, 0);
+            lcd.set_cursor_pos(3, 0);
             if let Some(command_text_2) = new {
-                self.lcd.write_str(command_text_2).unwrap();
+                lcd.write_str(command_text_2).unwrap();
             } else {
-                self.lcd.write_str(BLANK_LINE).unwrap();
+                lcd.write_str(BLANK_LINE).unwrap();
             }
         }
     }

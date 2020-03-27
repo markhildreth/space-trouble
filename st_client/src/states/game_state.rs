@@ -16,7 +16,8 @@ where
 {
     producer: ClientMessageProducer<'a>,
     panel: TPanel,
-    screen: GameScreen<TLCD>,
+    lcd: TLCD,
+    screen: GameScreen,
     directive_time_span: Option<TimeSpan>,
 }
 
@@ -26,17 +27,17 @@ where
     TLCD: LCD,
 {
     pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: TLCD) -> Self {
-        let screen = GameScreen::new(lcd);
         GameState {
             producer,
             panel,
-            screen,
+            lcd,
+            screen: GameScreen::new(),
             directive_time_span: None,
         }
     }
 
     pub fn update(&mut self, now: Instant) {
-        self.screen.update();
+        self.screen.update(&mut self.lcd);
         self.panel.update(&mut self.producer, now);
 
         if let Some(span) = &self.directive_time_span {
