@@ -10,7 +10,7 @@ use embedded_hal::timer::CountDown;
 use feather_m0::entry;
 use st_client::states::GameState;
 use st_data::{ClientMessage, ClientMessageQueue, GameMessageQueue};
-use st_logic::Game;
+use st_server::Game;
 
 #[entry]
 fn main() -> ! {
