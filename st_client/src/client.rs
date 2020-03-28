@@ -1,5 +1,5 @@
 use crate::states::GameState;
-use crate::{ClientComponents, Components, ComponentsDef, ComponentsDefImpl};
+use crate::{ClientComponents, Components, ComponentsDefImpl};
 use crate::{Panel, LCD};
 use st_data::time::Instant;
 use st_data::GameMessage;
