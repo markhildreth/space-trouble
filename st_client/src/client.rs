@@ -1,5 +1,5 @@
 use crate::states::GameState;
-use crate::{ClientComponents, ComponentDef, Components};
+use crate::{ClientComponents, Components, ComponentsDef, ComponentsDefImpl};
 use crate::{Panel, LCD};
 use st_data::time::Instant;
 use st_data::GameMessage;
@@ -8,17 +8,29 @@ enum ClientState {
     GameState(GameState),
 }
 
-pub struct Client<'a, CDef: ComponentDef> {
-    components: Components<'a, CDef>,
+pub struct Client<'a, TPanel, TLCD>
+where
+    TPanel: Panel,
+    TLCD: LCD,
+{
+    components: Components<'a, ComponentsDefImpl<TPanel, TLCD>>,
     state: ClientState,
 }
 
-impl<'a, TPanel: Panel, TLCD: LCD, CDef: ComponentDef<Panel = TPanel, LCD = TLCD>>
-    Client<'_, CDef>
+impl<'a, TPanel, TLCD> Client<'a, TPanel, TLCD>
+where
+    TPanel: Panel,
+    TLCD: LCD,
 {
-    pub fn new(components: ClientComponents<'a, TPanel, TLCD>) -> Client<'a, CDef> {
+    pub fn new(client_components: ClientComponents<'a, TPanel, TLCD>) -> Client<'a, TPanel, TLCD> {
+        let components = Components {
+            panel: client_components.panel,
+            lcd: client_components.lcd,
+            producer: client_components.producer,
+        };
+
         Client {
-            components: components.into(),
+            components,
             state: ClientState::GameState(GameState::new()),
         }
     }

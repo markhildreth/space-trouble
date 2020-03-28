@@ -1,7 +1,7 @@
 use crate::game_screen::GameScreen;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
-use crate::{ComponentDef, Components, Panel};
+use crate::{Components, ComponentsDef, Panel};
 use st_data::time::*;
 use st_data::GameMessage;
 
@@ -22,7 +22,7 @@ impl GameState {
         }
     }
 
-    pub fn update<CDef: ComponentDef>(&mut self, c: &mut Components<CDef>, now: Instant) {
+    pub fn update<CDef: ComponentsDef>(&mut self, c: &mut Components<CDef>, now: Instant) {
         self.screen.update(&mut c.lcd);
         c.panel.update(&mut c.producer, now);
 

@@ -6,7 +6,7 @@ mod strings;
 mod timing;
 
 use crate::components::Components;
-pub use crate::components::{build, ClientComponents};
+pub use crate::components::{ClientComponents, ComponentsDefImpl};
 use core::fmt::Write;
 pub use game_screen::GameScreen;
 use st_data::time::*;
@@ -23,7 +23,7 @@ pub trait LCD: Sized + Write {
     fn set_cursor_pos(&mut self, row: u8, col: u8);
 }
 
-pub trait ComponentDef
+pub trait ComponentsDef
 where
     Self::Panel: Panel,
     Self::LCD: LCD,
