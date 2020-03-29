@@ -1,4 +1,4 @@
-use crate::states::{ClientState, GameState, StateUpdate};
+use crate::states::*;
 use crate::{Components, ComponentsDef, ComponentsDefImpl, Panel, LCD};
 use st_data::time::Instant;
 use st_data::{ClientMessageProducer, GameMessage};
@@ -12,14 +12,14 @@ impl<'a, TPanel: Panel, TLCD: LCD> Client<'a, ComponentsDefImpl<TPanel, TLCD>> {
     pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: TLCD) -> Self {
         Client {
             components: Components::new(producer, panel, lcd),
-            state: ClientState::GameState(GameState::new()),
+            state: ClientState::WaitingToStart(WaitingToStartState::new()),
         }
     }
 
     pub fn update(&mut self, now: Instant) {
         let result = match &mut self.state {
-            ClientState::WaitingToStart(state) => state.update(&mut self.components, now),
-            ClientState::GameState(state) => state.update(&mut self.components, now),
+            ClientState::WaitingToStart(s) => s.update(&mut self.components, now),
+            ClientState::GameState(s) => s.update(&mut self.components, now),
         };
 
         if let Some(state_update) = result {
@@ -31,8 +31,8 @@ impl<'a, TPanel: Panel, TLCD: LCD> Client<'a, ComponentsDefImpl<TPanel, TLCD>> {
 
     pub fn handle(&mut self, now: Instant, msg: GameMessage) {
         match &mut self.state {
-            ClientState::WaitingToStart(_state) => (),
-            ClientState::GameState(state) => state.handle(now, msg),
+            ClientState::WaitingToStart(s) => s.handle(now, msg),
+            ClientState::GameState(s) => s.handle(now, msg),
         }
     }
 }
