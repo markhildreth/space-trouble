@@ -20,13 +20,34 @@ pub trait LCD: Sized + Write {
     fn set_cursor_pos(&mut self, row: u8, col: u8);
 }
 
-trait ComponentsDef
+pub trait ComponentsDef
 where
     Self::Panel: Panel,
     Self::LCD: LCD,
 {
     type Panel;
     type LCD;
+}
+
+pub struct Components<'a, CD: ComponentsDef> {
+    pub(crate) producer: ClientMessageProducer<'a>,
+    pub(crate) panel: CD::Panel,
+    pub(crate) lcd: CD::LCD,
+}
+
+impl<'a, TPanel, TLCD, CD> Components<'a, CD>
+where
+    CD: ComponentsDef<Panel = TPanel, LCD = TLCD>,
+    TPanel: Panel,
+    TLCD: LCD,
+{
+    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: TLCD) -> Self {
+        Components {
+            producer,
+            panel,
+            lcd,
+        }
+    }
 }
 
 pub struct ComponentsDefImpl<TPanel: Panel, TLCD: LCD> {
@@ -37,20 +58,4 @@ pub struct ComponentsDefImpl<TPanel: Panel, TLCD: LCD> {
 impl<TPanel: Panel, TLCD: LCD> ComponentsDef for ComponentsDefImpl<TPanel, TLCD> {
     type Panel = TPanel;
     type LCD = TLCD;
-}
-
-pub(crate) struct Components<'a, C: ComponentsDef> {
-    pub producer: ClientMessageProducer<'a>,
-    pub panel: C::Panel,
-    pub lcd: C::LCD,
-}
-
-pub struct ClientComponents<'a, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    pub producer: ClientMessageProducer<'a>,
-    pub panel: TPanel,
-    pub lcd: TLCD,
 }

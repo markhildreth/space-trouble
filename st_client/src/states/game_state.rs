@@ -1,4 +1,5 @@
 use crate::game_screen::GameScreen;
+use crate::states::StateUpdate;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
 use crate::{Components, ComponentsDef, Panel};
@@ -22,7 +23,11 @@ impl GameState {
         }
     }
 
-    pub fn update<CDef: ComponentsDef>(&mut self, c: &mut Components<CDef>, now: Instant) {
+    pub fn update<CDef: ComponentsDef>(
+        &mut self,
+        c: &mut Components<CDef>,
+        now: Instant,
+    ) -> Option<StateUpdate> {
         self.screen.update(&mut c.lcd);
         c.panel.update(&mut c.producer, now);
 
@@ -40,6 +45,8 @@ impl GameState {
                 }
             }
         }
+
+        None
     }
 
     pub(crate) fn handle(&mut self, now: Instant, msg: GameMessage) {

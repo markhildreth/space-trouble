@@ -1,48 +1,37 @@
-use crate::states::GameState;
-use crate::{ClientComponents, Components, ComponentsDefImpl};
-use crate::{Panel, LCD};
+use crate::states::{ClientState, GameState, StateUpdate};
+use crate::{Components, ComponentsDef, ComponentsDefImpl, Panel, LCD};
 use st_data::time::Instant;
-use st_data::GameMessage;
+use st_data::{ClientMessageProducer, GameMessage};
 
-enum ClientState {
-    GameState(GameState),
-}
-
-pub struct Client<'a, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    components: Components<'a, ComponentsDefImpl<TPanel, TLCD>>,
+pub struct Client<'a, CD: ComponentsDef> {
+    components: Components<'a, CD>,
     state: ClientState,
 }
 
-impl<'a, TPanel, TLCD> Client<'a, TPanel, TLCD>
-where
-    TPanel: Panel,
-    TLCD: LCD,
-{
-    pub fn new(client_components: ClientComponents<'a, TPanel, TLCD>) -> Client<'a, TPanel, TLCD> {
-        let components = Components {
-            panel: client_components.panel,
-            lcd: client_components.lcd,
-            producer: client_components.producer,
-        };
-
+impl<'a, TPanel: Panel, TLCD: LCD> Client<'a, ComponentsDefImpl<TPanel, TLCD>> {
+    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: TLCD) -> Self {
         Client {
-            components,
+            components: Components::new(producer, panel, lcd),
             state: ClientState::GameState(GameState::new()),
         }
     }
 
     pub fn update(&mut self, now: Instant) {
-        match &mut self.state {
+        let result = match &mut self.state {
+            ClientState::WaitingToStart(state) => state.update(&mut self.components, now),
             ClientState::GameState(state) => state.update(&mut self.components, now),
+        };
+
+        if let Some(state_update) = result {
+            self.state = match state_update {
+                StateUpdate::GameState => ClientState::GameState(GameState::new()),
+            }
         }
     }
 
     pub fn handle(&mut self, now: Instant, msg: GameMessage) {
         match &mut self.state {
+            ClientState::WaitingToStart(_state) => (),
             ClientState::GameState(state) => state.handle(now, msg),
         }
     }
