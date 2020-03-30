@@ -1,6 +1,6 @@
 use crate::controls::Control;
 use crate::{Pin, PinValue};
-use st_data::control_values::PushButtonValue;
+use st_common::control_values::PushButtonValue;
 
 pub struct PushButton<P: Pin> {
     pin: P,

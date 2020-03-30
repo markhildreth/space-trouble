@@ -1,4 +1,4 @@
-use st_data::time::*;
+use st_common::time::*;
 
 const SHIP_DISTANCE_CALC_DELAY: Duration = Duration::from_secs(2);
 const SHIP_DISTANCE_PER_DELAY: u32 = 275;

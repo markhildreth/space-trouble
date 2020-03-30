@@ -1,5 +1,5 @@
-use st_data::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
-use st_data::Action;
+use st_common::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
+use st_common::Action;
 
 const EMPTY: &str = "";
 const ENABLE: &str = "      Enable";

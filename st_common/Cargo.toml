@@ -1,5 +1,5 @@
 [package]
-name = "st_data"
+name = "st_common"
 version = "0.1.0"
 authors = ["Mark Hildreth <mark.k.hildreth@gmail.com>"]
 edition = "2018"

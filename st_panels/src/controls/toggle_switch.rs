@@ -1,6 +1,6 @@
 use crate::controls::Control;
 use crate::{Pin, PinValue};
-use st_data::control_values::ToggleSwitchValue;
+use st_common::control_values::ToggleSwitchValue;
 
 pub struct ToggleSwitch<P: Pin> {
     pin: P,

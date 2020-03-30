@@ -1,7 +1,7 @@
 use crate::states::*;
 use crate::{Components, ComponentsDef, ComponentsDefImpl, Panel, LCD};
-use st_data::time::Instant;
-use st_data::{ClientMessageProducer, GameMessage};
+use st_common::time::Instant;
+use st_common::{ClientMessageProducer, GameMessage};
 
 pub struct Client<'a, CD: ComponentsDef> {
     components: Components<'a, CD>,

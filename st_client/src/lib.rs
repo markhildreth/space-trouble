@@ -7,8 +7,8 @@ mod timing;
 
 use core::fmt::Write;
 pub use game_screen::GameScreen;
-use st_data::time::*;
-use st_data::ClientMessageProducer;
+use st_common::time::*;
+use st_common::ClientMessageProducer;
 
 pub use client::Client;
 

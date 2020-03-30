@@ -9,7 +9,7 @@ use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
 use st_client::Client;
-use st_data::*;
+use st_common::*;
 use st_server::Game;
 
 const TICK: Duration = Duration::from_millis(1);

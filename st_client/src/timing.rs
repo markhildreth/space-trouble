@@ -1,4 +1,4 @@
-use st_data::time::*;
+use st_common::time::*;
 
 pub struct TimeSpan {
     start: Instant,

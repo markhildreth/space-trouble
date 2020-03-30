@@ -4,7 +4,7 @@ mod toggle_switch;
 
 pub use four_switch::FourSwitch;
 pub use push_button::PushButton;
-use st_data::time::*;
+use st_common::time::*;
 pub use toggle_switch::ToggleSwitch;
 
 pub enum UpdateResult<T> {

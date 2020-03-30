@@ -50,7 +50,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "st_data"
+name = "st_common"
 version = "0.1.0"
 dependencies = [
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -3,8 +3,8 @@ use crate::states::StateUpdate;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
 use crate::{Components, ComponentsDef, Panel};
-use st_data::time::*;
-use st_data::GameMessage;
+use st_common::time::*;
+use st_common::GameMessage;
 
 fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
     return (20 * remaining.as_millis() / total.as_millis()) as u8;

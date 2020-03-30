@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
 heapless = "0.5.3"
-st_data = { path = "../st_data" }
+st_common = { path = "../st_common" }
 
 [dev-dependencies]
 # While testing on native computer, we will use more features

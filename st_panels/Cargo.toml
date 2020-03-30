@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 feather_m0 = { version = "0.6.0", features = ["unproven"] }
-st_data = { path = "../st_data" }
+st_common = { path = "../st_common" }
 embedded-hal = "0.2.3"

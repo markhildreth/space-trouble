@@ -2,8 +2,8 @@ use crate::ship_distance::{ShipDistance, ShipDistanceResult};
 use crate::ShipState;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
-use st_data::time::*;
-use st_data::{Action, Directive, GameMessage, GameMessageProducer};
+use st_common::time::*;
+use st_common::{Action, Directive, GameMessage, GameMessageProducer};
 
 const DIRECTIVE_WAIT: Duration = Duration::from_millis(500);
 const DIRECTIVE_TIME_LIMIT: Duration = Duration::from_secs(7);
