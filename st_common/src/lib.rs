@@ -1,6 +1,7 @@
 #![cfg_attr(not(test), no_std)]
 
 pub mod control_values;
+mod messaging;
 pub mod time;
 
 pub use time::*;
