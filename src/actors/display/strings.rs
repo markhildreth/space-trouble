@@ -1,26 +1,27 @@
 use st_common::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use st_common::Action;
 
-const EMPTY: &str = "";
-const ENABLE: &str = "      Enable";
-const DISABLE: &str = "     Disable";
-const TO_ONE: &str = "      to One";
-const TO_TWO: &str = "      to Two";
-const TO_THREE: &str = "     to Three";
-const TURN_OFF: &str = "      Turn off";
+pub type GameString = &'static str;
+const EMPTY: GameString = "";
+const ENABLE: GameString = "      Enable";
+const DISABLE: GameString = "     Disable";
+const TO_ONE: GameString = "      to One";
+const TO_TWO: GameString = "      to Two";
+const TO_THREE: GameString = "     to Three";
+const TURN_OFF: GameString = "      Turn off";
 
-const EIGENTHROTTLE: &str = "   Eigenthrottle";
+const EIGENTHROTTLE: GameString = "   Eigenthrottle";
 
-const VENT_HYDROGEN: &str = "   Vent Hydrogen";
-const VENT_WATER_VAPOR: &str = "  Vent Water Vapor";
-const VENT_WASTE: &str = "     Vent Waste";
-const VENT_FRUSTRATIONS: &str = "  Vent Frustrations";
+const VENT_HYDROGEN: GameString = "   Vent Hydrogen";
+const VENT_WATER_VAPOR: GameString = "  Vent Water Vapor";
+const VENT_WASTE: GameString = "     Vent Waste";
+const VENT_FRUSTRATIONS: GameString = "  Vent Frustrations";
 
-const ENABLE_GELATINOUS_DARK_BUCKET: &str = " Enable Gelatinous";
-const DISABLE_GELATINOUS_DARK_BUCKET: &str = " Disable Gelatinous";
-const GELATINOUS_DARK_BUCKET: &str = "     Darkbucket";
+const ENABLE_GELATINOUS_DARK_BUCKET: GameString = " Enable Gelatinous";
+const DISABLE_GELATINOUS_DARK_BUCKET: GameString = " Disable Gelatinous";
+const GELATINOUS_DARK_BUCKET: GameString = "     Darkbucket";
 
-const NEWTONIAN_FIBERMIST: &str = "Newtonian Fibermist";
+const NEWTONIAN_FIBERMIST: GameString = "Newtonian Fibermist";
 
 pub fn get_action_text(action: Action) -> (&'static str, &'static str) {
     match action {

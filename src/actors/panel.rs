@@ -15,7 +15,7 @@ impl Handler for PanelActor {
 }
 
 impl Handles<TickEvent> for PanelActor {
-    fn handle(&mut self, msg: TickEvent, ctx: &mut Context) {
-        ctx.panel.update(msg.now, &mut ctx.queue);
+    fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
+        ctx.panel.update(ctx.now, &mut ctx.queue);
     }
 }

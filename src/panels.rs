@@ -1,7 +1,7 @@
 use feather_m0::gpio::*;
 use st_common::control_values::{PushButtonValue, VentControlValue};
 use st_common::time::*;
-use st_common::{Action, Event, EventQueue};
+use st_common::*;
 use st_panels::controls::{
     DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
@@ -66,7 +66,7 @@ impl Panel {
     }
 
     fn perform(&self, queue: &mut EventQueue, action: Action) {
-        let msg = Event::ActionPerformed(action);
+        let msg = Event::ActionPerformed(ActionPerformedEvent { action });
         queue.enqueue(msg).unwrap();
     }
 }

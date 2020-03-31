@@ -14,19 +14,44 @@ use heapless::spsc::Queue;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Event {
     Tick(TickEvent),
-    NewDirective(Directive),
-    HullHealthUpdated(u8),
-    ShipDistanceUpdated(u32),
-    DirectiveCompleted,
-    ActionPerformed(Action),
+    NewDirective(NewDirectiveEvent),
+    HullHealthUpdated(HullHealthUpdatedEvent),
+    ShipDistanceUpdated(ShipDistanceUpdatedEvent),
+    DirectiveCompleted(DirectiveCompletedEvent),
+    ActionPerformed(ActionPerformedEvent),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct TickEvent {
-    pub now: Instant,
-}
-
+pub struct TickEvent;
 impl Message for TickEvent {}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct NewDirectiveEvent {
+    pub directive: Directive,
+}
+impl Message for NewDirectiveEvent {}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct HullHealthUpdatedEvent {
+    pub health: u8,
+}
+impl Message for HullHealthUpdatedEvent {}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ShipDistanceUpdatedEvent {
+    pub distance: u32,
+}
+impl Message for ShipDistanceUpdatedEvent {}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct DirectiveCompletedEvent;
+impl Message for DirectiveCompletedEvent {}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ActionPerformedEvent {
+    pub action: Action,
+}
+impl Message for ActionPerformedEvent {}
 
 pub type EventQueue = Queue<Event, U8>;
 
@@ -42,8 +67,4 @@ pub enum Action {
     GelatinousDarkbucket(ToggleSwitchValue),
     VentControl(VentControlValue),
     NewtonianFibermist(FourSwitchValue),
-}
-
-pub trait LCD: Sized + core::fmt::Write {
-    fn set_cursor_pos(&mut self, row: u8, col: u8);
 }

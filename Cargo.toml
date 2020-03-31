@@ -11,14 +11,9 @@ feather_m0 = { version = "0.6.0" }
 heapless = "0.5.3"
 embedded-hal = { version = "0.2.3" }
 hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
-st_server = { path = "st_server" }
 st_common = { path = "st_common" }
 st_panels = { path = "st_panels" }
-st_client = { path = "st_client" }
 
 [profile.release]
 codegen-units = 1
 lto = true
-
-[alias]
-b = "build"
