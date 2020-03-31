@@ -28,7 +28,7 @@ fn main() -> ! {
 
     // Context for Actors
     let mut ctx = Context {
-        queue: EventQueue::new(),
+        queue: EventsQueue::new(),
         panel: device.panel,
         lcd: device.lcd,
         now: Instant::from_millis(0),
@@ -39,16 +39,16 @@ fn main() -> ! {
             ctx.now += TICK;
         }
 
-        ctx.queue.enqueue(Event::Tick(TickEvent {})).unwrap();
+        ctx.queue.enqueue(TickEvent {}.into()).unwrap();
 
         while let Some(event) = ctx.queue.dequeue() {
             match event {
-                Event::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
-                Event::NewDirective(ev) => display.handle(ev, &mut ctx),
-                Event::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
-                Event::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
-                Event::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),
-                Event::Tick(ev) => {
+                Events::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
+                Events::NewDirective(ev) => display.handle(ev, &mut ctx),
+                Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
+                Events::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
+                Events::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),
+                Events::Tick(ev) => {
                     game_logic.handle(ev, &mut ctx);
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);

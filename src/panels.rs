@@ -26,7 +26,7 @@ pub struct Panel {
 }
 
 impl Panel {
-    pub fn update(&mut self, now: Instant, queue: &mut EventQueue) {
+    pub fn update(&mut self, now: Instant, queue: &mut EventsQueue) {
         if let UpdateResult::Change(value) = self.eigenthrottle.update(now) {
             let action = Action::Eigenthrottle(value);
             self.perform(queue, action);
@@ -63,8 +63,8 @@ impl Panel {
         }
     }
 
-    fn perform(&self, queue: &mut EventQueue, action: Action) {
-        let msg = Event::ActionPerformed(ActionPerformedEvent { action });
-        queue.enqueue(msg).unwrap();
+    fn perform(&self, queue: &mut EventsQueue, action: Action) {
+        let ev = ActionPerformedEvent { action }.into();
+        queue.enqueue(ev).unwrap();
     }
 }

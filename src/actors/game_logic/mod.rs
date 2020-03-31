@@ -43,14 +43,14 @@ impl GameLogicActor {
         }
     }
 
-    fn generate_directive(&mut self, now: Instant, queue: &mut EventQueue) {
+    fn generate_directive(&mut self, now: Instant, queue: &mut EventsQueue) {
         if let Ok(action) = self.ship_state.generate_action(&mut self.rng) {
             let directive = Directive {
                 action,
                 time_limit: DIRECTIVE_TIME_LIMIT,
             };
             queue
-                .enqueue(Event::NewDirective(NewDirectiveEvent { directive }))
+                .enqueue(NewDirectiveEvent { directive }.into())
                 .unwrap();
             self.directive = CurrentDirective::OutstandingDirective {
                 action,
@@ -59,7 +59,7 @@ impl GameLogicActor {
         }
     }
 
-    fn fail_directive(&mut self, now: Instant, action: Action, queue: &mut EventQueue) {
+    fn fail_directive(&mut self, now: Instant, action: Action, queue: &mut EventsQueue) {
         self.ship_state.clear(action);
         self.directive = CurrentDirective::WaitingForDirective {
             wait_until: now + DIRECTIVE_WAIT,
@@ -67,12 +67,15 @@ impl GameLogicActor {
         self.update_hull_health(-4, queue);
     }
 
-    fn update_hull_health(&mut self, update: i16, queue: &mut EventQueue) {
+    fn update_hull_health(&mut self, update: i16, queue: &mut EventsQueue) {
         self.hull_health = (self.hull_health as i16 + update) as u8;
         queue
-            .enqueue(Event::HullHealthUpdated(HullHealthUpdatedEvent {
-                health: self.hull_health,
-            }))
+            .enqueue(
+                HullHealthUpdatedEvent {
+                    health: self.hull_health,
+                }
+                .into(),
+            )
             .unwrap();
     }
 }
@@ -97,8 +100,8 @@ impl Handles<TickEvent> for GameLogicActor {
         }
 
         if let ShipDistanceResult::DistanceUpdated(distance) = self.ship_distance.update(ctx.now) {
-            let message = Event::ShipDistanceUpdated(ShipDistanceUpdatedEvent { distance });
-            ctx.queue.enqueue(message).unwrap();
+            let ev = ShipDistanceUpdatedEvent { distance };
+            ctx.queue.enqueue(ev.into()).unwrap();
         }
     }
 }
@@ -113,7 +116,7 @@ impl Handles<ActionPerformedEvent> for GameLogicActor {
             if action == ev.action {
                 valid = true;
                 ctx.queue
-                    .enqueue(Event::DirectiveCompleted(DirectiveCompletedEvent))
+                    .enqueue(DirectiveCompletedEvent {}.into())
                     .unwrap();
                 self.directive = CurrentDirective::WaitingForDirective {
                     wait_until: ctx.now + DIRECTIVE_WAIT,

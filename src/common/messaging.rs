@@ -1,21 +1,21 @@
-pub trait Message {}
+pub trait Event {}
 pub trait Handler {
     type Context;
 }
 
-pub trait Handles<M: Message>: Handler + Sized {
-    fn handle(&mut self, m: M, ctx: &mut Self::Context);
+pub trait Handles<E: Event>: Handler + Sized {
+    fn handle(&mut self, e: E, ctx: &mut Self::Context);
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
 
-    struct TestMessageA {
+    struct TestEventA {
         pub data: u32,
     }
 
-    impl Message for TestMessageA {}
+    impl Event for TestEventA {}
 
     struct TestHandler {
         data: u32,
@@ -29,11 +29,11 @@ mod test {
         type Context = TestContext;
     }
 
-    impl Handles<TestMessageA> for TestHandler {
+    impl Handles<TestEventA> for TestHandler {
         type ErrorKind = ();
 
-        fn handle(&mut self, msg: TestMessageA, ctx: &TestContext) -> Result<(), ()> {
-            self.data += msg.data + ctx.data;
+        fn handle(&mut self, ev: TestEventA, ctx: &TestContext) -> Result<(), ()> {
+            self.data += ev.data + ctx.data;
             Ok(())
         }
     }
@@ -41,10 +41,10 @@ mod test {
     #[test]
     fn test_handlers_and_messages() {
         let mut handler = TestHandler { data: 1 };
-        let msg = TestMessageA { data: 2 };
+        let ev = TestEventA { data: 2 };
         let ctx = TestContext { data: 3 };
 
-        handler.handle(msg, &ctx);
+        handler.handle(ev, &ctx);
         assert_eq!(handler.data, 6);
     }
 }

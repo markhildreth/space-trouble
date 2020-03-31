@@ -11,7 +11,7 @@ use crate::lcd::LCD;
 use crate::panels::Panel;
 
 pub struct Context {
-    pub queue: EventQueue,
+    pub queue: EventsQueue,
     pub panel: Panel,
     pub lcd: LCD,
     pub now: Instant,

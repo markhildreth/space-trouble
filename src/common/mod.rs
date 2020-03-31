@@ -10,7 +10,7 @@ pub use messaging::*;
 pub use time::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Event {
+pub enum Events {
     Tick(TickEvent),
     NewDirective(NewDirectiveEvent),
     HullHealthUpdated(HullHealthUpdatedEvent),
@@ -21,37 +21,67 @@ pub enum Event {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TickEvent;
-impl Message for TickEvent {}
+impl Event for TickEvent {}
+impl From<TickEvent> for Events {
+    fn from(ev: TickEvent) -> Events {
+        Events::Tick(ev)
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct NewDirectiveEvent {
     pub directive: Directive,
 }
-impl Message for NewDirectiveEvent {}
+impl Event for NewDirectiveEvent {}
+impl From<NewDirectiveEvent> for Events {
+    fn from(ev: NewDirectiveEvent) -> Events {
+        Events::NewDirective(ev)
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct HullHealthUpdatedEvent {
     pub health: u8,
 }
-impl Message for HullHealthUpdatedEvent {}
+impl Event for HullHealthUpdatedEvent {}
+impl From<HullHealthUpdatedEvent> for Events {
+    fn from(ev: HullHealthUpdatedEvent) -> Events {
+        Events::HullHealthUpdated(ev)
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct ShipDistanceUpdatedEvent {
     pub distance: u32,
 }
-impl Message for ShipDistanceUpdatedEvent {}
+impl Event for ShipDistanceUpdatedEvent {}
+impl From<ShipDistanceUpdatedEvent> for Events {
+    fn from(ev: ShipDistanceUpdatedEvent) -> Events {
+        Events::ShipDistanceUpdated(ev)
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct DirectiveCompletedEvent;
-impl Message for DirectiveCompletedEvent {}
+impl Event for DirectiveCompletedEvent {}
+impl From<DirectiveCompletedEvent> for Events {
+    fn from(ev: DirectiveCompletedEvent) -> Events {
+        Events::DirectiveCompleted(ev)
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct ActionPerformedEvent {
     pub action: Action,
 }
-impl Message for ActionPerformedEvent {}
+impl Event for ActionPerformedEvent {}
+impl From<ActionPerformedEvent> for Events {
+    fn from(ev: ActionPerformedEvent) -> Events {
+        Events::ActionPerformed(ev)
+    }
+}
 
-pub type EventQueue = Queue<Event, U8>;
+pub type EventsQueue = Queue<Events, U8>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Directive {
