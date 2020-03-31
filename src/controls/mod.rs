@@ -19,9 +19,10 @@ pub enum PinValue {
 
 impl<T: InputPin> Pin for T {
     fn read(&self) -> PinValue {
-        match self.is_high().ok().unwrap() {
-            false => PinValue::Low,
-            true => PinValue::High,
+        if self.is_high().ok().unwrap() {
+            PinValue::High
+        } else {
+            PinValue::Low
         }
     }
 }

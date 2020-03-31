@@ -33,7 +33,7 @@ enum CurrentDirective {
 impl GameLogicActor {
     pub fn new() -> GameLogicActor {
         GameLogicActor {
-            rng: SmallRng::seed_from_u64(0x12345678),
+            rng: SmallRng::seed_from_u64(0x1234_5678),
             ship_state: ShipState::default(),
             ship_distance: ShipDistance::new(),
             hull_health: 100,
@@ -68,7 +68,7 @@ impl GameLogicActor {
     }
 
     fn update_hull_health(&mut self, update: i16, queue: &mut EventsQueue) {
-        self.hull_health = (self.hull_health as i16 + update) as u8;
+        self.hull_health = (i16::from(self.hull_health) + update) as u8;
         queue
             .enqueue(
                 HullHealthUpdatedEvent {

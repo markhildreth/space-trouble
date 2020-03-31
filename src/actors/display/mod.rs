@@ -13,7 +13,7 @@ const BLOCK: char = 0xff as char;
 const BLANK: char = ' ';
 
 fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
-    return (20 * remaining.as_millis() / total.as_millis()) as u8;
+    (20 * remaining.as_millis() / total.as_millis()) as u8
 }
 
 pub struct DisplayActor {

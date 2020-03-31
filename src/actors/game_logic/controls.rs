@@ -31,12 +31,9 @@ where
             .enumerate()
             .filter_map(|(i, &v)| if v == option { Some(i) } else { None })
             .nth(0);
-        match index {
-            Some(i) => {
-                self.available.swap_remove(i);
-                ()
-            }
-            None => (),
+
+        if let Some(i) = index {
+            self.available.swap_remove(i);
         }
     }
 

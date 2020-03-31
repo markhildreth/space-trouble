@@ -36,7 +36,7 @@ fn main() -> ! {
 
     ctx.queue.enqueue(StartGameEvent {}.into()).unwrap();
     loop {
-        if let Ok(_) = device.timer.wait() {
+        if device.timer.wait().is_ok() {
             ctx.now += TICK;
         }
 
@@ -63,5 +63,6 @@ fn main() -> ! {
 #[inline(never)]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
+    #[allow(clippy::empty_loop)]
     loop {}
 }

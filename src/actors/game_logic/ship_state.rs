@@ -69,12 +69,10 @@ impl ShipState {
             i += 1;
         }
 
-        if self.newtonian_fibermist.actions_available() {
-            if r == i {
-                return Ok(Action::NewtonianFibermist(
-                    self.newtonian_fibermist.generate(rng),
-                ));
-            }
+        if self.newtonian_fibermist.actions_available() && r == i {
+            return Ok(Action::NewtonianFibermist(
+                self.newtonian_fibermist.generate(rng),
+            ));
         }
 
         unreachable!();
