@@ -9,10 +9,6 @@ impl Instant {
     pub const fn from_millis(ms: u32) -> Instant {
         Instant { ms }
     }
-
-    pub const fn to_millis(&self) -> u32 {
-        self.ms
-    }
 }
 
 impl core::ops::Add<Duration> for Instant {

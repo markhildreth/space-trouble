@@ -11,7 +11,6 @@ mod panels;
 
 use crate::actors::*;
 use crate::common::*;
-use core::fmt::Write;
 use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
@@ -35,6 +34,7 @@ fn main() -> ! {
         now: Instant::from_millis(0),
     };
 
+    ctx.queue.enqueue(StartGameEvent {}.into()).unwrap();
     loop {
         if let Ok(_) = device.timer.wait() {
             ctx.now += TICK;
@@ -44,16 +44,17 @@ fn main() -> ! {
 
         while let Some(event) = ctx.queue.dequeue() {
             match event {
-                Events::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
-                Events::NewDirective(ev) => display.handle(ev, &mut ctx),
-                Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
-                Events::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
-                Events::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),
                 Events::Tick(ev) => {
                     game_logic.handle(ev, &mut ctx);
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
+                Events::StartGame(ev) => game_logic.handle(ev, &mut ctx),
+                Events::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
+                Events::NewDirective(ev) => display.handle(ev, &mut ctx),
+                Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
+                Events::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
+                Events::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),
             }
         }
     }

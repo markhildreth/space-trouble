@@ -84,6 +84,18 @@ impl Handler for GameLogicActor {
     type Context = Context;
 }
 
+impl Handles<StartGameEvent> for GameLogicActor {
+    fn handle(&mut self, _: StartGameEvent, ctx: &mut Context) {
+        // Don't change the health, just report it out.
+        self.update_hull_health(0, &mut ctx.queue);
+
+        // TODO: Yuck. Also need to report out starting distance.
+        ctx.queue
+            .enqueue(ShipDistanceUpdatedEvent { distance: 0 }.into())
+            .unwrap();
+    }
+}
+
 impl Handles<TickEvent> for GameLogicActor {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
         match self.directive {
