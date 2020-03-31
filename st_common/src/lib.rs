@@ -12,12 +12,16 @@ use heapless::spsc::{Consumer, Producer, Queue};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Event {
+    Tick(TickEvent),
     NewDirective(Directive),
     HullHealthUpdated(u8),
     ShipDistanceUpdated(u32),
     DirectiveCompleted,
     ActionPerformed(Action),
 }
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct TickEvent;
 
 pub type EventQueue = Queue<Event, U8>;
 pub type EventQueueProducer<'a> = Producer<'a, Event, U8>;

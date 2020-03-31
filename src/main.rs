@@ -33,14 +33,21 @@ fn main() -> ! {
             now += TICK;
         }
 
-        client.update(now, &mut producer, &mut device.panel, &mut device.lcd);
+        producer.enqueue(Event::Tick(TickEvent)).unwrap();
+
         game.update(now, &mut producer);
 
         while let Some(event) = consumer.dequeue() {
             if let Event::ActionPerformed(action) = event {
                 game.perform(now, action, &mut producer);
             } else {
-                client.handle(now, event, &mut producer);
+                client.handle(
+                    now,
+                    event,
+                    &mut producer,
+                    &mut device.panel,
+                    &mut device.lcd,
+                );
             }
         }
     }

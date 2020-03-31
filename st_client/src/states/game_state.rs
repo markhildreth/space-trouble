@@ -1,10 +1,9 @@
 use crate::game_screen::GameScreen;
-use crate::states::StateUpdate;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
 use crate::{Panel, LCD};
 use st_common::time::*;
-use st_common::{Event, EventQueueProducer};
+use st_common::*;
 
 fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
     return (20 * remaining.as_millis() / total.as_millis()) as u8;
@@ -23,13 +22,13 @@ impl GameState {
         }
     }
 
-    pub fn update(
+    fn update(
         &mut self,
         now: Instant,
         producer: &mut EventQueueProducer,
         panel: &mut impl Panel,
         lcd: &mut impl LCD,
-    ) -> Option<StateUpdate> {
+    ) {
         self.screen.update(lcd);
         panel.update(producer, now);
 
@@ -47,11 +46,16 @@ impl GameState {
                 }
             }
         }
-
-        None
     }
 
-    pub(crate) fn handle(&mut self, now: Instant, ev: Event) {
+    pub(crate) fn handle(
+        &mut self,
+        now: Instant,
+        ev: Event,
+        producer: &mut EventQueueProducer,
+        panel: &mut impl Panel,
+        lcd: &mut impl LCD,
+    ) {
         match ev {
             Event::ShipDistanceUpdated(distance) => {
                 self.screen.update_distance(distance);
@@ -72,6 +76,9 @@ impl GameState {
                 self.directive_time_span = None;
             }
             Event::ActionPerformed(_) => (),
+            Event::Tick(_) => {
+                self.update(now, producer, panel, lcd);
+            }
         }
     }
 }
