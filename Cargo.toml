@@ -20,3 +20,5 @@ st_client = { path = "st_client" }
 codegen-units = 1
 lto = true
 
+[alias]
+b = "build"

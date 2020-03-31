@@ -3,7 +3,7 @@ use feather_m0::gpio::{Pa22, Pa23, PfC};
 use feather_m0::sercom::{I2CMaster3, Sercom3Pad0, Sercom3Pad1};
 use hd44780_driver::bus::I2CBus;
 use hd44780_driver::HD44780;
-use st_client;
+use st_common;
 
 use hd44780_driver::{Cursor, CursorBlink};
 
@@ -44,7 +44,7 @@ impl DisplayAddress {
     }
 }
 
-impl st_client::LCD for LCD {
+impl st_common::LCD for LCD {
     fn set_cursor_pos(&mut self, row: u8, col: u8) {
         self.0
             .set_cursor_pos(DisplayAddress::from_row_col(row, col).bits())

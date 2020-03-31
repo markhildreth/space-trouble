@@ -1,7 +1,6 @@
 use crate::states::*;
-use crate::{Panel, LCD};
-use st_common::time::Instant;
-use st_common::{Event, EventQueueProducer};
+use st_common::time::*;
+use st_common::*;
 
 pub struct Client {
     state: ClientState,
@@ -18,12 +17,11 @@ impl Client {
         &mut self,
         now: Instant,
         ev: Event,
-        producer: &mut EventQueueProducer,
-        panel: &mut impl Panel,
+        producer: &mut EventQueue,
         lcd: &mut impl LCD,
     ) {
         match &mut self.state {
-            ClientState::GameState(s) => s.handle(now, ev, producer, panel, lcd),
+            ClientState::GameState(s) => s.handle(now, ev, producer, lcd),
         }
     }
 }

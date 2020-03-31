@@ -3,7 +3,7 @@ use crate::ShipState;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
 use st_common::time::*;
-use st_common::{Action, Directive, Event, EventQueueProducer};
+use st_common::{Action, Directive, Event, EventQueue};
 
 const DIRECTIVE_WAIT: Duration = Duration::from_millis(500);
 const DIRECTIVE_TIME_LIMIT: Duration = Duration::from_secs(7);
@@ -35,32 +35,27 @@ impl Game {
         }
     }
 
-    pub fn update(&mut self, now: Instant, producer: &mut EventQueueProducer) {
+    pub fn update(&mut self, now: Instant, queue: &mut EventQueue) {
         match self.directive {
             CurrentDirective::WaitingForDirective { wait_until } => {
                 if now >= wait_until {
-                    self.generate_directive(now, producer);
+                    self.generate_directive(now, queue);
                 }
             }
             CurrentDirective::OutstandingDirective { expires_at, action } => {
                 if now >= expires_at {
-                    self.fail_directive(now, action, producer);
+                    self.fail_directive(now, action, queue);
                 }
             }
         }
 
         if let ShipDistanceResult::DistanceUpdated(new_distance) = self.ship_distance.update(now) {
             let message = Event::ShipDistanceUpdated(new_distance);
-            producer.enqueue(message).unwrap();
+            queue.enqueue(message).unwrap();
         }
     }
 
-    pub fn perform(
-        &mut self,
-        now: Instant,
-        performed_action: Action,
-        producer: &mut EventQueueProducer,
-    ) {
+    pub fn perform(&mut self, now: Instant, performed_action: Action, queue: &mut EventQueue) {
         self.ship_state.perform(performed_action);
 
         let mut valid = false;
@@ -68,7 +63,7 @@ impl Game {
         if let CurrentDirective::OutstandingDirective { action, .. } = self.directive {
             if action == performed_action {
                 valid = true;
-                producer.enqueue(Event::DirectiveCompleted).unwrap();
+                queue.enqueue(Event::DirectiveCompleted).unwrap();
                 self.directive = CurrentDirective::WaitingForDirective {
                     wait_until: now + DIRECTIVE_WAIT,
                 }
@@ -76,17 +71,17 @@ impl Game {
         }
 
         if !valid {
-            self.update_hull_health(-2, producer);
+            self.update_hull_health(-2, queue);
         }
     }
 
-    fn generate_directive(&mut self, now: Instant, producer: &mut EventQueueProducer) {
+    fn generate_directive(&mut self, now: Instant, queue: &mut EventQueue) {
         if let Ok(action) = self.ship_state.generate_action(&mut self.rng) {
             let directive = Directive {
                 action,
                 time_limit: DIRECTIVE_TIME_LIMIT,
             };
-            producer.enqueue(Event::NewDirective(directive)).unwrap();
+            queue.enqueue(Event::NewDirective(directive)).unwrap();
             self.directive = CurrentDirective::OutstandingDirective {
                 action,
                 expires_at: now + directive.time_limit,
@@ -94,17 +89,17 @@ impl Game {
         }
     }
 
-    fn fail_directive(&mut self, now: Instant, action: Action, producer: &mut EventQueueProducer) {
+    fn fail_directive(&mut self, now: Instant, action: Action, queue: &mut EventQueue) {
         self.ship_state.clear(action);
         self.directive = CurrentDirective::WaitingForDirective {
             wait_until: now + DIRECTIVE_WAIT,
         };
-        self.update_hull_health(-4, producer);
+        self.update_hull_health(-4, queue);
     }
 
-    fn update_hull_health(&mut self, update: i16, producer: &mut EventQueueProducer) {
+    fn update_hull_health(&mut self, update: i16, queue: &mut EventQueue) {
         self.hull_health = (self.hull_health as i16 + update) as u8;
-        producer
+        queue
             .enqueue(Event::HullHealthUpdated(self.hull_health))
             .unwrap();
     }

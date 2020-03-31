@@ -1,14 +1,15 @@
 #![cfg_attr(not(test), no_std)]
 
 pub mod control_values;
-mod messaging;
+pub mod messaging;
 pub mod time;
 
-pub use time::*;
+use messaging::*;
+use time::*;
 
 use crate::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use heapless::consts::*;
-use heapless::spsc::{Consumer, Producer, Queue};
+use heapless::spsc::Queue;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Event {
@@ -21,11 +22,13 @@ pub enum Event {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct TickEvent;
+pub struct TickEvent {
+    pub now: Instant,
+}
+
+impl Message for TickEvent {}
 
 pub type EventQueue = Queue<Event, U8>;
-pub type EventQueueProducer<'a> = Producer<'a, Event, U8>;
-pub type EventQueueConsumer<'a> = Consumer<'a, Event, U8>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Directive {
@@ -39,4 +42,8 @@ pub enum Action {
     GelatinousDarkbucket(ToggleSwitchValue),
     VentControl(VentControlValue),
     NewtonianFibermist(FourSwitchValue),
+}
+
+pub trait LCD: Sized + core::fmt::Write {
+    fn set_cursor_pos(&mut self, row: u8, col: u8);
 }

@@ -1,7 +1,6 @@
 use crate::game_screen::GameScreen;
 use crate::strings::get_action_text;
 use crate::timing::{SpanStatus, TimeSpan};
-use crate::{Panel, LCD};
 use st_common::time::*;
 use st_common::*;
 
@@ -22,15 +21,8 @@ impl GameState {
         }
     }
 
-    fn update(
-        &mut self,
-        now: Instant,
-        producer: &mut EventQueueProducer,
-        panel: &mut impl Panel,
-        lcd: &mut impl LCD,
-    ) {
+    fn update(&mut self, now: Instant, _queue: &mut EventQueue, lcd: &mut impl LCD) {
         self.screen.update(lcd);
-        panel.update(producer, now);
 
         if let Some(span) = &self.directive_time_span {
             let status = span.status(now);
@@ -52,8 +44,7 @@ impl GameState {
         &mut self,
         now: Instant,
         ev: Event,
-        producer: &mut EventQueueProducer,
-        panel: &mut impl Panel,
+        queue: &mut EventQueue,
         lcd: &mut impl LCD,
     ) {
         match ev {
@@ -77,7 +68,7 @@ impl GameState {
             }
             Event::ActionPerformed(_) => (),
             Event::Tick(_) => {
-                self.update(now, producer, panel, lcd);
+                self.update(now, queue, lcd);
             }
         }
     }

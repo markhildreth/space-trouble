@@ -4,9 +4,7 @@ pub trait Handler {
 }
 
 pub trait Handles<M: Message>: Handler + Sized {
-    type ErrorKind;
-
-    fn handle(&mut self, m: M, ctx: &<Self as Handler>::Context) -> Result<(), Self::ErrorKind>;
+    fn handle(&mut self, m: M, ctx: &mut Self::Context);
 }
 
 #[cfg(test)]

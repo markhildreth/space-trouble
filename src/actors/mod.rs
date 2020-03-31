@@ -1,20 +1,11 @@
-mod panels;
+mod panel;
+
+pub use panel::PanelActor;
 
 use crate::panels::Panel;
-use st_common::messaging::*;
-use st_common::time::*;
+use st_common::*;
 
-struct Context {
-    pub producer: Queue<Event, U8>
+pub struct Context {
+    pub queue: EventQueue,
     pub panel: Panel,
 }
-
-pub struct Tick {
-    pub now: Instant,
-}
-
-pub enum Event {
-    Tick(Tick),
-}
-
-impl Message for Tick {}

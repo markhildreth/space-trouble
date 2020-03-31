@@ -1,4 +1,4 @@
-use crate::LCD;
+use st_common::LCD;
 
 type StaticStrRef = &'static str;
 
