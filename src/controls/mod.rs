@@ -2,10 +2,29 @@ mod four_switch;
 mod push_button;
 mod toggle_switch;
 
+use crate::common::*;
+use embedded_hal::digital::v2::InputPin;
 pub use four_switch::FourSwitch;
 pub use push_button::PushButton;
-use st_common::time::*;
 pub use toggle_switch::ToggleSwitch;
+
+pub trait Pin {
+    fn read(&self) -> PinValue;
+}
+
+pub enum PinValue {
+    Low,
+    High,
+}
+
+impl<T: InputPin> Pin for T {
+    fn read(&self) -> PinValue {
+        match self.is_high().ok().unwrap() {
+            false => PinValue::Low,
+            true => PinValue::High,
+        }
+    }
+}
 
 pub enum UpdateResult<T> {
     NoChange,

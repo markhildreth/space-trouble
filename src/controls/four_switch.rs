@@ -1,6 +1,5 @@
-use crate::controls::Control;
-use crate::{Pin, PinValue};
-use st_common::control_values::FourSwitchValue;
+use crate::common::*;
+use crate::controls::{Control, Pin, PinValue};
 
 pub struct FourSwitch<P1, P2, P3>
 where

@@ -6,10 +6,9 @@ pub use display::DisplayActor;
 pub use game_logic::GameLogicActor;
 pub use panel::PanelActor;
 
+use crate::common::*;
 use crate::lcd::LCD;
 use crate::panels::Panel;
-use st_common::time::*;
-use st_common::*;
 
 pub struct Context {
     pub queue: EventQueue,

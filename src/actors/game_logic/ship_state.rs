@@ -1,8 +1,7 @@
 use super::controls::{Control, Stateful, Stateless};
 use super::GenerateFailReason;
+use crate::common::*;
 use core::fmt::Debug;
-use st_common::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
-use st_common::Action;
 
 #[derive(Default, Debug)]
 pub struct ShipState {

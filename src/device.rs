@@ -1,3 +1,5 @@
+use crate::common::*;
+use crate::controls::{Control, FourSwitch, PushButton, ToggleSwitch};
 use crate::lcd::{LCDImpl, LCD};
 use crate::panels::Panel;
 use feather_m0 as hal;
@@ -6,8 +8,6 @@ use hal::delay::Delay;
 use hal::pac::{CorePeripherals, Peripherals, TC3};
 use hal::prelude::*;
 use hal::timer::TimerCounter;
-use st_common::time::*;
-use st_panels::controls::{Control, FourSwitch, PushButton, ToggleSwitch};
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 

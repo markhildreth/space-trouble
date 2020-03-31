@@ -1,10 +1,8 @@
-use feather_m0::gpio::*;
-use st_common::control_values::{PushButtonValue, VentControlValue};
-use st_common::time::*;
-use st_common::*;
-use st_panels::controls::{
+use crate::common::*;
+use crate::controls::{
     DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
+use feather_m0::gpio::*;
 
 type D5 = Pa15<Input<PullDown>>;
 type D6 = Pa20<Input<PullDown>>;

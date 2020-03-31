@@ -1,5 +1,4 @@
-use st_common::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
-use st_common::Action;
+use crate::common::*;
 
 pub type GameString = &'static str;
 const EMPTY: GameString = "";

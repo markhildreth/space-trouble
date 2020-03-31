@@ -3,13 +3,11 @@ mod ship_distance;
 mod ship_state;
 
 use crate::actors::Context;
+use crate::common::*;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
 use ship_distance::{ShipDistance, ShipDistanceResult};
 use ship_state::ShipState;
-use st_common::messaging::*;
-use st_common::time::*;
-use st_common::*;
 
 const DIRECTIVE_WAIT: Duration = Duration::from_millis(500);
 const DIRECTIVE_TIME_LIMIT: Duration = Duration::from_secs(7);

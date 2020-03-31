@@ -1,15 +1,13 @@
-#![cfg_attr(not(test), no_std)]
+mod control_values;
+mod messaging;
+mod time;
 
-pub mod control_values;
-pub mod messaging;
-pub mod time;
-
-use messaging::*;
-use time::*;
-
-use crate::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
 use heapless::consts::*;
 use heapless::spsc::Queue;
+
+pub use control_values::*;
+pub use messaging::*;
+pub use time::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Event {

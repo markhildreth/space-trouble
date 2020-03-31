@@ -1,7 +1,7 @@
+use crate::common::*;
 use core::fmt::Debug;
 use heapless::consts::*;
 use rand::Rng;
-use st_common::control_values::EnumFill;
 
 pub(super) trait Control<T> {
     fn perform(&mut self, option: T);

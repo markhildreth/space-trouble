@@ -2,11 +2,9 @@ mod strings;
 mod time_span;
 
 use super::Context;
+use crate::common::*;
 use crate::lcd::LCD;
 use core::fmt::Write;
-use st_common::messaging::*;
-use st_common::time::*;
-use st_common::*;
 use strings::get_action_text;
 use time_span::{SpanStatus, TimeSpan};
 

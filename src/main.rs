@@ -3,17 +3,17 @@
 #![no_main]
 
 mod actors;
+mod common;
+mod controls;
 mod device;
 mod lcd;
 mod panels;
 
 use crate::actors::*;
+use crate::common::*;
 use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
-use st_common::messaging::*;
-use st_common::time::*;
-use st_common::*;
 
 const TICK: Duration = Duration::from_millis(1);
 

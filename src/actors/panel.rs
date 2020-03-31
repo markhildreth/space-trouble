@@ -1,6 +1,5 @@
 use super::Context;
-use st_common::messaging::*;
-use st_common::*;
+use crate::common::*;
 
 pub struct PanelActor {}
 
