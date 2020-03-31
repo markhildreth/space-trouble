@@ -18,12 +18,14 @@ fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
 
 pub struct DisplayActor {
     directive_time_span: Option<TimeSpan>,
+    current_blocks: Option<u8>,
 }
 
 impl DisplayActor {
     pub fn new() -> DisplayActor {
         DisplayActor {
             directive_time_span: None,
+            current_blocks: None,
         }
     }
 
@@ -49,10 +51,22 @@ impl Handles<TickEvent> for DisplayActor {
             match time_span.status(ctx.now) {
                 SpanStatus::Ongoing { remaining, total } => {
                     let blocks = calc_blocks(remaining, total);
-                    self.update_blocks(&mut ctx.lcd, blocks);
+                    if self.current_blocks.unwrap() != blocks {
+                        self.current_blocks = Some(blocks);
+                        self.update_blocks(&mut ctx.lcd, blocks);
+                    }
                 }
 
-                SpanStatus::Completed => self.directive_time_span = None,
+                SpanStatus::Completed => {
+                    self.directive_time_span = None;
+                    self.current_blocks = None;
+                    ctx.lcd.set_cursor_pos(1, 0);
+                    ctx.lcd.write_str(BLANK_LINE).unwrap();
+                    ctx.lcd.set_cursor_pos(2, 0);
+                    ctx.lcd.write_str(BLANK_LINE).unwrap();
+                    ctx.lcd.set_cursor_pos(3, 0);
+                    ctx.lcd.write_str(BLANK_LINE).unwrap();
+                }
             }
         }
     }
@@ -86,14 +100,19 @@ impl Handles<NewDirectiveEvent> for DisplayActor {
         ctx.lcd.write_str(command_text_2).unwrap();
 
         self.directive_time_span = Some(TimeSpan::new(ctx.now, ev.directive.time_limit));
+        self.current_blocks = Some(20);
     }
 }
 
 impl Handles<DirectiveCompletedEvent> for DisplayActor {
     fn handle(&mut self, _: DirectiveCompletedEvent, ctx: &mut Context) {
+        ctx.lcd.set_cursor_pos(1, 0);
+        ctx.lcd.write_str(BLANK_LINE).unwrap();
         ctx.lcd.set_cursor_pos(2, 0);
         ctx.lcd.write_str(BLANK_LINE).unwrap();
         ctx.lcd.set_cursor_pos(3, 0);
         ctx.lcd.write_str(BLANK_LINE).unwrap();
+        self.directive_time_span = None;
+        self.current_blocks = None;
     }
 }

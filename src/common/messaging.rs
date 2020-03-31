@@ -1,4 +1,5 @@
-pub trait Event {}
+pub trait Event: core::fmt::Debug {}
+
 pub trait Handler {
     type Context;
 }

@@ -11,6 +11,7 @@ mod panels;
 
 use crate::actors::*;
 use crate::common::*;
+use core::fmt::Write;
 use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
