@@ -35,19 +35,22 @@ fn main() -> ! {
 
         producer.enqueue(Event::Tick(TickEvent)).unwrap();
 
-        game.update(now, &mut producer);
-
         while let Some(event) = consumer.dequeue() {
-            if let Event::ActionPerformed(action) = event {
-                game.perform(now, action, &mut producer);
-            } else {
-                client.handle(
-                    now,
-                    event,
-                    &mut producer,
-                    &mut device.panel,
-                    &mut device.lcd,
-                );
+            match event {
+                Event::ActionPerformed(action) => game.perform(now, action, &mut producer),
+                Event::NewDirective(_)
+                | Event::HullHealthUpdated(_)
+                | Event::ShipDistanceUpdated(_)
+                | Event::DirectiveCompleted => {
+                    client.handle(
+                        now,
+                        event,
+                        &mut producer,
+                        &mut device.panel,
+                        &mut device.lcd,
+                    );
+                }
+                Event::Tick(_) => game.update(now, &mut producer),
             }
         }
     }
