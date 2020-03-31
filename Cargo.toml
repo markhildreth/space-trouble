@@ -13,6 +13,7 @@ embedded-hal = { version = "0.2.3" }
 hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
 st_common = { path = "st_common" }
 st_panels = { path = "st_panels" }
+rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
 
 [profile.release]
 codegen-units = 1

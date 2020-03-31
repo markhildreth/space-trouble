@@ -14,7 +14,6 @@ use feather_m0::entry;
 use st_common::messaging::*;
 use st_common::time::*;
 use st_common::*;
-use st_server::Game;
 
 const TICK: Duration = Duration::from_millis(1);
 
@@ -22,12 +21,10 @@ const TICK: Duration = Duration::from_millis(1);
 fn main() -> ! {
     let mut device = device::initialize_device();
 
-    // The game "server".
-    let mut game = Game::new();
-
     // Actors
     let mut panel = PanelActor::new();
     let mut display = DisplayActor::new();
+    let mut game_logic = GameLogicActor::new();
 
     // Context for Actors
     let mut ctx = Context {
@@ -46,13 +43,13 @@ fn main() -> ! {
 
         while let Some(event) = ctx.queue.dequeue() {
             match event {
-                Event::ActionPerformed(ev) => game.handle(ctx.now, ev, &mut ctx.queue),
+                Event::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
                 Event::NewDirective(ev) => display.handle(ev, &mut ctx),
                 Event::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
                 Event::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
                 Event::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),
                 Event::Tick(ev) => {
-                    game.update(ctx.now, &mut ctx.queue);
+                    game_logic.handle(ev, &mut ctx);
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }

@@ -292,9 +292,9 @@ dependencies = [
  "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hd44780-driver 0.3.0 (git+https://github.com/JohnDoneth/hd44780-driver)",
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "st_common 0.1.0",
  "st_panels 0.1.0",
- "st_server 0.1.0",
 ]
 
 [[package]]
@@ -310,15 +310,6 @@ version = "0.1.0"
 dependencies = [
  "embedded-hal 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "feather_m0 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "st_common 0.1.0",
-]
-
-[[package]]
-name = "st_server"
-version = "0.1.0"
-dependencies = [
- "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "st_common 0.1.0",
 ]
 
