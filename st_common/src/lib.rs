@@ -7,16 +7,21 @@ pub mod time;
 pub use time::*;
 
 use crate::control_values::{FourSwitchValue, ToggleSwitchValue, VentControlValue};
-use heapless::consts::U4;
+use heapless::consts::*;
 use heapless::spsc::{Consumer, Producer, Queue};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Action {
-    Eigenthrottle(ToggleSwitchValue),
-    GelatinousDarkbucket(ToggleSwitchValue),
-    VentControl(VentControlValue),
-    NewtonianFibermist(FourSwitchValue),
+pub enum Event {
+    NewDirective(Directive),
+    HullHealthUpdated(u8),
+    ShipDistanceUpdated(u32),
+    DirectiveCompleted,
+    ActionPerformed(Action),
 }
+
+pub type EventQueue = Queue<Event, U8>;
+pub type EventQueueProducer<'a> = Producer<'a, Event, U8>;
+pub type EventQueueConsumer<'a> = Consumer<'a, Event, U8>;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Directive {
@@ -25,22 +30,9 @@ pub struct Directive {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum GameMessage {
-    NewDirective(Directive),
-    HullHealthUpdated(u8),
-    ShipDistanceUpdated(u32),
-    DirectiveCompleted,
+pub enum Action {
+    Eigenthrottle(ToggleSwitchValue),
+    GelatinousDarkbucket(ToggleSwitchValue),
+    VentControl(VentControlValue),
+    NewtonianFibermist(FourSwitchValue),
 }
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum ClientMessage {
-    ActionPerformed(Action),
-}
-
-pub type ClientMessageQueue = Queue<ClientMessage, U4>;
-pub type ClientMessageProducer<'a> = Producer<'a, ClientMessage, U4>;
-pub type ClientMessageConsumer<'a> = Consumer<'a, ClientMessage, U4>;
-
-pub type GameMessageQueue = Queue<GameMessage, U4>;
-pub type GameMessageProducer<'a> = Producer<'a, GameMessage, U4>;
-pub type GameMessageConsumer<'a> = Consumer<'a, GameMessage, U4>;

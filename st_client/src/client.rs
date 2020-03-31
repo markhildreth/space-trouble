@@ -1,25 +1,29 @@
 use crate::states::*;
-use crate::{Components, ComponentsDef, ComponentsDefImpl, Panel, LCD};
+use crate::{Panel, LCD};
 use st_common::time::Instant;
-use st_common::{ClientMessageProducer, GameMessage};
+use st_common::{Event, EventQueueProducer};
 
-pub struct Client<'a, CD: ComponentsDef> {
-    components: Components<'a, CD>,
+pub struct Client {
     state: ClientState,
 }
 
-impl<'a, TPanel: Panel, TLCD: LCD> Client<'a, ComponentsDefImpl<TPanel, TLCD>> {
-    pub fn new(producer: ClientMessageProducer<'a>, panel: TPanel, lcd: TLCD) -> Self {
+impl Client {
+    pub fn new() -> Self {
         Client {
-            components: Components::new(producer, panel, lcd),
             state: ClientState::WaitingToStart(WaitingToStartState::new()),
         }
     }
 
-    pub fn update(&mut self, now: Instant) {
+    pub fn update(
+        &mut self,
+        now: Instant,
+        producer: &mut EventQueueProducer,
+        panel: &mut impl Panel,
+        lcd: &mut impl LCD,
+    ) {
         let result = match &mut self.state {
-            ClientState::WaitingToStart(s) => s.update(&mut self.components, now),
-            ClientState::GameState(s) => s.update(&mut self.components, now),
+            ClientState::WaitingToStart(s) => s.update(now),
+            ClientState::GameState(s) => s.update(now, producer, panel, lcd),
         };
 
         if let Some(state_update) = result {
@@ -29,10 +33,10 @@ impl<'a, TPanel: Panel, TLCD: LCD> Client<'a, ComponentsDefImpl<TPanel, TLCD>> {
         }
     }
 
-    pub fn handle(&mut self, now: Instant, msg: GameMessage) {
+    pub fn handle(&mut self, now: Instant, ev: Event, producer: &mut EventQueueProducer) {
         match &mut self.state {
-            ClientState::WaitingToStart(s) => s.handle(now, msg),
-            ClientState::GameState(s) => s.handle(now, msg),
+            ClientState::WaitingToStart(s) => s.handle(now, ev),
+            ClientState::GameState(s) => s.handle(now, ev),
         }
     }
 }

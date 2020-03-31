@@ -1,7 +1,6 @@
 use crate::states::StateUpdate;
-use crate::{Components, ComponentsDef};
 use st_common::time::Instant;
-use st_common::GameMessage;
+use st_common::Event;
 
 pub(crate) struct WaitingToStartState {
     input_found: bool,
@@ -12,16 +11,12 @@ impl WaitingToStartState {
         Self { input_found: false }
     }
 
-    pub fn update<CD: ComponentsDef>(
-        &mut self,
-        _c: &mut Components<CD>,
-        _now: Instant,
-    ) -> Option<StateUpdate> {
+    pub fn update(&mut self, _: Instant) -> Option<StateUpdate> {
         match self.input_found {
             true => Some(StateUpdate::GameState),
             false => None,
         }
     }
 
-    pub fn handle(&mut self, _now: Instant, _msg: GameMessage) {}
+    pub fn handle(&mut self, _now: Instant, _: Event) {}
 }

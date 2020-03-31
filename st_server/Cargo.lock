@@ -121,7 +121,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "st_data"
+name = "st_common"
 version = "0.1.0"
 dependencies = [
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -133,7 +133,7 @@ version = "0.1.0"
 dependencies = [
  "heapless 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "st_data 0.1.0",
+ "st_common 0.1.0",
 ]
 
 [[package]]

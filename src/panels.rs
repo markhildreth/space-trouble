@@ -1,7 +1,7 @@
 use feather_m0::gpio::*;
 use st_common::control_values::{PushButtonValue, VentControlValue};
 use st_common::time::*;
-use st_common::{Action, ClientMessage, ClientMessageProducer};
+use st_common::{Action, Event, EventQueueProducer};
 use st_panels::controls::{
     DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
@@ -28,14 +28,14 @@ pub struct Panel {
 }
 
 impl Panel {
-    fn perform(&self, producer: &mut ClientMessageProducer, action: Action) {
-        let msg = ClientMessage::ActionPerformed(action);
+    fn perform(&self, producer: &mut EventQueueProducer, action: Action) {
+        let msg = Event::ActionPerformed(action);
         producer.enqueue(msg).unwrap();
     }
 }
 
 impl st_client::Panel for Panel {
-    fn update(&mut self, producer: &mut ClientMessageProducer, now: Instant) {
+    fn update(&mut self, producer: &mut EventQueueProducer, now: Instant) {
         if let UpdateResult::Change(value) = self.eigenthrottle.update(now) {
             let action = Action::Eigenthrottle(value);
             self.perform(producer, action);

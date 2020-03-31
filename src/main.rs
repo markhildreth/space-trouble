@@ -18,20 +18,14 @@ const TICK: Duration = Duration::from_millis(1);
 fn main() -> ! {
     let mut device = device::initialize_device();
 
-    // Messages coming from the game server
-    let mut game_msg_queue = GameMessageQueue::new();
-    let (game_msg_producer, mut game_msg_consumer) = game_msg_queue.split();
-
-    // Messages coming from the client
-    let mut client_msg_queue = ClientMessageQueue::new();
-    let (client_msg_producer, mut client_msg_consumer) = client_msg_queue.split();
+    let mut queue = EventQueue::new();
+    let (mut producer, mut consumer) = queue.split();
 
     // The game "server".
-    let mut game = Game::new(game_msg_producer);
+    let mut game = Game::new();
 
     // The game "client"
-    // let mut client = Components::new(client_msg_producer, device.panel, device.lcd);
-    let mut client = Client::new(client_msg_producer, device.panel, device.lcd);
+    let mut client = Client::new();
 
     let mut now = Instant::from_millis(0);
     loop {
@@ -39,24 +33,14 @@ fn main() -> ! {
             now += TICK;
         }
 
-        client.update(now);
-        game.update(now);
+        client.update(now, &mut producer, &mut device.panel, &mut device.lcd);
+        game.update(now, &mut producer);
 
-        loop {
-            match game_msg_consumer.dequeue() {
-                Some(msg) => client.handle(now, msg),
-                None => break,
-            }
-        }
-
-        loop {
-            match client_msg_consumer.dequeue() {
-                Some(msg) => match msg {
-                    ClientMessage::ActionPerformed(action) => {
-                        game.perform(now, action);
-                    }
-                },
-                None => break,
+        while let Some(event) = consumer.dequeue() {
+            if let Event::ActionPerformed(action) = event {
+                game.perform(now, action, &mut producer);
+            } else {
+                client.handle(now, event, &mut producer);
             }
         }
     }
