@@ -12,6 +12,7 @@ heapless = "0.5.3"
 embedded-hal = { version = "0.2.3", features = ["unproven"] }
 hd44780-driver = { git = "https://github.com/JohnDoneth/hd44780-driver", branch = "master" }
 rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
+st_core = { path = "st_core" }
 
 [profile.release]
 codegen-units = 1

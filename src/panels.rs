@@ -1,8 +1,9 @@
-use crate::common::*;
 use crate::controls::{
     DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
 };
 use feather_m0::gpio::*;
+use st_core::actors::Panel;
+use st_core::common::*;
 
 type D5 = Pa15<Input<PullDown>>;
 type D6 = Pa20<Input<PullDown>>;
@@ -15,7 +16,7 @@ type A3 = Pa4<Input<PullDown>>;
 type A4 = Pa5<Input<PullDown>>;
 type A5 = Pb2<Input<PullDown>>;
 
-pub struct Panel {
+pub struct PanelOne {
     pub eigenthrottle: StatefulControl<ToggleSwitch<D5>>,
     pub gelatinous_darkbucket: StatefulControl<ToggleSwitch<D6>>,
     pub vent_hydrogen: StatefulControl<PushButton<A2>>,
@@ -25,8 +26,15 @@ pub struct Panel {
     pub newtonian_fibermist: DebounceControl<FourSwitch<D10, D11, D12>>,
 }
 
-impl Panel {
-    pub fn update(&mut self, now: Instant, queue: &mut EventsQueue) {
+impl PanelOne {
+    fn perform(&self, queue: &mut EventsQueue, action: Action) {
+        let ev = ActionPerformedEvent { action }.into();
+        queue.enqueue(ev).unwrap();
+    }
+}
+
+impl Panel for PanelOne {
+    fn update(&mut self, now: Instant, queue: &mut EventsQueue) {
         if let UpdateResult::Change(value) = self.eigenthrottle.update(now) {
             let action = Action::Eigenthrottle(value);
             self.perform(queue, action);
@@ -61,10 +69,5 @@ impl Panel {
             let action = Action::NewtonianFibermist(value);
             self.perform(queue, action);
         }
-    }
-
-    fn perform(&self, queue: &mut EventsQueue, action: Action) {
-        let ev = ActionPerformedEvent { action }.into();
-        queue.enqueue(ev).unwrap();
     }
 }

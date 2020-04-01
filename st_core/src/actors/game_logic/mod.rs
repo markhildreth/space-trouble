@@ -2,7 +2,6 @@ mod controls;
 mod ship_distance;
 mod ship_state;
 
-use crate::actors::Context;
 use crate::common::*;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
@@ -78,10 +77,6 @@ impl GameLogicActor {
             )
             .unwrap();
     }
-}
-
-impl Handler for GameLogicActor {
-    type Context = Context;
 }
 
 impl Handles<StartGameEvent> for GameLogicActor {

@@ -1,19 +1,19 @@
-use crate::common::*;
 use crate::controls::{Control, FourSwitch, PushButton, ToggleSwitch};
-use crate::lcd::{LCDImpl, LCD};
-use crate::panels::Panel;
+use crate::lcd::{LCDDriver, LCDImpl};
+use crate::panels::PanelOne;
 use feather_m0 as hal;
 use hal::clock::GenericClockController;
 use hal::delay::Delay;
 use hal::pac::{CorePeripherals, Peripherals, TC3};
 use hal::prelude::*;
 use hal::timer::TimerCounter;
+use st_core::common::*;
 
 const LCD_I2C_ADDRESS: u8 = 0x27;
 
 pub struct DeviceComponents {
-    pub panel: Panel,
-    pub lcd: LCD,
+    pub panel: PanelOne,
+    pub lcd: LCDImpl,
     pub timer: TimerCounter<TC3>,
 }
 
@@ -40,7 +40,7 @@ pub fn initialize_device() -> DeviceComponents {
         );
 
         let lcd_delay = Delay::new(core.SYST, &mut clocks);
-        LCD::new(LCDImpl::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay))
+        LCDImpl::new(LCDDriver::new_i2c(i2c, LCD_I2C_ADDRESS, lcd_delay))
     };
 
     let timer = {
@@ -63,7 +63,7 @@ pub fn initialize_device() -> DeviceComponents {
         let a4 = pins.a4.into_pull_down_input(&mut pins.port);
         let a5 = pins.a5.into_pull_down_input(&mut pins.port);
 
-        Panel {
+        PanelOne {
             eigenthrottle: ToggleSwitch::new(d5).stateful(),
             gelatinous_darkbucket: ToggleSwitch::new(d6).stateful(),
             vent_hydrogen: PushButton::new(a2).stateful(),

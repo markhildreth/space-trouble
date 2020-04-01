@@ -1,5 +1,5 @@
 use super::{Control, Pin, PinValue};
-use crate::common::*;
+use st_core::common::*;
 
 pub struct PushButton<P: Pin> {
     pin: P,

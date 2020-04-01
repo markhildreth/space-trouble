@@ -2,10 +2,10 @@ mod four_switch;
 mod push_button;
 mod toggle_switch;
 
-use crate::common::*;
 use embedded_hal::digital::v2::InputPin;
 pub use four_switch::FourSwitch;
 pub use push_button::PushButton;
+use st_core::common::*;
 pub use toggle_switch::ToggleSwitch;
 
 pub trait Pin {

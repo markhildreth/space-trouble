@@ -2,18 +2,16 @@
 #![no_std]
 #![no_main]
 
-mod actors;
-mod common;
 mod controls;
 mod device;
 mod lcd;
 mod panels;
 
-use crate::actors::*;
-use crate::common::*;
 use core::panic::PanicInfo;
 use embedded_hal::timer::CountDown;
 use feather_m0::entry;
+use st_core::actors::*;
+use st_core::common::*;
 
 const TICK: Duration = Duration::from_millis(1);
 
@@ -22,15 +20,13 @@ fn main() -> ! {
     let mut device = device::initialize_device();
 
     // Actors
-    let mut panel = PanelActor::new();
-    let mut display = DisplayActor::new();
+    let mut panel = PanelActor::new(device.panel);
+    let mut display = DisplayActor::new(device.lcd);
     let mut game_logic = GameLogicActor::new();
 
     // Context for Actors
     let mut ctx = Context {
         queue: EventsQueue::new(),
-        panel: device.panel,
-        lcd: device.lcd,
         now: Instant::from_millis(0),
     };
 
