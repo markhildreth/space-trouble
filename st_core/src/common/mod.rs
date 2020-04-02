@@ -14,6 +14,7 @@ pub enum Events {
     Tick(TickEvent),
     StartGame(StartGameEvent),
     NewDirective(NewDirectiveEvent),
+    UpdateHullHealth(UpdateHullHealthEvent),
     HullHealthUpdated(HullHealthUpdatedEvent),
     ShipDistanceUpdated(ShipDistanceUpdatedEvent),
     DirectiveCompleted(DirectiveCompletedEvent),
@@ -46,6 +47,17 @@ impl Event for NewDirectiveEvent {}
 impl From<NewDirectiveEvent> for Events {
     fn from(ev: NewDirectiveEvent) -> Events {
         Events::NewDirective(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct UpdateHullHealthEvent {
+    pub delta: i8,
+}
+impl Event for UpdateHullHealthEvent {}
+impl From<UpdateHullHealthEvent> for Events {
+    fn from(ev: UpdateHullHealthEvent) -> Events {
+        Events::UpdateHullHealth(ev)
     }
 }
 

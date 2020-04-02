@@ -27,11 +27,6 @@ impl<T: InputPin> Pin for T {
     }
 }
 
-pub enum UpdateResult<T> {
-    NoChange,
-    Change(T),
-}
-
 pub trait Control
 where
     Self: Sized,
@@ -70,13 +65,13 @@ where
         }
     }
 
-    pub fn update(&mut self, _now: Instant) -> UpdateResult<T::Value> {
+    pub fn update(&mut self, _now: Instant) -> Option<T::Value> {
         let value = self.control.read();
         if value == self.current_value {
-            UpdateResult::NoChange
+            None
         } else {
             self.current_value = value;
-            UpdateResult::Change(self.current_value)
+            Some(self.current_value)
         }
     }
 }
@@ -110,28 +105,28 @@ where
         }
     }
 
-    pub fn update(&mut self, now: Instant) -> UpdateResult<T::Value> {
+    pub fn update(&mut self, now: Instant) -> Option<T::Value> {
         let new_value = self.control.read();
         match (self.debounce_status, self.current_value == new_value) {
-            (DebounceStatus::Neutral, true) => UpdateResult::NoChange,
+            (DebounceStatus::Neutral, true) => None,
             (DebounceStatus::Neutral, false) => {
                 self.start_debounce(now, new_value);
-                UpdateResult::NoChange
+                None
             }
             (DebounceStatus::Debouncing { .. }, true) => {
                 self.stop_debouncing();
-                UpdateResult::NoChange
+                None
             }
             (DebounceStatus::Debouncing { de_value, ends_at }, false) => {
                 if de_value != new_value {
                     self.start_debounce(now, new_value);
-                    UpdateResult::NoChange
+                    None
                 } else if now > ends_at {
                     self.current_value = de_value;
                     self.stop_debouncing();
-                    UpdateResult::Change(self.current_value)
+                    Some(self.current_value)
                 } else {
-                    UpdateResult::NoChange
+                    None
                 }
             }
         }

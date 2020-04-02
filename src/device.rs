@@ -71,7 +71,7 @@ pub fn initialize_device() -> DeviceComponents {
             vent_waste: PushButton::new(a4).stateful(),
             vent_frustrations: PushButton::new(a5).stateful(),
             newtonian_fibermist: FourSwitch::new(d10, d11, d12)
-                .debounce(Duration::from_millis(600)),
+                .debounce(Duration::from_millis(400)),
         }
     };
 

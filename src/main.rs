@@ -22,23 +22,25 @@ fn main() -> ! {
     // Actors
     let mut panel = PanelActor::new(device.panel);
     let mut display = DisplayActor::new(device.lcd);
-    let mut game_logic = GameLogicActor::new();
+    let mut game_logic = GameLogicActor::default();
+    let mut hull_health = HullHealthActor::default();
 
     // Context for Actors
-    let mut ctx = Context {
-        queue: EventsQueue::new(),
-        now: Instant::from_millis(0),
-    };
+    let queue = EventsQueue::new();
+    let mut now = Instant::from_millis(0);
+    let mut ctx = Context::new(queue, now);
 
-    ctx.queue.enqueue(StartGameEvent {}.into()).unwrap();
+    ctx.send(StartGameEvent {});
+
     loop {
         if device.timer.wait().is_ok() {
-            ctx.now += TICK;
+            now += TICK;
         }
 
-        ctx.queue.enqueue(TickEvent {}.into()).unwrap();
+        ctx.update_now(now);
+        ctx.send(TickEvent {});
 
-        while let Some(event) = ctx.queue.dequeue() {
+        while let Some(event) = ctx.dequeue() {
             match event {
                 Events::Tick(ev) => {
                     game_logic.handle(ev, &mut ctx);
@@ -48,6 +50,7 @@ fn main() -> ! {
                 Events::StartGame(ev) => game_logic.handle(ev, &mut ctx),
                 Events::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
                 Events::NewDirective(ev) => display.handle(ev, &mut ctx),
+                Events::UpdateHullHealth(ev) => hull_health.handle(ev, &mut ctx),
                 Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
                 Events::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
                 Events::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),

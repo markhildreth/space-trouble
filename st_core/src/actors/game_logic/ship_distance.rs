@@ -4,18 +4,18 @@ const SHIP_DISTANCE_CALC_DELAY: Duration = Duration::from_secs(2);
 const SHIP_DISTANCE_PER_DELAY: u32 = 275;
 
 #[derive(Eq, PartialEq, Debug)]
-pub(crate) enum ShipDistanceResult {
+pub(super) enum ShipDistanceResult {
     Noop,
     DistanceUpdated(u32),
 }
 
-pub(crate) struct ShipDistance {
+pub(super) struct ShipDistance {
     distance: u32,
     next_update_at: Instant,
 }
 
 impl ShipDistance {
-    pub(crate) fn new() -> ShipDistance {
+    pub(super) fn new() -> ShipDistance {
         ShipDistance {
             distance: 0,
             // TODO: A bit funky
@@ -23,7 +23,7 @@ impl ShipDistance {
         }
     }
 
-    pub(crate) fn update(&mut self, now: Instant) -> ShipDistanceResult {
+    pub(super) fn update(&mut self, now: Instant) -> ShipDistanceResult {
         // Note that we will assume that we won't be stalling for more
         // than the delay time. There are much bigger problems if it's
         // taking us 2 seconds to run this update.

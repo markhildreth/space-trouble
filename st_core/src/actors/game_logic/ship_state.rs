@@ -4,7 +4,7 @@ use crate::common::*;
 use core::fmt::Debug;
 
 #[derive(Default, Debug)]
-pub struct ShipState {
+pub(super) struct ShipState {
     eigenthrottle: Stateful<ToggleSwitchValue>,
     vent_control: Stateless<VentControlValue>,
     gelatinous_darkbucket: Stateful<ToggleSwitchValue>,
@@ -12,7 +12,7 @@ pub struct ShipState {
 }
 
 impl ShipState {
-    pub fn perform(&mut self, action: Action) {
+    pub(super) fn perform(&mut self, action: Action) {
         match action {
             Action::Eigenthrottle(v) => self.eigenthrottle.perform(v),
             Action::VentControl(v) => self.vent_control.perform(v),
@@ -21,7 +21,7 @@ impl ShipState {
         }
     }
 
-    pub fn clear(&mut self, action: Action) {
+    pub(super) fn clear(&mut self, action: Action) {
         match action {
             Action::Eigenthrottle(v) => self.eigenthrottle.clear(v),
             Action::VentControl(v) => self.vent_control.clear(v),
@@ -30,7 +30,7 @@ impl ShipState {
         }
     }
 
-    pub fn generate_action(
+    pub(super) fn generate_action(
         &mut self,
         rng: &mut impl rand::Rng,
     ) -> Result<Action, GenerateFailReason> {

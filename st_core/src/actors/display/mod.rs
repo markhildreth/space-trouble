@@ -54,7 +54,7 @@ where
 impl<T: LCD> Handles<TickEvent> for DisplayActor<T> {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
         if let Some(time_span) = &self.directive_time_span {
-            match time_span.status(ctx.now) {
+            match time_span.status(ctx.now()) {
                 SpanStatus::Ongoing { remaining, total } => {
                     let blocks = calc_blocks(remaining, total);
                     if self.current_blocks.unwrap() != blocks {
@@ -105,7 +105,7 @@ impl<T: LCD> Handles<NewDirectiveEvent> for DisplayActor<T> {
         self.lcd.set_cursor_pos(3, 0);
         self.lcd.write_str(command_text_2).unwrap();
 
-        self.directive_time_span = Some(TimeSpan::new(ctx.now, ev.directive.time_limit));
+        self.directive_time_span = Some(TimeSpan::new(ctx.now(), ev.directive.time_limit));
         self.current_blocks = Some(20);
     }
 }

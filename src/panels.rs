@@ -1,7 +1,7 @@
-use crate::controls::{
-    DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch, UpdateResult,
-};
+use crate::controls::{DebounceControl, FourSwitch, PushButton, StatefulControl, ToggleSwitch};
 use feather_m0::gpio::*;
+use heapless::consts::*;
+use heapless::Vec;
 use st_core::actors::Panel;
 use st_core::common::*;
 
@@ -26,48 +26,72 @@ pub struct PanelOne {
     pub newtonian_fibermist: DebounceControl<FourSwitch<D10, D11, D12>>,
 }
 
-impl PanelOne {
-    fn perform(&self, queue: &mut EventsQueue, action: Action) {
-        let ev = ActionPerformedEvent { action }.into();
-        queue.enqueue(ev).unwrap();
-    }
+fn push_button_only(&x: &PushButtonValue) -> bool {
+    x == PushButtonValue::Pushed
 }
 
 impl Panel for PanelOne {
-    fn update(&mut self, now: Instant, queue: &mut EventsQueue) {
-        if let UpdateResult::Change(value) = self.eigenthrottle.update(now) {
-            let action = Action::Eigenthrottle(value);
-            self.perform(queue, action);
-        }
+    // There's probably a better way to do this. Using conservative_impl_trait is
+    // an unstable feature that would resolve it, although not sure if it would be
+    // allowed on the trait itself. Just going to accept the ugly for now.
+    type Iter = PanelControlValueIterator;
 
-        if let UpdateResult::Change(value) = self.gelatinous_darkbucket.update(now) {
-            let action = Action::GelatinousDarkbucket(value);
-            self.perform(queue, action);
-        }
+    fn poll(&mut self, now: Instant) -> Self::Iter {
+        let mut vec = Vec::<_, U8>::new();
+        vec.extend_from_slice(&[
+            self.eigenthrottle
+                .update(now)
+                .map(|x| Action::Eigenthrottle(x)),
+            self.gelatinous_darkbucket
+                .update(now)
+                .map(|x| Action::GelatinousDarkbucket(x)),
+            self.vent_hydrogen
+                .update(now)
+                .filter(push_button_only)
+                .map(|_| Action::VentControl(VentControlValue::Hydrogen)),
+            self.vent_water_vapor
+                .update(now)
+                .filter(push_button_only)
+                .map(|_| Action::VentControl(VentControlValue::WaterVapor)),
+            self.vent_waste
+                .update(now)
+                .filter(push_button_only)
+                .map(|_| Action::VentControl(VentControlValue::Waste)),
+            self.vent_frustrations
+                .update(now)
+                .filter(push_button_only)
+                .map(|_| Action::VentControl(VentControlValue::Frustrations)),
+            self.newtonian_fibermist
+                .update(now)
+                .map(|x| Action::NewtonianFibermist(x)),
+        ])
+        .unwrap();
+        PanelControlValueIterator::new(vec)
+    }
+}
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_hydrogen.update(now) {
-            let action = Action::VentControl(VentControlValue::Hydrogen);
-            self.perform(queue, action);
-        }
+pub struct PanelControlValueIterator {
+    results: heapless::Vec<Option<Action>, heapless::consts::U8>,
+}
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_water_vapor.update(now) {
-            let action = Action::VentControl(VentControlValue::WaterVapor);
-            self.perform(queue, action);
-        }
+impl PanelControlValueIterator {
+    fn new(
+        results: heapless::Vec<Option<Action>, heapless::consts::U8>,
+    ) -> PanelControlValueIterator {
+        PanelControlValueIterator { results }
+    }
+}
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_waste.update(now) {
-            let action = Action::VentControl(VentControlValue::Waste);
-            self.perform(queue, action);
-        }
+impl Iterator for PanelControlValueIterator {
+    type Item = Action;
 
-        if let UpdateResult::Change(PushButtonValue::Pushed) = self.vent_frustrations.update(now) {
-            let action = Action::VentControl(VentControlValue::Frustrations);
-            self.perform(queue, action);
-        }
-
-        if let UpdateResult::Change(value) = self.newtonian_fibermist.update(now) {
-            let action = Action::NewtonianFibermist(value);
-            self.perform(queue, action);
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.results.pop() {
+                Some(Some(action)) => return Some(action),
+                None => return None,
+                _ => (),
+            }
         }
     }
 }
