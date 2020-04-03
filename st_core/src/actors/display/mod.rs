@@ -318,4 +318,35 @@ mod test {
             "                    ",
         ]);
     }
+
+    #[test]
+    fn clears_screen_upon_directed_finished() {
+        let (lcd, screen) = TestLCD::new().split();
+        let mut actor = DisplayActor::new(lcd);
+        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+
+        actor.handle(GameStartedEvent {}, &mut ctx);
+
+        let ev = NewDirectiveEvent {
+            directive: Directive {
+                action: Action::Eigenthrottle(ToggleSwitchValue::Enabled),
+                time_limit: Duration::from_secs(10),
+            },
+        };
+        actor.handle(ev, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "********************",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        actor.handle(DirectiveCompletedEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+    }
 }
