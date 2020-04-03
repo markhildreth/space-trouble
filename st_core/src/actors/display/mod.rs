@@ -7,11 +7,21 @@ use strings::get_action_text;
 use time_span::{SpanStatus, TimeSpan};
 
 const BLANK_LINE: &str = "                    ";
+
+// Typically, we need block to be 0xff. But in testing,
+// this doesn't actually show up as anything. So we'll
+// replace it with stars for testing purposes.
+#[cfg(not(test))]
 const BLOCK: char = 0xff as char;
+#[cfg(test)]
+const BLOCK: char = '*';
+
 const BLANK: char = ' ';
 
 fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
-    (20 * remaining.as_millis() / total.as_millis()) as u8
+    let numerator = (20 * remaining.as_millis()) - 1;
+    let denominator = total.as_millis();
+    (numerator / denominator) as u8 + 1
 }
 
 pub struct DisplayActor<T>
@@ -44,6 +54,15 @@ where
         for _ in blocks..20 {
             self.lcd.write_char(BLANK).unwrap();
         }
+    }
+}
+
+impl<T: LCD> Handles<GameStartedEvent> for DisplayActor<T> {
+    fn handle(&mut self, _: GameStartedEvent, _: &mut Context) {
+        self.lcd.set_cursor_pos(0, 0);
+        self.lcd.write_str("0 km").unwrap();
+        self.lcd.set_cursor_pos(0, 10);
+        self.lcd.write_str("Hull: 100%").unwrap();
     }
 }
 
@@ -103,6 +122,7 @@ impl<T: LCD> Handles<NewDirectiveEvent> for DisplayActor<T> {
 
         self.directive_time_span = Some(TimeSpan::new(ctx.now(), ev.directive.time_limit));
         self.current_blocks = Some(20);
+        self.update_blocks(20);
     }
 }
 
@@ -116,5 +136,183 @@ impl<T: LCD> Handles<DirectiveCompletedEvent> for DisplayActor<T> {
         self.lcd.write_str(BLANK_LINE).unwrap();
         self.directive_time_span = None;
         self.current_blocks = None;
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::test_helpers::TestLCD;
+
+    fn ms(x: u32) -> Instant {
+        Instant::from_millis(x)
+    }
+
+    #[test]
+    fn starts_clean() {
+        let (lcd, screen) = TestLCD::new().split();
+        let mut actor = DisplayActor::new(lcd);
+        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+        actor.handle(GameStartedEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+    }
+
+    #[test]
+    fn can_display_health() {
+        let (lcd, screen) = TestLCD::new().split();
+        let mut actor = DisplayActor::new(lcd);
+        let events = EventsQueue::new();
+        let mut ctx = Context::new(events, ms(0));
+
+        actor.handle(GameStartedEvent {}, &mut ctx);
+        actor.handle(HullHealthUpdatedEvent { health: 98 }, &mut ctx);
+        screen.assert([
+            "0 km      Hull:  98%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+        actor.handle(HullHealthUpdatedEvent { health: 2 }, &mut ctx);
+        screen.assert([
+            "0 km      Hull:   2%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+    }
+
+    #[test]
+    fn can_display_ship_distance() {
+        let (lcd, screen) = TestLCD::new().split();
+        let mut actor = DisplayActor::new(lcd);
+        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+
+        actor.handle(GameStartedEvent {}, &mut ctx);
+        actor.handle(ShipDistanceUpdatedEvent { distance: 9 }, &mut ctx);
+        screen.assert([
+            "9 km      Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+
+        actor.handle(ShipDistanceUpdatedEvent { distance: 19 }, &mut ctx);
+        screen.assert([
+            "19 km     Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+
+        actor.handle(ShipDistanceUpdatedEvent { distance: 199 }, &mut ctx);
+        screen.assert([
+            "199 km    Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+
+        actor.handle(ShipDistanceUpdatedEvent { distance: 1999 }, &mut ctx);
+        screen.assert([
+            "1999 km   Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+
+        actor.handle(ShipDistanceUpdatedEvent { distance: 19999 }, &mut ctx);
+        screen.assert([
+            "19999 km  Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+    }
+
+    #[test]
+    fn can_display_directive_and_countdown() {
+        let (lcd, screen) = TestLCD::new().split();
+        let mut actor = DisplayActor::new(lcd);
+        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+
+        actor.handle(GameStartedEvent {}, &mut ctx);
+
+        let ev = NewDirectiveEvent {
+            directive: Directive {
+                action: Action::Eigenthrottle(ToggleSwitchValue::Enabled),
+                time_limit: Duration::from_secs(10),
+            },
+        };
+        actor.handle(ev, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "********************",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        ctx.update_now(ms(1));
+        actor.handle(TickEvent {}, &mut ctx);
+        // No change
+        screen.assert([
+            "0 km      Hull: 100%",
+            "********************",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        ctx.update_now(ms(500));
+        actor.handle(TickEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "******************* ",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        // Almost half way
+        ctx.update_now(ms(4999));
+        actor.handle(TickEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "***********         ",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        // Half way
+        ctx.update_now(ms(5000));
+        actor.handle(TickEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "**********          ",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        // Almost gone
+        ctx.update_now(ms(9999));
+        actor.handle(TickEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "*                   ",
+            "      Enable        ",
+            "   Eigenthrottle    ",
+        ]);
+
+        // Gone
+        ctx.update_now(ms(10_000));
+        actor.handle(TickEvent {}, &mut ctx);
+        screen.assert([
+            "0 km      Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
     }
 }

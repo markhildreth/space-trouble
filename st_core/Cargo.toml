@@ -12,4 +12,3 @@ rand = { version = "0.7.3", default-features = false, features = ["small_rng"] }
 
 [dev-dependencies]
 rand = "0.7.3"
-
