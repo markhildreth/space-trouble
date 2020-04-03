@@ -7,16 +7,15 @@ use strings::get_action_text;
 use time_span::{SpanStatus, TimeSpan};
 
 const BLANK_LINE: &str = "                    ";
+const BLANK: char = ' ';
 
-// Typically, we need block to be 0xff. But in testing,
+// The real LCD needs block to be 0xff. But in testing,
 // this doesn't actually show up as anything. So we'll
-// replace it with stars for testing purposes.
+// replace it with an asterisk for testing purposes.
 #[cfg(not(test))]
 const BLOCK: char = 0xff as char;
 #[cfg(test)]
 const BLOCK: char = '*';
-
-const BLANK: char = ' ';
 
 fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
     let numerator = (20 * remaining.as_millis()) - 1;
