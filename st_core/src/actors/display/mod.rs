@@ -45,6 +45,10 @@ where
     }
 
     fn update_blocks(&mut self, blocks: u8) {
+        if self.current_blocks == Some(blocks) {
+            return;
+        }
+
         self.lcd.set_cursor_pos(1, 0);
         for _ in 0..blocks {
             self.lcd.write_char(BLOCK).unwrap();
@@ -53,6 +57,8 @@ where
         for _ in blocks..20 {
             self.lcd.write_char(BLANK).unwrap();
         }
+
+        self.current_blocks = Some(blocks);
     }
 }
 
@@ -67,26 +73,22 @@ impl<T: LCD> Handles<GameStartedEvent> for DisplayActor<T> {
 
 impl<T: LCD> Handles<TickEvent> for DisplayActor<T> {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
-        if let Some(time_span) = &self.directive_time_span {
-            match time_span.status(ctx.now()) {
-                SpanStatus::Ongoing { remaining, total } => {
-                    let blocks = calc_blocks(remaining, total);
-                    if self.current_blocks.unwrap() != blocks {
-                        self.current_blocks = Some(blocks);
-                        self.update_blocks(blocks);
-                    }
-                }
-
-                SpanStatus::Completed => {
-                    self.directive_time_span = None;
-                    self.current_blocks = None;
-                    self.lcd.set_cursor_pos(1, 0);
-                    self.lcd.write_str(BLANK_LINE).unwrap();
-                    self.lcd.set_cursor_pos(2, 0);
-                    self.lcd.write_str(BLANK_LINE).unwrap();
-                    self.lcd.set_cursor_pos(3, 0);
-                    self.lcd.write_str(BLANK_LINE).unwrap();
-                }
+        let status_fn = |span: &TimeSpan| span.status(ctx.now());
+        match self.directive_time_span.as_ref().map(status_fn) {
+            None => (),
+            Some(SpanStatus::Ongoing { remaining, total }) => {
+                let blocks = calc_blocks(remaining, total);
+                self.update_blocks(blocks);
+            }
+            Some(SpanStatus::Completed) => {
+                self.directive_time_span = None;
+                self.current_blocks = None;
+                self.lcd.set_cursor_pos(1, 0);
+                self.lcd.write_str(BLANK_LINE).unwrap();
+                self.lcd.set_cursor_pos(2, 0);
+                self.lcd.write_str(BLANK_LINE).unwrap();
+                self.lcd.set_cursor_pos(3, 0);
+                self.lcd.write_str(BLANK_LINE).unwrap();
             }
         }
     }
@@ -120,7 +122,6 @@ impl<T: LCD> Handles<NewDirectiveEvent> for DisplayActor<T> {
         self.lcd.write_str(command_text_2).unwrap();
 
         self.directive_time_span = Some(TimeSpan::new(ctx.now(), ev.directive.time_limit));
-        self.current_blocks = Some(20);
         self.update_blocks(20);
     }
 }
