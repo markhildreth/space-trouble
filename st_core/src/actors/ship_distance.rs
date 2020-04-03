@@ -64,8 +64,7 @@ mod test {
         let tick = TickEvent {};
 
         let mut actor = ShipDistanceActor::default();
-        let queue = EventsQueue::new();
-        let mut ctx = Context::new(queue, ms(0));
+        let mut ctx = Context::new(ms(0));
 
         actor.handle(tick, &mut ctx);
         ctx.update_now(ms(2000));
@@ -81,8 +80,7 @@ mod test {
         let tick = TickEvent {};
 
         let mut actor = ShipDistanceActor::default();
-        let queue = EventsQueue::new();
-        let mut ctx = Context::new(queue, ms(50));
+        let mut ctx = Context::new(ms(50));
 
         actor.handle(game_started, &mut ctx);
         ctx.update_now(ms(2001));
@@ -95,8 +93,7 @@ mod test {
         let tick = TickEvent {};
 
         let mut actor = ShipDistanceActor::default();
-        let queue = EventsQueue::new();
-        let mut ctx = Context::new(queue, ms(0));
+        let mut ctx = Context::new(ms(0));
 
         actor.handle(GameStartedEvent {}, &mut ctx);
         actor.handle(tick, &mut ctx);

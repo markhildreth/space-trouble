@@ -164,7 +164,7 @@ mod test {
     fn starts_clean() {
         let (lcd, screen) = TestLCD::new().split();
         let mut actor = DisplayActor::new(lcd);
-        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+        let mut ctx = Context::new(ms(0));
         actor.handle(GameStartedEvent {}, &mut ctx);
         screen.assert([
             "0 km      Hull: 100%",
@@ -178,8 +178,7 @@ mod test {
     fn can_display_health() {
         let (lcd, screen) = TestLCD::new().split();
         let mut actor = DisplayActor::new(lcd);
-        let events = EventsQueue::new();
-        let mut ctx = Context::new(events, ms(0));
+        let mut ctx = Context::new(ms(0));
 
         actor.handle(GameStartedEvent {}, &mut ctx);
         actor.handle(HullHealthUpdatedEvent { health: 98 }, &mut ctx);
@@ -202,7 +201,7 @@ mod test {
     fn can_display_ship_distance() {
         let (lcd, screen) = TestLCD::new().split();
         let mut actor = DisplayActor::new(lcd);
-        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+        let mut ctx = Context::new(ms(0));
 
         actor.handle(GameStartedEvent {}, &mut ctx);
         actor.handle(ShipDistanceUpdatedEvent { distance: 9 }, &mut ctx);
@@ -250,7 +249,7 @@ mod test {
     fn can_display_directive_and_countdown() {
         let (lcd, screen) = TestLCD::new().split();
         let mut actor = DisplayActor::new(lcd);
-        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+        let mut ctx = Context::new(ms(0));
 
         actor.handle(GameStartedEvent {}, &mut ctx);
 
@@ -332,7 +331,7 @@ mod test {
     fn clears_screen_upon_directed_finished() {
         let (lcd, screen) = TestLCD::new().split();
         let mut actor = DisplayActor::new(lcd);
-        let mut ctx = Context::new(EventsQueue::new(), ms(0));
+        let mut ctx = Context::new(ms(0));
 
         actor.handle(GameStartedEvent {}, &mut ctx);
 

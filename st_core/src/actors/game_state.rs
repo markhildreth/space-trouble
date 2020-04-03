@@ -37,8 +37,7 @@ mod test {
     #[test]
     fn responds_as_directed() {
         let mut actor = GameStateActor::default();
-        let queue = EventsQueue::new();
-        let mut ctx = Context::new(queue, ms(0));
+        let mut ctx = Context::new(ms(0));
         actor.handle(ControlInitFinishedEvent {}, &mut ctx);
         assert_eq!(ctx.dequeue().unwrap(), GameStartedEvent {}.into());
     }

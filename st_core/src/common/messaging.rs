@@ -8,8 +8,11 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(queue: EventsQueue, now: Instant) -> Context {
-        Context { now, queue }
+    pub fn new(now: Instant) -> Context {
+        Context {
+            now,
+            queue: EventsQueue::new(),
+        }
     }
 
     pub fn now(&self) -> Instant {

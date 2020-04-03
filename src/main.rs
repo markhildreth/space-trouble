@@ -28,9 +28,8 @@ fn main() -> ! {
     let mut ship_distance = ShipDistanceActor::default();
 
     // Context for Actors
-    let queue = EventsQueue::new();
     let mut now = Instant::from_millis(0);
-    let mut ctx = Context::new(queue, now);
+    let mut ctx = Context::new(now);
 
     ctx.send(InitGameEvent {});
 
