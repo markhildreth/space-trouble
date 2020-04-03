@@ -1,11 +1,9 @@
 mod controls;
-mod ship_distance;
 mod ship_state;
 
 use crate::common::*;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
-use ship_distance::{ShipDistance, ShipDistanceResult};
 use ship_state::ShipState;
 
 const DIRECTIVE_WAIT: Duration = Duration::from_millis(500);
@@ -24,7 +22,6 @@ enum CurrentDirective {
 pub struct GameLogicActor {
     rng: SmallRng,
     ship_state: ShipState,
-    ship_distance: ShipDistance,
     directive: CurrentDirective,
 }
 
@@ -50,17 +47,10 @@ impl Default for GameLogicActor {
         GameLogicActor {
             rng: SmallRng::seed_from_u64(0x1234_5678),
             ship_state: ShipState::default(),
-            ship_distance: ShipDistance::new(),
             directive: CurrentDirective::WaitingForDirective {
                 wait_until: Instant::from_millis(0) + DIRECTIVE_WAIT,
             },
         }
-    }
-}
-
-impl Handles<StartGameEvent> for GameLogicActor {
-    fn handle(&mut self, _: StartGameEvent, ctx: &mut Context) {
-        ctx.send(ShipDistanceUpdatedEvent { distance: 0 });
     }
 }
 
@@ -83,12 +73,6 @@ impl Handles<TickEvent> for GameLogicActor {
                     ctx.send(UpdateHullHealthEvent { delta: -4 });
                 }
             }
-        }
-
-        if let ShipDistanceResult::DistanceUpdated(distance) = self.ship_distance.update(ctx.now())
-        {
-            let ev = ShipDistanceUpdatedEvent { distance };
-            ctx.send(ev);
         }
     }
 }

@@ -24,13 +24,14 @@ fn main() -> ! {
     let mut display = DisplayActor::new(device.lcd);
     let mut game_logic = GameLogicActor::default();
     let mut hull_health = HullHealthActor::default();
+    let mut ship_distance = ShipDistanceActor::default();
 
     // Context for Actors
     let queue = EventsQueue::new();
     let mut now = Instant::from_millis(0);
     let mut ctx = Context::new(queue, now);
 
-    ctx.send(StartGameEvent {});
+    ctx.send(GameStartedEvent {});
 
     loop {
         if device.timer.wait().is_ok() {
@@ -47,7 +48,7 @@ fn main() -> ! {
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
-                Events::StartGame(ev) => game_logic.handle(ev, &mut ctx),
+                Events::GameStarted(ev) => ship_distance.handle(ev, &mut ctx),
                 Events::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
                 Events::NewDirective(ev) => display.handle(ev, &mut ctx),
                 Events::UpdateHullHealth(ev) => hull_health.handle(ev, &mut ctx),
