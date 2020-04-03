@@ -1,11 +1,5 @@
 use crate::common::*;
-
-pub trait Panel {
-    type Iter: Iterator<Item = Action>;
-
-    // Return any values that have changed since the last poll.
-    fn poll(&mut self, now: Instant) -> Self::Iter;
-}
+use crate::device::Panel;
 
 pub struct PanelActor<P>
 where

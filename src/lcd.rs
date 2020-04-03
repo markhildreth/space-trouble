@@ -3,7 +3,7 @@ use feather_m0::gpio::{Pa22, Pa23, PfC};
 use feather_m0::sercom::{I2CMaster3, Sercom3Pad0, Sercom3Pad1};
 use hd44780_driver::bus::I2CBus;
 use hd44780_driver::HD44780;
-use st_core::actors::LCD;
+use st_core::device::LCD;
 
 use hd44780_driver::{Cursor, CursorBlink};
 

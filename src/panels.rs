@@ -2,8 +2,8 @@ use crate::controls::{DebounceControl, FourSwitch, PushButton, StatefulControl, 
 use feather_m0::gpio::*;
 use heapless::consts::*;
 use heapless::Vec;
-use st_core::actors::Panel;
 use st_core::common::*;
+use st_core::device::Panel;
 
 type D5 = Pa15<Input<PullDown>>;
 type D6 = Pa20<Input<PullDown>>;

@@ -2,13 +2,9 @@ mod strings;
 mod time_span;
 
 use crate::common::*;
-use core::fmt::Write;
+use crate::device::LCD;
 use strings::get_action_text;
 use time_span::{SpanStatus, TimeSpan};
-
-pub trait LCD: Write {
-    fn set_cursor_pos(&mut self, row: u8, col: u8);
-}
 
 const BLANK_LINE: &str = "                    ";
 const BLOCK: char = 0xff as char;

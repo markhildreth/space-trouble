@@ -9,6 +9,3 @@ pub use display::DisplayActor;
 pub use hull_health::HullHealthActor;
 pub use panel::PanelActor;
 pub use ship_distance::ShipDistanceActor;
-
-pub use display::LCD;
-pub use panel::Panel;
