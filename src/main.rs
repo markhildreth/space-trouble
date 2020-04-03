@@ -22,7 +22,7 @@ fn main() -> ! {
     // Actors
     let mut panel = PanelActor::new(device.panel);
     let mut display = DisplayActor::new(device.lcd);
-    let mut game_logic = GameLogicActor::default();
+    let mut directives = DirectivesActor::default();
     let mut hull_health = HullHealthActor::default();
     let mut ship_distance = ShipDistanceActor::default();
 
@@ -41,15 +41,18 @@ fn main() -> ! {
         ctx.update_now(now);
         ctx.send(TickEvent {});
 
+        // I'm currently hand-crafting this routing of events. In the future, I might
+        // look into improving this.
         while let Some(event) = ctx.dequeue() {
             match event {
                 Events::Tick(ev) => {
-                    game_logic.handle(ev, &mut ctx);
+                    directives.handle(ev, &mut ctx);
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
+                    ship_distance.handle(ev, &mut ctx);
                 }
                 Events::GameStarted(ev) => ship_distance.handle(ev, &mut ctx),
-                Events::ActionPerformed(ev) => game_logic.handle(ev, &mut ctx),
+                Events::ActionPerformed(ev) => directives.handle(ev, &mut ctx),
                 Events::NewDirective(ev) => display.handle(ev, &mut ctx),
                 Events::UpdateHullHealth(ev) => hull_health.handle(ev, &mut ctx),
                 Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),

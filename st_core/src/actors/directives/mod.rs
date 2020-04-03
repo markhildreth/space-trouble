@@ -19,13 +19,13 @@ enum CurrentDirective {
     OutstandingDirective { expires_at: Instant, action: Action },
 }
 
-pub struct GameLogicActor {
+pub struct DirectivesActor {
     rng: SmallRng,
     ship_state: ShipState,
     directive: CurrentDirective,
 }
 
-impl GameLogicActor {
+impl DirectivesActor {
     fn generate_directive(&mut self, now: Instant) -> Result<Directive, GenerateFailReason> {
         if let Ok(action) = self.ship_state.generate_action(&mut self.rng) {
             let directive = Directive {
@@ -42,9 +42,9 @@ impl GameLogicActor {
     }
 }
 
-impl Default for GameLogicActor {
-    fn default() -> GameLogicActor {
-        GameLogicActor {
+impl Default for DirectivesActor {
+    fn default() -> DirectivesActor {
+        DirectivesActor {
             rng: SmallRng::seed_from_u64(0x1234_5678),
             ship_state: ShipState::default(),
             directive: CurrentDirective::WaitingForDirective {
@@ -54,7 +54,7 @@ impl Default for GameLogicActor {
     }
 }
 
-impl Handles<TickEvent> for GameLogicActor {
+impl Handles<TickEvent> for DirectivesActor {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
         match self.directive {
             CurrentDirective::WaitingForDirective { wait_until } => {
@@ -77,7 +77,7 @@ impl Handles<TickEvent> for GameLogicActor {
     }
 }
 
-impl Handles<ActionPerformedEvent> for GameLogicActor {
+impl Handles<ActionPerformedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ActionPerformedEvent, ctx: &mut Context) {
         self.ship_state.perform(ev.action);
 
