@@ -1,23 +1,22 @@
 use crate::common::*;
 
 pub struct TimeSpan {
-    start: Instant,
+    finish: Instant,
     duration: Duration,
 }
 
 impl TimeSpan {
-    pub fn new(start: Instant, duration: Duration) -> Self {
-        TimeSpan { start, duration }
+    pub fn new(finish: Instant, duration: Duration) -> Self {
+        TimeSpan { finish, duration }
     }
 
     pub fn status(&self, now: Instant) -> SpanStatus {
-        let completed = now - self.start;
-        if completed >= self.duration {
+        if now >= self.finish {
             return SpanStatus::Completed;
         }
 
         SpanStatus::Ongoing {
-            remaining: self.duration - completed,
+            remaining: self.finish - now,
             total: self.duration,
         }
     }

@@ -121,7 +121,10 @@ impl<T: LCD> Handles<NewDirectiveEvent> for DisplayActor<T> {
         self.lcd.set_cursor_pos(3, 0);
         self.lcd.write_str(command_text_2).unwrap();
 
-        self.directive_time_span = Some(TimeSpan::new(ctx.now(), ev.directive.time_limit));
+        self.directive_time_span = Some(TimeSpan::new(
+            ctx.now() + ev.directive.time_limit,
+            ev.directive.time_limit,
+        ));
         self.update_blocks(20);
     }
 }
