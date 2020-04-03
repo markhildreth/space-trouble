@@ -62,8 +62,17 @@ where
     }
 }
 
+impl<T: LCD> Handles<InitGameEvent> for DisplayActor<T> {
+    fn handle(&mut self, _: InitGameEvent, _: &mut Context) {
+        self.lcd.set_cursor_pos(1, 5);
+        self.lcd.write_str("Initializing...").unwrap();
+    }
+}
+
 impl<T: LCD> Handles<GameStartedEvent> for DisplayActor<T> {
     fn handle(&mut self, _: GameStartedEvent, _: &mut Context) {
+        self.lcd.set_cursor_pos(1, 0);
+        self.lcd.write_str(BLANK_LINE).unwrap();
         self.lcd.set_cursor_pos(0, 0);
         self.lcd.write_str("0 km").unwrap();
         self.lcd.set_cursor_pos(0, 10);

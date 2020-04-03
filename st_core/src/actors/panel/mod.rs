@@ -18,12 +18,15 @@ where
 }
 
 impl<P> Handles<InitGameEvent> for PanelActor<P>
-where P: Panel
+where
+    P: Panel,
 {
     fn handle(&mut self, _: InitGameEvent, ctx: &mut Context) {
         self.panel
             .poll_all(ctx.now())
-            .iter().copied().for_each(|action| ctx.send(ReportInitialControlStateEvent { action }));
+            .iter()
+            .copied()
+            .for_each(|action| ctx.send(ReportInitialControlStateEvent { action }));
     }
 }
 
@@ -39,4 +42,3 @@ where
             .for_each(|action| ctx.send(ActionPerformedEvent { action }));
     }
 }
-

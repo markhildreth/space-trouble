@@ -40,6 +40,6 @@ mod test {
         let queue = EventsQueue::new();
         let mut ctx = Context::new(queue, ms(0));
         actor.handle(ControlInitFinishedEvent {}, &mut ctx);
-        assert_eq!(ctx.dequeue().unwrap(), GameStartedEvent{}.into());
+        assert_eq!(ctx.dequeue().unwrap(), GameStartedEvent {}.into());
     }
 }

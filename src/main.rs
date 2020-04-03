@@ -32,7 +32,7 @@ fn main() -> ! {
     let mut now = Instant::from_millis(0);
     let mut ctx = Context::new(queue, now);
 
-    ctx.send(GameStartedEvent {});
+    ctx.send(InitGameEvent {});
 
     loop {
         if device.timer.wait().is_ok() {
@@ -52,10 +52,16 @@ fn main() -> ! {
                     display.handle(ev, &mut ctx);
                     ship_distance.handle(ev, &mut ctx);
                 }
-                Events::InitGame(ev) => panel.handle(ev, &mut ctx),
+                Events::InitGame(ev) => {
+                    panel.handle(ev, &mut ctx);
+                    display.handle(ev, &mut ctx);
+                }
                 Events::ReportInitialControlState(ev) => directives.handle(ev, &mut ctx),
                 Events::ControlInitFinished(ev) => game_state.handle(ev, &mut ctx),
-                Events::GameStarted(ev) => ship_distance.handle(ev, &mut ctx),
+                Events::GameStarted(ev) => {
+                    ship_distance.handle(ev, &mut ctx);
+                    display.handle(ev, &mut ctx);
+                }
                 Events::ActionPerformed(ev) => directives.handle(ev, &mut ctx),
                 Events::NewDirective(ev) => display.handle(ev, &mut ctx),
                 Events::UpdateHullHealth(ev) => hull_health.handle(ev, &mut ctx),
