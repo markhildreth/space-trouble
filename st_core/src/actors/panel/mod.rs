@@ -17,13 +17,26 @@ where
     }
 }
 
+impl<P> Handles<InitGameEvent> for PanelActor<P>
+where P: Panel
+{
+    fn handle(&mut self, _: InitGameEvent, ctx: &mut Context) {
+        self.panel
+            .poll_all(ctx.now())
+            .iter().copied().for_each(|action| ctx.send(ReportInitialControlStateEvent { action }));
+    }
+}
+
 impl<P> Handles<TickEvent> for PanelActor<P>
 where
     P: Panel,
 {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
         self.panel
-            .poll(ctx.now())
+            .poll_changed(ctx.now())
+            .iter()
+            .copied()
             .for_each(|action| ctx.send(ActionPerformedEvent { action }));
     }
 }
+

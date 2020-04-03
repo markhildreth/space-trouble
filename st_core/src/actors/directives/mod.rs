@@ -77,6 +77,13 @@ impl Handles<TickEvent> for DirectivesActor {
     }
 }
 
+impl Handles<ReportInitialControlStateEvent> for DirectivesActor {
+    fn handle(&mut self, ev: ReportInitialControlStateEvent, _: &mut Context) {
+        // TODO: Check that everything has been configured
+        self.ship_state.perform(ev.action);
+    }
+}
+
 impl Handles<ActionPerformedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ActionPerformedEvent, ctx: &mut Context) {
         self.ship_state.perform(ev.action);

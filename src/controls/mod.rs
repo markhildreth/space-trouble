@@ -65,6 +65,11 @@ where
         }
     }
 
+    pub fn read(&mut self) -> T::Value {
+        self.current_value = self.control.read();
+        self.current_value
+    }
+
     pub fn update(&mut self, _now: Instant) -> Option<T::Value> {
         let value = self.control.read();
         if value == self.current_value {
@@ -103,6 +108,10 @@ where
             current_value: T::Value::default(),
             debounce_status: DebounceStatus::Neutral,
         }
+    }
+
+    pub fn read(&mut self) -> T::Value {
+        self.current_value
     }
 
     pub fn update(&mut self, now: Instant) -> Option<T::Value> {

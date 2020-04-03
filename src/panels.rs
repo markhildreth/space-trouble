@@ -31,67 +31,47 @@ fn push_button_only(&x: &PushButtonValue) -> bool {
 }
 
 impl Panel for PanelOne {
-    // There's probably a better way to do this. Using conservative_impl_trait is
-    // an unstable feature that would resolve it, although not sure if it would be
-    // allowed on the trait itself. Just going to accept the ugly for now.
-    type Iter = PanelControlValueIterator;
-
-    fn poll(&mut self, now: Instant) -> Self::Iter {
-        let mut vec = Vec::<_, U8>::new();
+    // Note that this will not return values for momentary push buttons, as this
+    // is designed to get the current state, whereas push buttons are designed to
+    // not really have a "state" so much as a moment where they are pushed
+    fn poll_all(&mut self, _: Instant) -> Vec<Action, U8> {
+        let mut vec: Vec<Action, U8> = Vec::new();
         vec.extend_from_slice(&[
-            self.eigenthrottle
-                .update(now)
-                .map(|x| Action::Eigenthrottle(x)),
-            self.gelatinous_darkbucket
-                .update(now)
-                .map(|x| Action::GelatinousDarkbucket(x)),
-            self.vent_hydrogen
-                .update(now)
-                .filter(push_button_only)
-                .map(|_| Action::VentControl(VentControlValue::Hydrogen)),
-            self.vent_water_vapor
-                .update(now)
-                .filter(push_button_only)
-                .map(|_| Action::VentControl(VentControlValue::WaterVapor)),
-            self.vent_waste
-                .update(now)
-                .filter(push_button_only)
-                .map(|_| Action::VentControl(VentControlValue::Waste)),
-            self.vent_frustrations
-                .update(now)
-                .filter(push_button_only)
-                .map(|_| Action::VentControl(VentControlValue::Frustrations)),
-            self.newtonian_fibermist
-                .update(now)
-                .map(|x| Action::NewtonianFibermist(x)),
+            Action::Eigenthrottle(self.eigenthrottle.read()),
+            Action::GelatinousDarkbucket(self.gelatinous_darkbucket.read()),
+            Action::NewtonianFibermist(self.newtonian_fibermist.read()),
         ])
         .unwrap();
-        PanelControlValueIterator::new(vec)
+        vec
     }
-}
 
-pub struct PanelControlValueIterator {
-    results: heapless::Vec<Option<Action>, heapless::consts::U8>,
-}
-
-impl PanelControlValueIterator {
-    fn new(
-        results: heapless::Vec<Option<Action>, heapless::consts::U8>,
-    ) -> PanelControlValueIterator {
-        PanelControlValueIterator { results }
-    }
-}
-
-impl Iterator for PanelControlValueIterator {
-    type Item = Action;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.results.pop() {
-                Some(Some(action)) => return Some(action),
-                None => return None,
-                _ => (),
-            }
-        }
+    fn poll_changed(&mut self, now: Instant) -> Vec<Action, U8> {
+        let mut vec: Vec<Action, U8> = Vec::new();
+        self.eigenthrottle
+            .update(now)
+            .map(|x| vec.push(Action::Eigenthrottle(x)));
+        self.gelatinous_darkbucket
+            .update(now)
+            .map(|x| vec.push(Action::GelatinousDarkbucket(x)));
+        self.vent_hydrogen
+            .update(now)
+            .filter(push_button_only)
+            .map(|_| vec.push(Action::VentControl(VentControlValue::Hydrogen)));
+        self.vent_water_vapor
+            .update(now)
+            .filter(push_button_only)
+            .map(|_| vec.push(Action::VentControl(VentControlValue::WaterVapor)));
+        self.vent_waste
+            .update(now)
+            .filter(push_button_only)
+            .map(|_| vec.push(Action::VentControl(VentControlValue::Waste)));
+        self.vent_frustrations
+            .update(now)
+            .filter(push_button_only)
+            .map(|_| vec.push(Action::VentControl(VentControlValue::Frustrations)));
+        self.newtonian_fibermist
+            .update(now)
+            .map(|x| vec.push(Action::NewtonianFibermist(x)));
+        vec
     }
 }

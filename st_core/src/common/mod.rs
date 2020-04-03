@@ -12,6 +12,9 @@ pub use time::*;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Events {
     Tick(TickEvent),
+    InitGame(InitGameEvent),
+    ReportInitialControlState(ReportInitialControlStateEvent),
+    ControlInitFinished(ControlInitFinishedEvent),
     GameStarted(GameStartedEvent),
     NewDirective(NewDirectiveEvent),
     UpdateHullHealth(UpdateHullHealthEvent),
@@ -27,6 +30,35 @@ impl Event for TickEvent {}
 impl From<TickEvent> for Events {
     fn from(ev: TickEvent) -> Events {
         Events::Tick(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct InitGameEvent;
+impl Event for InitGameEvent {}
+impl From<InitGameEvent> for Events {
+    fn from(ev: InitGameEvent) -> Events {
+        Events::InitGame(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ReportInitialControlStateEvent {
+    pub action: Action,
+}
+impl Event for ReportInitialControlStateEvent {}
+impl From<ReportInitialControlStateEvent> for Events {
+    fn from(ev: ReportInitialControlStateEvent) -> Events {
+        Events::ReportInitialControlState(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ControlInitFinishedEvent;
+impl Event for ControlInitFinishedEvent {}
+impl From<ControlInitFinishedEvent> for Events {
+    fn from(ev: ControlInitFinishedEvent) -> Events {
+        Events::ControlInitFinished(ev)
     }
 }
 
