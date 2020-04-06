@@ -1,15 +1,15 @@
-mod awaiting_control_values_state;
+mod control_init_state;
 mod playing_state;
 
 mod controls;
 mod ship_state;
 
 use crate::common::*;
-use awaiting_control_values_state::AwaitingControlValuesState;
+use control_init_state::ControlInitState;
 use playing_state::PlayingState;
 
 enum States {
-    AwaitingControlValues(AwaitingControlValuesState),
+    ControlInit(ControlInitState),
     Playing(PlayingState),
 }
 
@@ -20,9 +20,7 @@ pub struct DirectivesActor {
 impl Default for DirectivesActor {
     fn default() -> DirectivesActor {
         DirectivesActor {
-            state: Some(States::AwaitingControlValues(
-                AwaitingControlValuesState::default(),
-            )),
+            state: Some(States::ControlInit(ControlInitState::default())),
         }
     }
 }
@@ -37,11 +35,11 @@ impl Handles<TickEvent> for DirectivesActor {
     }
 }
 
-impl Handles<ReportInitialControlStateEvent> for DirectivesActor {
-    fn handle(&mut self, ev: ReportInitialControlStateEvent, ctx: &mut Context) {
+impl Handles<ReportInitControlValueEvent> for DirectivesActor {
+    fn handle(&mut self, ev: ReportInitControlValueEvent, ctx: &mut Context) {
         let old_state = self.state.take().unwrap();
         self.state.replace(match old_state {
-            States::AwaitingControlValues(s) => s.handle_report_initial_control_state(ev, ctx),
+            States::ControlInit(s) => s.handle_report_init_control_value(ev, ctx),
             _ => old_state,
         });
     }
@@ -51,7 +49,7 @@ impl Handles<ActionPerformedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ActionPerformedEvent, ctx: &mut Context) {
         let old_state = self.state.take().unwrap();
         self.state.replace(match old_state {
-            States::AwaitingControlValues(s) => s.handle_action_performed(ev, ctx),
+            States::ControlInit(s) => s.handle_action_performed(ev, ctx),
             States::Playing(s) => s.handle_action_performed(ev, ctx),
         });
     }

@@ -5,17 +5,17 @@ use super::States;
 use crate::common::*;
 
 #[derive(Default)]
-pub struct AwaitingControlValuesState {
+pub struct ControlInitState {
     ship_state: ShipState,
     received_eigenthrottle: bool,
     received_gelatinous_darkbucket: bool,
     received_newtonian_fibermist: bool,
 }
 
-impl AwaitingControlValuesState {
-    pub(super) fn handle_report_initial_control_state(
+impl ControlInitState {
+    pub(super) fn handle_report_init_control_value(
         mut self,
-        ev: ReportInitialControlStateEvent,
+        ev: ReportInitControlValueEvent,
         ctx: &mut Context,
     ) -> States {
         self.ship_state.perform(ev.action);
@@ -33,7 +33,7 @@ impl AwaitingControlValuesState {
             ctx.send(ControlInitFinishedEvent {});
             States::Playing(PlayingState::new(0x1234_5678, self.ship_state, ctx.now()))
         } else {
-            States::AwaitingControlValues(self)
+            States::ControlInit(self)
         }
     }
 
@@ -43,6 +43,6 @@ impl AwaitingControlValuesState {
         _ctx: &mut Context,
     ) -> States {
         self.ship_state.perform(ev.action);
-        States::AwaitingControlValues(self)
+        States::ControlInit(self)
     }
 }

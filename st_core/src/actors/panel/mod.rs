@@ -26,7 +26,7 @@ where
             .poll_all(ctx.now())
             .iter()
             .copied()
-            .for_each(|action| ctx.send(ReportInitialControlStateEvent { action }));
+            .for_each(|action| ctx.send(ReportInitControlValueEvent { action }));
     }
 }
 
