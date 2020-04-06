@@ -31,9 +31,9 @@ impl ControlInitState {
             && self.received_newtonian_fibermist
         {
             ctx.send(ControlInitFinishedEvent {});
-            States::Playing(PlayingState::new(0x1234_5678, self.ship_state, ctx.now()))
+            PlayingState::new(0x1234_5678, self.ship_state, ctx.now()).into()
         } else {
-            States::ControlInit(self)
+            self.into()
         }
     }
 
@@ -43,6 +43,6 @@ impl ControlInitState {
         _ctx: &mut Context,
     ) -> States {
         self.ship_state.perform(ev.action);
-        States::ControlInit(self)
+        self.into()
     }
 }

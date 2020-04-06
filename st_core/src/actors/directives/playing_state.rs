@@ -50,7 +50,7 @@ impl PlayingState {
             }
         }
 
-        States::Playing(self)
+        self.into()
     }
 
     pub(super) fn handle_action_performed(
@@ -76,7 +76,7 @@ impl PlayingState {
             ctx.send(UpdateHullHealthEvent { delta: -2 })
         }
 
-        States::Playing(self)
+        self.into()
     }
 
     fn generate_directive(&mut self, now: Instant) -> Result<Directive, GenerateFailReason> {
