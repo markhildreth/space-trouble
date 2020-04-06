@@ -2,7 +2,7 @@ mod control_init_state;
 mod playing_state;
 
 mod controls;
-mod ship_state;
+mod ship_actions;
 
 use crate::common::*;
 use control_init_state::ControlInitState;

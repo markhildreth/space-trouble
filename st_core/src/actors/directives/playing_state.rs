@@ -1,4 +1,4 @@
-use super::ship_state::{GenerateFailReason, ShipState};
+use super::ship_actions::{GenerateFailReason, ShipActions};
 use super::States;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
@@ -15,15 +15,15 @@ enum CurrentDirective {
 
 pub(super) struct PlayingState {
     rng: SmallRng,
-    ship_state: ShipState,
+    ship_actions: ShipActions,
     directive: CurrentDirective,
 }
 
 impl PlayingState {
-    pub(super) fn new(rng_seed: u64, ship_state: ShipState, now: Instant) -> PlayingState {
+    pub(super) fn new(rng_seed: u64, ship_actions: ShipActions, now: Instant) -> PlayingState {
         PlayingState {
             rng: SmallRng::seed_from_u64(rng_seed),
-            ship_state,
+            ship_actions,
             directive: CurrentDirective::WaitingForDirective {
                 wait_until: now + DIRECTIVE_WAIT,
             },
@@ -41,7 +41,7 @@ impl PlayingState {
             }
             CurrentDirective::OutstandingDirective { expires_at, action } => {
                 if ctx.now() >= expires_at {
-                    self.ship_state.clear(action);
+                    self.ship_actions.clear(action);
                     self.directive = CurrentDirective::WaitingForDirective {
                         wait_until: ctx.now() + DIRECTIVE_WAIT,
                     };
@@ -58,7 +58,7 @@ impl PlayingState {
         ev: ActionPerformedEvent,
         ctx: &mut Context,
     ) -> States {
-        self.ship_state.perform(ev.action);
+        self.ship_actions.perform(ev.action);
 
         let mut valid = false;
 
@@ -80,7 +80,7 @@ impl PlayingState {
     }
 
     fn generate_directive(&mut self, now: Instant) -> Result<Directive, GenerateFailReason> {
-        if let Ok(action) = self.ship_state.generate_action(&mut self.rng) {
+        if let Ok(action) = self.ship_actions.generate_action(&mut self.rng) {
             let directive = Directive {
                 action,
                 time_limit: DIRECTIVE_TIME_LIMIT,

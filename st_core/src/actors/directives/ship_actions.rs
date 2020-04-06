@@ -8,14 +8,14 @@ pub enum GenerateFailReason {
 }
 
 #[derive(Default, Debug)]
-pub(super) struct ShipState {
+pub(super) struct ShipActions {
     eigenthrottle: Stateful<ToggleSwitchValue>,
     vent_control: Stateless<VentControlValue>,
     gelatinous_darkbucket: Stateful<ToggleSwitchValue>,
     newtonian_fibermist: Stateful<FourSwitchValue>,
 }
 
-impl ShipState {
+impl ShipActions {
     pub(super) fn perform(&mut self, action: Action) {
         match action {
             Action::Eigenthrottle(v) => self.eigenthrottle.perform(v),
@@ -87,12 +87,12 @@ impl ShipState {
 mod test {
     use super::*;
 
-    fn generate_all_actions(ship_state: &mut ShipState) -> Vec<Action> {
+    fn generate_all_actions(ship_actions: &mut ShipActions) -> Vec<Action> {
         let mut rng = rand::thread_rng();
         let mut results = Vec::with_capacity(16);
         let mut i = 0;
         loop {
-            match ship_state.generate_action(&mut rng) {
+            match ship_actions.generate_action(&mut rng) {
                 Ok(a) => results.push(a),
                 Err(GenerateFailReason::NoActionsAvailable) => break,
             }
@@ -107,7 +107,7 @@ mod test {
 
     #[test]
     fn can_generate_actions_from_default_state() {
-        let mut ship = ShipState::default();
+        let mut ship = ShipActions::default();
         println!("{:?}", ship);
         let actions = generate_all_actions(&mut ship);
 
@@ -127,7 +127,7 @@ mod test {
 
     #[test]
     fn can_generate_other_actions_from_default_state() {
-        let mut ship = ShipState::default();
+        let mut ship = ShipActions::default();
         let actions = generate_all_actions(&mut ship);
 
         let items = [
