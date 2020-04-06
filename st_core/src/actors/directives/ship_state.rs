@@ -1,7 +1,11 @@
 use super::controls::{Control, Stateful, Stateless};
-use super::GenerateFailReason;
 use crate::common::*;
 use core::fmt::Debug;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum GenerateFailReason {
+    NoActionsAvailable,
+}
 
 #[derive(Default, Debug)]
 pub(super) struct ShipState {
