@@ -15,7 +15,7 @@ pub struct ControlInitState {
 impl ControlInitState {
     pub(super) fn handle_report_init_control_value(
         mut self,
-        ev: ReportInitControlValueEvent,
+        ev: ControlInitReportedEvent,
         ctx: &mut Context,
     ) -> States {
         self.ship_actions.perform(ev.action);

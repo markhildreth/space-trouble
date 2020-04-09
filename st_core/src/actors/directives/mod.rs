@@ -26,7 +26,7 @@ impl States {
 
     fn handle_report_init_control_value(
         self,
-        ev: ReportInitControlValueEvent,
+        ev: ControlInitReportedEvent,
         ctx: &mut Context,
     ) -> States {
         match self {
@@ -62,8 +62,8 @@ impl Handles<TickEvent> for DirectivesActor {
     }
 }
 
-impl Handles<ReportInitControlValueEvent> for DirectivesActor {
-    fn handle(&mut self, ev: ReportInitControlValueEvent, ctx: &mut Context) {
+impl Handles<ControlInitReportedEvent> for DirectivesActor {
+    fn handle(&mut self, ev: ControlInitReportedEvent, ctx: &mut Context) {
         let old_state = self.state.take().unwrap();
         self.state
             .replace(old_state.handle_report_init_control_value(ev, ctx));
