@@ -20,6 +20,15 @@ impl FakeScreen {
         }
     }
 
+    fn clear(&mut self) {
+        self.rows = [
+            " ".repeat(20),
+            " ".repeat(20),
+            " ".repeat(20),
+            " ".repeat(20),
+        ];
+    }
+
     fn write_str(&mut self, pos: (u8, u8), s: &str) {
         let row = pos.0 as usize;
         let col = pos.1 as usize;
@@ -86,6 +95,10 @@ impl TestLCD {
 impl LCD for TestLCD {
     fn set_cursor_pos(&mut self, row: u8, col: u8) {
         self.cursor_pos = (row, col);
+    }
+
+    fn clear(&mut self) {
+        self.screen.borrow_mut().clear();
     }
 }
 

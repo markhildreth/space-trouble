@@ -1,10 +1,11 @@
 use crate::common::*;
 use core::fmt::Write;
-use heapless::Vec;
 use heapless::consts::*;
+use heapless::Vec;
 
 pub trait LCD: Write {
     fn set_cursor_pos(&mut self, row: u8, col: u8);
+    fn clear(&mut self);
 }
 
 pub trait Panel {
