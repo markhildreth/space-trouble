@@ -27,6 +27,10 @@ impl LCD for LCDImpl {
         self.0
             .set_cursor_pos(DisplayAddress::from_row_col(row, col).bits())
     }
+
+    fn clear(&mut self) {
+        self.0.reset();
+    }
 }
 
 impl core::fmt::Write for LCDImpl {

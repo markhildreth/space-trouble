@@ -41,8 +41,8 @@ fn main() -> ! {
         ctx.update_now(now);
         ctx.send(TickEvent {});
 
-        // I'm currently hand-crafting this routing of events. In the future, I might
-        // look into improving this to be less manual.
+        // I'm currently hand-crafting this routing of events. It would be nice
+        // if this could be less manual.
         while let Some(event) = ctx.dequeue() {
             match event {
                 Events::Tick(ev) => {
@@ -55,10 +55,11 @@ fn main() -> ! {
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
-                Events::ReportInitialControlState(ev) => directives.handle(ev, &mut ctx),
+                Events::ControlInitReported(ev) => directives.handle(ev, &mut ctx),
                 Events::ControlInitFinished(ev) => game_state.handle(ev, &mut ctx),
                 Events::GameStarted(ev) => {
                     ship_distance.handle(ev, &mut ctx);
+                    directives.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
                 Events::ActionPerformed(ev) => directives.handle(ev, &mut ctx),
