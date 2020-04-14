@@ -59,9 +59,10 @@ where
     T: Control,
 {
     fn new(control: T) -> StatefulControl<T> {
+        let current_value = control.read();
         StatefulControl {
             control,
-            current_value: T::Value::default(),
+            current_value,
         }
     }
 
@@ -102,10 +103,11 @@ where
     T: Control,
 {
     fn new(control: T, debounce_time: Duration) -> DebounceControl<T> {
+        let current_value = control.read();
         DebounceControl {
             control,
             debounce_time,
-            current_value: T::Value::default(),
+            current_value,
             debounce_status: DebounceStatus::Neutral,
         }
     }
