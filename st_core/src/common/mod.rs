@@ -63,7 +63,9 @@ impl From<ControlInitFinishedEvent> for Events {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct GameStartedEvent;
+pub struct GameStartedEvent {
+    pub random_seed: u32,
+}
 impl Event for GameStartedEvent {}
 impl From<GameStartedEvent> for Events {
     fn from(ev: GameStartedEvent) -> Events {

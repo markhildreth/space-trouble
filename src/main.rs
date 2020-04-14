@@ -32,16 +32,16 @@ fn main() -> ! {
     let mut ctx = Context::new(now);
 
     loop {
-        if device.timer.wait().is_ok() {
-            now += TICK;
-        }
-
-        ctx.update_now(now);
         ctx.send(TickEvent {});
 
         // I'm currently hand-crafting this routing of events. It would be nice
         // if this could be less manual.
         while let Some(event) = ctx.dequeue() {
+            if device.timer.wait().is_ok() {
+                now += TICK;
+                ctx.update_now(now);
+            }
+
             match event {
                 Events::Tick(ev) => {
                     directives.handle(ev, &mut ctx);

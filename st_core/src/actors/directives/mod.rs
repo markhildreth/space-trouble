@@ -62,11 +62,15 @@ impl Handles<ControlInitReportedEvent> for DirectivesActor {
 }
 
 impl Handles<GameStartedEvent> for DirectivesActor {
-    fn handle(&mut self, _: GameStartedEvent, ctx: &mut Context) {
+    fn handle(&mut self, ev: GameStartedEvent, ctx: &mut Context) {
         self.replace_state(|old_state| {
             if let States::ControlInit(s) = old_state {
                 let ship_state = s.finish();
-                States::Playing(PlayingState::new(0x1234_5678, ship_state, ctx.now()))
+                States::Playing(PlayingState::new(
+                    ev.random_seed as u64,
+                    ship_state,
+                    ctx.now(),
+                ))
             } else {
                 old_state
             }
