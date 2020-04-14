@@ -1,13 +1,17 @@
 use crate::common::*;
 
+const GAME_END_TIME: Duration = Duration::from_secs(5);
+
 #[derive(PartialEq)]
 enum State {
+    // The system is started.
+    SystemStartup,
     // We are waiting for the user to press a button to start the game.
     AwaitingInput,
     // We are waiting for the game to finish any pre-game setup.
     Initializing { start: Instant },
     Playing { distance_traveled: u32 },
-    GameEnded,
+    GameEnded { switch_screens_timeout: Instant },
 }
 
 pub struct GameStateActor {
@@ -17,7 +21,30 @@ pub struct GameStateActor {
 impl Default for GameStateActor {
     fn default() -> GameStateActor {
         GameStateActor {
-            state: State::AwaitingInput,
+            state: State::SystemStartup,
+        }
+    }
+}
+
+impl Handles<SystemStartedEvent> for GameStateActor {
+    fn handle(&mut self, _: SystemStartedEvent, ctx: &mut Context) {
+        if let State::SystemStartup = self.state {
+            self.state = State::AwaitingInput;
+            ctx.send(AwaitingInputEvent {});
+        }
+    }
+}
+
+impl Handles<TickEvent> for GameStateActor {
+    fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
+        if let State::GameEnded {
+            switch_screens_timeout,
+        } = self.state
+        {
+            if switch_screens_timeout <= ctx.now() {
+                self.state = State::AwaitingInput;
+                ctx.send(AwaitingInputEvent {});
+            }
         }
     }
 }
@@ -68,8 +95,10 @@ impl Handles<HullHealthUpdatedEvent> for GameStateActor {
         }
 
         if let State::Playing { distance_traveled } = self.state {
-            self.state = State::GameEnded;
             ctx.send(GameEndedEvent { distance_traveled });
+            self.state = State::GameEnded {
+                switch_screens_timeout: ctx.now() + GAME_END_TIME,
+            };
         }
     }
 }

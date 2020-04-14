@@ -10,6 +10,7 @@ use playing_state::PlayingState;
 
 enum States {
     Transition,
+    Startup,
     ControlInit(ControlInitState),
     Playing(PlayingState),
 }
@@ -34,8 +35,14 @@ impl DirectivesActor {
 impl Default for DirectivesActor {
     fn default() -> DirectivesActor {
         DirectivesActor {
-            state: States::ControlInit(ControlInitState::default()),
+            state: States::Startup,
         }
+    }
+}
+
+impl Handles<InitializeGameEvent> for DirectivesActor {
+    fn handle(&mut self, _: InitializeGameEvent, _: &mut Context) {
+        self.state = States::ControlInit(ControlInitState::default());
     }
 }
 

@@ -72,20 +72,16 @@ impl<T: LCD> PlayingState<T> {
 
 enum State<T: LCD> {
     Transition,
-    WaitingForInput { lcd: T },
+    Initial { lcd: T },
+    AwaitingInput { lcd: T },
     Initializing { lcd: T },
     Playing(PlayingState<T>),
     GameOver { lcd: T },
 }
 
 impl<T: LCD> State<T> {
-    fn new(mut lcd: T) -> State<T> {
-        lcd.clear();
-        lcd.set_cursor_pos(1, 0);
-        lcd.write_str("  Press any button  ").unwrap();
-        lcd.set_cursor_pos(2, 0);
-        lcd.write_str("      to begin      ").unwrap();
-        State::WaitingForInput { lcd }
+    fn new(lcd: T) -> State<T> {
+        State::Initial { lcd }
     }
 
     fn replace<F>(&mut self, f: F)
@@ -96,7 +92,8 @@ impl<T: LCD> State<T> {
         core::mem::swap(self, &mut temp);
         temp = match temp {
             State::Transition => unreachable!(),
-            State::WaitingForInput { lcd } => f(lcd),
+            State::Initial { lcd } => f(lcd),
+            State::AwaitingInput { lcd } => f(lcd),
             State::Initializing { lcd } => f(lcd),
             State::Playing(s) => f(s.unwrap()),
             State::GameOver { lcd } => f(lcd),
@@ -123,11 +120,26 @@ where
     }
 }
 
+impl<T: LCD> Handles<AwaitingInputEvent> for DisplayActor<T> {
+    fn handle(&mut self, _: AwaitingInputEvent, _: &mut Context) {
+        self.state.replace(|mut lcd| {
+            lcd.clear();
+            lcd.set_cursor_pos(1, 0);
+            lcd.write_str("  Press any button  ").unwrap();
+            lcd.set_cursor_pos(2, 0);
+            lcd.write_str("      to begin      ").unwrap();
+            State::AwaitingInput { lcd }
+        });
+    }
+}
 impl<T: LCD> Handles<InitializeGameEvent> for DisplayActor<T> {
     fn handle(&mut self, _: InitializeGameEvent, _: &mut Context) {
         self.state.replace(|mut lcd| {
             lcd.clear();
-            lcd.write_str("Initializing...").unwrap();
+            lcd.set_cursor_pos(1, 0);
+            lcd.write_str("Launching Space Ship").unwrap();
+            lcd.set_cursor_pos(1, 0);
+            lcd.write_str("     Get Ready!     ").unwrap();
             State::Initializing { lcd }
         });
     }

@@ -30,7 +30,7 @@ fn main() -> ! {
     // Context for Actors
     let mut now = Instant::from_millis(0);
     let mut ctx = Context::new(now);
-
+    ctx.send(SystemStartedEvent {});
     loop {
         ctx.send(TickEvent {});
 
@@ -43,19 +43,24 @@ fn main() -> ! {
             }
 
             match event {
+                Events::SystemStarted(ev) => game_state.handle(ev, &mut ctx),
                 Events::Tick(ev) => {
+                    game_state.handle(ev, &mut ctx);
                     directives.handle(ev, &mut ctx);
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                     ship_distance.handle(ev, &mut ctx);
                 }
+                Events::AwaitingInput(ev) => display.handle(ev, &mut ctx),
                 Events::InitializeGame(ev) => {
+                    directives.handle(ev, &mut ctx);
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
                 Events::ControlInitReported(ev) => directives.handle(ev, &mut ctx),
                 Events::ControlInitFinished(ev) => game_state.handle(ev, &mut ctx),
                 Events::GameStarted(ev) => {
+                    hull_health.handle(ev, &mut ctx);
                     ship_distance.handle(ev, &mut ctx);
                     directives.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);

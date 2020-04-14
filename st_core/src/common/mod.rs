@@ -11,7 +11,9 @@ pub use time::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Events {
+    SystemStarted(SystemStartedEvent),
     Tick(TickEvent),
+    AwaitingInput(AwaitingInputEvent),
     InitializeGame(InitializeGameEvent),
     ControlInitReported(ControlInitReportedEvent),
     ControlInitFinished(ControlInitFinishedEvent),
@@ -26,11 +28,29 @@ pub enum Events {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct SystemStartedEvent;
+impl Event for SystemStartedEvent {}
+impl From<SystemStartedEvent> for Events {
+    fn from(ev: SystemStartedEvent) -> Events {
+        Events::SystemStarted(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TickEvent;
 impl Event for TickEvent {}
 impl From<TickEvent> for Events {
     fn from(ev: TickEvent) -> Events {
         Events::Tick(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct AwaitingInputEvent;
+impl Event for AwaitingInputEvent {}
+impl From<AwaitingInputEvent> for Events {
+    fn from(ev: AwaitingInputEvent) -> Events {
+        Events::AwaitingInput(ev)
     }
 }
 
