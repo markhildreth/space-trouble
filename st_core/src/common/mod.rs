@@ -22,6 +22,7 @@ pub enum Events {
     ShipDistanceUpdated(ShipDistanceUpdatedEvent),
     DirectiveCompleted(DirectiveCompletedEvent),
     ActionPerformed(ActionPerformedEvent),
+    GameEnded(GameEndedEvent),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -134,6 +135,17 @@ impl Event for ActionPerformedEvent {}
 impl From<ActionPerformedEvent> for Events {
     fn from(ev: ActionPerformedEvent) -> Events {
         Events::ActionPerformed(ev)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct GameEndedEvent {
+    pub distance_traveled: u32,
+}
+impl Event for GameEndedEvent {}
+impl From<GameEndedEvent> for Events {
+    fn from(ev: GameEndedEvent) -> Events {
+        Events::GameEnded(ev)
     }
 }
 

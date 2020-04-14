@@ -66,9 +66,16 @@ fn main() -> ! {
                 }
                 Events::NewDirective(ev) => display.handle(ev, &mut ctx),
                 Events::UpdateHullHealth(ev) => hull_health.handle(ev, &mut ctx),
-                Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),
-                Events::ShipDistanceUpdated(ev) => display.handle(ev, &mut ctx),
+                Events::HullHealthUpdated(ev) => {
+                    display.handle(ev, &mut ctx);
+                    game_state.handle(ev, &mut ctx);
+                }
+                Events::ShipDistanceUpdated(ev) => {
+                    display.handle(ev, &mut ctx);
+                    game_state.handle(ev, &mut ctx);
+                }
                 Events::DirectiveCompleted(ev) => display.handle(ev, &mut ctx),
+                Events::GameEnded(ev) => display.handle(ev, &mut ctx),
             }
         }
     }

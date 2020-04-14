@@ -75,11 +75,16 @@ enum State<T: LCD> {
     WaitingForInput { lcd: T },
     Initializing { lcd: T },
     Playing(PlayingState<T>),
+    GameOver { lcd: T },
 }
 
 impl<T: LCD> State<T> {
     fn new(mut lcd: T) -> State<T> {
-        lcd.write_str("Press any button to begin...").unwrap();
+        lcd.clear();
+        lcd.set_cursor_pos(1, 0);
+        lcd.write_str("  Press any button  ").unwrap();
+        lcd.set_cursor_pos(2, 0);
+        lcd.write_str("      to begin      ").unwrap();
         State::WaitingForInput { lcd }
     }
 
@@ -94,6 +99,7 @@ impl<T: LCD> State<T> {
             State::WaitingForInput { lcd } => f(lcd),
             State::Initializing { lcd } => f(lcd),
             State::Playing(s) => f(s.unwrap()),
+            State::GameOver { lcd } => f(lcd),
         };
         core::mem::swap(self, &mut temp);
     }
@@ -171,5 +177,19 @@ impl<T: LCD> Handles<DirectiveCompletedEvent> for DisplayActor<T> {
         if let State::Playing(s) = &mut self.state {
             s.clear_directive();
         }
+    }
+}
+
+impl<T: LCD> Handles<GameEndedEvent> for DisplayActor<T> {
+    fn handle(&mut self, ev: GameEndedEvent, _: &mut Context) {
+        self.state.replace(|mut lcd| {
+            lcd.clear();
+            lcd.set_cursor_pos(1, 0);
+            lcd.write_str("     Game Over      ").unwrap();
+            lcd.set_cursor_pos(2, 0);
+            lcd.write_fmt(format_args!("Distance: {: >8}km", ev.distance_traveled))
+                .unwrap();
+            State::GameOver { lcd }
+        });
     }
 }

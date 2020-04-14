@@ -2,6 +2,7 @@ use crate::common::*;
 
 const SHIP_DISTANCE_CALC_PERIOD: Duration = Duration::from_secs(2);
 const SHIP_DISTANCE_PER_PERIOD: u32 = 278;
+const DEFAULT_DISTANCE: u32 = 0;
 
 pub struct ShipDistanceActor {
     distance: u32,
@@ -11,7 +12,7 @@ pub struct ShipDistanceActor {
 impl Default for ShipDistanceActor {
     fn default() -> ShipDistanceActor {
         ShipDistanceActor {
-            distance: 0,
+            distance: DEFAULT_DISTANCE,
             next_update_at: None,
         }
     }
@@ -19,6 +20,7 @@ impl Default for ShipDistanceActor {
 
 impl Handles<GameStartedEvent> for ShipDistanceActor {
     fn handle(&mut self, _: GameStartedEvent, ctx: &mut Context) {
+        self.distance = DEFAULT_DISTANCE;
         self.next_update_at = Some(ctx.now() + SHIP_DISTANCE_CALC_PERIOD);
     }
 }
@@ -76,7 +78,7 @@ mod test {
 
     #[test]
     fn offsets_first_update_after_game_start() {
-        let game_started = GameStartedEvent {};
+        let game_started = GameStartedEvent { random_seed: 0 };
         let tick = TickEvent {};
 
         let mut actor = ShipDistanceActor::default();
@@ -95,7 +97,7 @@ mod test {
         let mut actor = ShipDistanceActor::default();
         let mut ctx = Context::new(ms(0));
 
-        actor.handle(GameStartedEvent {}, &mut ctx);
+        actor.handle(GameStartedEvent { random_seed: 0 }, &mut ctx);
         actor.handle(tick, &mut ctx);
         assert_eq!(ctx.dequeue(), None);
 
