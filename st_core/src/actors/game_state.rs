@@ -38,20 +38,3 @@ impl Handles<ControlInitFinishedEvent> for GameStateActor {
         }
     }
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    fn ms(x: u32) -> Instant {
-        Instant::from_millis(x)
-    }
-
-    #[test]
-    fn responds_as_directed() {
-        let mut actor = GameStateActor::default();
-        let mut ctx = Context::new(ms(0));
-        actor.handle(ControlInitFinishedEvent {}, &mut ctx);
-        assert_eq!(ctx.dequeue().unwrap(), GameStartedEvent {}.into());
-    }
-}

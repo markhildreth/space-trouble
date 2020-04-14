@@ -39,8 +39,7 @@ impl<T: LCD> PlayingState<T> {
                 self.display.update_countdown(blocks);
             }
             Some(SpanStatus::Completed) => {
-                self.display.clear_directive();
-                self.directive_time_span = None;
+                self.clear_directive();
             }
         }
     }
@@ -58,6 +57,11 @@ impl<T: LCD> PlayingState<T> {
 
         let (text1, text2) = get_action_text(directive.action);
         self.display.display_directive(text1, text2);
+    }
+
+    fn clear_directive(&mut self) {
+        self.display.clear_directive();
+        self.directive_time_span = None;
     }
 
     fn unwrap(self) -> T {
@@ -162,5 +166,9 @@ impl<T: LCD> Handles<NewDirectiveEvent> for DisplayActor<T> {
 }
 
 impl<T: LCD> Handles<DirectiveCompletedEvent> for DisplayActor<T> {
-    fn handle(&mut self, _: DirectiveCompletedEvent, _: &mut Context) {}
+    fn handle(&mut self, _: DirectiveCompletedEvent, _: &mut Context) {
+        if let State::Playing(s) = &mut self.state {
+            s.clear_directive();
+        }
+    }
 }

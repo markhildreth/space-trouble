@@ -55,8 +55,11 @@ impl PlayingState {
 
         let mut valid = false;
 
-        if let CurrentDirective::OutstandingDirective { action, .. } = self.directive {
-            if action == action {
+        if let CurrentDirective::OutstandingDirective {
+            action: req_action, ..
+        } = self.directive
+        {
+            if action == req_action {
                 valid = true;
                 ctx.send(DirectiveCompletedEvent {});
                 self.directive = CurrentDirective::WaitingForDirective {

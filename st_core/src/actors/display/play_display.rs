@@ -68,6 +68,8 @@ impl<T: LCD> PlayDisplay<T> {
     }
 
     pub(super) fn clear_directive(&mut self) {
+        self.lcd.set_cursor_pos(1, 0);
+        self.lcd.write_str(BLANK_LINE).unwrap();
         self.lcd.set_cursor_pos(2, 0);
         self.lcd.write_str(BLANK_LINE).unwrap();
         self.lcd.set_cursor_pos(3, 0);
@@ -210,6 +212,28 @@ mod test_play_lcd {
         screen.assert([
             "0 km      Hull: 100%",
             "                    ",
+            "        Test        ",
+            "        Stuff       ",
+        ]);
+
+        play_lcd.clear_directive();
+        screen.assert([
+            "0 km      Hull: 100%",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+    }
+
+    #[test]
+    fn clears_countdown_with_clear_directive() {
+        let (lcd, screen) = TestLCD::new().split();
+        let mut play_lcd = PlayDisplay::new(lcd);
+
+        play_lcd.display_directive("        Test        ", "        Stuff      ");
+        screen.assert([
+            "0 km      Hull: 100%",
+            "********************",
             "        Test        ",
             "        Stuff       ",
         ]);
