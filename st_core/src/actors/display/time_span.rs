@@ -6,8 +6,11 @@ pub struct TimeSpan {
 }
 
 impl TimeSpan {
-    pub fn new(finish: Instant, duration: Duration) -> Self {
-        TimeSpan { finish, duration }
+    pub fn new(start: Instant, duration: Duration) -> Self {
+        TimeSpan {
+            finish: start + duration,
+            duration,
+        }
     }
 
     pub fn status(&self, now: Instant) -> SpanStatus {
