@@ -14,15 +14,61 @@ fn calc_blocks(remaining: Duration, total: Duration) -> u8 {
     (numerator / denominator) as u8 + 1
 }
 
+struct PlayingState<T: LCD> {
+    display: PlayDisplay<T>,
+    directive_time_span: Option<TimeSpan>,
+}
+
+impl<T: LCD> PlayingState<T> {
+    fn new(lcd: T) -> PlayingState<T> {
+        PlayingState {
+            display: PlayDisplay::new(lcd),
+            directive_time_span: None,
+        }
+    }
+
+    fn tick(&mut self, now: Instant) {
+        match self
+            .directive_time_span
+            .as_ref()
+            .map(|span| span.status(now))
+        {
+            None => (),
+            Some(SpanStatus::Ongoing { remaining, total }) => {
+                let blocks = calc_blocks(remaining, total);
+                self.display.update_countdown(blocks);
+            }
+            Some(SpanStatus::Completed) => {
+                self.display.clear_directive();
+                self.directive_time_span = None;
+            }
+        }
+    }
+
+    fn update_ship_distance(&mut self, distance: u32) {
+        self.display.update_ship_distance(distance);
+    }
+
+    fn update_ship_hull_health(&mut self, hull_health: u8) {
+        self.display.update_ship_hull_health(hull_health);
+    }
+
+    fn new_directive(&mut self, directive: Directive, now: Instant) {
+        self.directive_time_span = Some(TimeSpan::new(now, directive.time_limit));
+
+        let (text1, text2) = get_action_text(directive.action);
+        self.display.display_directive(text1, text2);
+    }
+
+    fn unwrap(self) -> T {
+        self.display.unwrap()
+    }
+}
+
 enum State<T: LCD> {
     Transition,
-    WaitingForGame {
-        lcd: T,
-    },
-    Playing {
-        display: PlayDisplay<T>,
-        directive_time_span: Option<TimeSpan>,
-    },
+    WaitingForGame { lcd: T },
+    Playing(PlayingState<T>),
 }
 
 impl<T: LCD> State<T> {
@@ -39,7 +85,7 @@ impl<T: LCD> State<T> {
         temp = match temp {
             State::Transition => unreachable!(),
             State::WaitingForGame { lcd } => f(lcd),
-            State::Playing { display, .. } => f(display.unwrap()),
+            State::Playing(s) => f(s.unwrap()),
         };
         core::mem::swap(self, &mut temp);
     }
@@ -64,71 +110,44 @@ where
 }
 
 impl<T: LCD> Handles<InitGameEvent> for DisplayActor<T> {
-    fn handle(&mut self, _: InitGameEvent, _: &mut Context) {
-        self.state.replace(|lcd| State::Playing {
-            display: PlayDisplay::new(lcd),
-            directive_time_span: None,
-        });
-    }
+    fn handle(&mut self, _: InitGameEvent, _: &mut Context) {}
 }
 
 impl<T: LCD> Handles<GameStartedEvent> for DisplayActor<T> {
-    fn handle(&mut self, _: GameStartedEvent, _: &mut Context) {}
+    fn handle(&mut self, _: GameStartedEvent, _: &mut Context) {
+        self.state
+            .replace(|lcd| State::Playing(PlayingState::new(lcd)));
+    }
 }
 
 impl<T: LCD> Handles<TickEvent> for DisplayActor<T> {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
-        if let State::Playing {
-            display,
-            directive_time_span,
-        } = &mut self.state
-        {
-            let status_fn = |span: &TimeSpan| span.status(ctx.now());
-            match directive_time_span.as_ref().map(status_fn) {
-                None => (),
-                Some(SpanStatus::Ongoing { remaining, total }) => {
-                    let blocks = calc_blocks(remaining, total);
-                    display.update_countdown(blocks);
-                }
-                Some(SpanStatus::Completed) => {
-                    display.clear_directive();
-                    *directive_time_span = None;
-                }
-            }
+        if let State::Playing(s) = &mut self.state {
+            s.tick(ctx.now());
         }
     }
 }
 
 impl<T: LCD> Handles<ShipDistanceUpdatedEvent> for DisplayActor<T> {
     fn handle(&mut self, ev: ShipDistanceUpdatedEvent, _: &mut Context) {
-        if let State::Playing { display, .. } = &mut self.state {
-            display.update_ship_distance(ev.distance);
+        if let State::Playing(s) = &mut self.state {
+            s.update_ship_distance(ev.distance);
         }
     }
 }
 
 impl<T: LCD> Handles<HullHealthUpdatedEvent> for DisplayActor<T> {
     fn handle(&mut self, ev: HullHealthUpdatedEvent, _: &mut Context) {
-        if let State::Playing { display, .. } = &mut self.state {
-            display.update_ship_hull_health(ev.health);
+        if let State::Playing(s) = &mut self.state {
+            s.update_ship_hull_health(ev.health);
         }
     }
 }
 
 impl<T: LCD> Handles<NewDirectiveEvent> for DisplayActor<T> {
     fn handle(&mut self, ev: NewDirectiveEvent, ctx: &mut Context) {
-        if let State::Playing {
-            display,
-            directive_time_span,
-        } = &mut self.state
-        {
-            *directive_time_span = Some(TimeSpan::new(
-                ctx.now() + ev.directive.time_limit,
-                ev.directive.time_limit,
-            ));
-
-            let (text1, text2) = get_action_text(ev.directive.action);
-            display.display_directive(text1, text2);
+        if let State::Playing(s) = &mut self.state {
+            s.new_directive(ev.directive, ctx.now());
         }
     }
 }
