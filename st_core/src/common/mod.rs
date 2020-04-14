@@ -12,7 +12,7 @@ pub use time::*;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Events {
     Tick(TickEvent),
-    InitGame(InitGameEvent),
+    InitializeGame(InitializeGameEvent),
     ControlInitReported(ControlInitReportedEvent),
     ControlInitFinished(ControlInitFinishedEvent),
     GameStarted(GameStartedEvent),
@@ -34,11 +34,11 @@ impl From<TickEvent> for Events {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct InitGameEvent;
-impl Event for InitGameEvent {}
-impl From<InitGameEvent> for Events {
-    fn from(ev: InitGameEvent) -> Events {
-        Events::InitGame(ev)
+pub struct InitializeGameEvent;
+impl Event for InitializeGameEvent {}
+impl From<InitializeGameEvent> for Events {
+    fn from(ev: InitializeGameEvent) -> Events {
+        Events::InitializeGame(ev)
     }
 }
 

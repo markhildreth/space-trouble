@@ -31,8 +31,6 @@ fn main() -> ! {
     let mut now = Instant::from_millis(0);
     let mut ctx = Context::new(now);
 
-    ctx.send(InitGameEvent {});
-
     loop {
         if device.timer.wait().is_ok() {
             now += TICK;
@@ -51,7 +49,7 @@ fn main() -> ! {
                     display.handle(ev, &mut ctx);
                     ship_distance.handle(ev, &mut ctx);
                 }
-                Events::InitGame(ev) => {
+                Events::InitializeGame(ev) => {
                     panel.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
@@ -62,7 +60,10 @@ fn main() -> ! {
                     directives.handle(ev, &mut ctx);
                     display.handle(ev, &mut ctx);
                 }
-                Events::ActionPerformed(ev) => directives.handle(ev, &mut ctx),
+                Events::ActionPerformed(ev) => {
+                    directives.handle(ev, &mut ctx);
+                    game_state.handle(ev, &mut ctx);
+                }
                 Events::NewDirective(ev) => display.handle(ev, &mut ctx),
                 Events::UpdateHullHealth(ev) => hull_health.handle(ev, &mut ctx),
                 Events::HullHealthUpdated(ev) => display.handle(ev, &mut ctx),

@@ -67,13 +67,15 @@ impl<T: LCD> PlayingState<T> {
 
 enum State<T: LCD> {
     Transition,
-    WaitingForGame { lcd: T },
+    WaitingForInput { lcd: T },
+    Initializing { lcd: T },
     Playing(PlayingState<T>),
 }
 
 impl<T: LCD> State<T> {
-    fn new(lcd: T) -> State<T> {
-        State::WaitingForGame { lcd }
+    fn new(mut lcd: T) -> State<T> {
+        lcd.write_str("Press any button to begin...").unwrap();
+        State::WaitingForInput { lcd }
     }
 
     fn replace<F>(&mut self, f: F)
@@ -84,7 +86,8 @@ impl<T: LCD> State<T> {
         core::mem::swap(self, &mut temp);
         temp = match temp {
             State::Transition => unreachable!(),
-            State::WaitingForGame { lcd } => f(lcd),
+            State::WaitingForInput { lcd } => f(lcd),
+            State::Initializing { lcd } => f(lcd),
             State::Playing(s) => f(s.unwrap()),
         };
         core::mem::swap(self, &mut temp);
@@ -109,8 +112,14 @@ where
     }
 }
 
-impl<T: LCD> Handles<InitGameEvent> for DisplayActor<T> {
-    fn handle(&mut self, _: InitGameEvent, _: &mut Context) {}
+impl<T: LCD> Handles<InitializeGameEvent> for DisplayActor<T> {
+    fn handle(&mut self, _: InitializeGameEvent, _: &mut Context) {
+        self.state.replace(|mut lcd| {
+            lcd.clear();
+            lcd.write_str("Initializing...").unwrap();
+            State::Initializing { lcd }
+        });
+    }
 }
 
 impl<T: LCD> Handles<GameStartedEvent> for DisplayActor<T> {

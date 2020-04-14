@@ -17,11 +17,11 @@ where
     }
 }
 
-impl<P> Handles<InitGameEvent> for PanelActor<P>
+impl<P> Handles<InitializeGameEvent> for PanelActor<P>
 where
     P: Panel,
 {
-    fn handle(&mut self, _: InitGameEvent, ctx: &mut Context) {
+    fn handle(&mut self, _: InitializeGameEvent, ctx: &mut Context) {
         self.panel
             .poll_all(ctx.now())
             .iter()
