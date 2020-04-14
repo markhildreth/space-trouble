@@ -9,17 +9,17 @@ const BLOCK: char = 0xff as char;
 #[cfg(test)]
 const BLOCK: char = '*';
 
-pub(super) struct PlayLCD<T: LCD> {
+pub(super) struct PlayDisplay<T: LCD> {
     lcd: T,
     current_blocks: Option<u8>,
 }
 
-impl<T: LCD> PlayLCD<T> {
-    pub(super) fn new(mut lcd: T) -> PlayLCD<T> {
+impl<T: LCD> PlayDisplay<T> {
+    pub(super) fn new(mut lcd: T) -> PlayDisplay<T> {
         lcd.clear();
         lcd.set_cursor_pos(0, 0);
         lcd.write_str("0 km      Hull: 100%").unwrap();
-        PlayLCD {
+        PlayDisplay {
             lcd,
             current_blocks: None,
         }
@@ -87,7 +87,7 @@ mod test_play_lcd {
     #[test]
     fn starts_clean() {
         let (lcd, screen) = TestLCD::new().split();
-        PlayLCD::new(lcd);
+        PlayDisplay::new(lcd);
         screen.assert([
             "0 km      Hull: 100%",
             "                    ",
@@ -99,7 +99,7 @@ mod test_play_lcd {
     #[test]
     fn can_display_health() {
         let (lcd, screen) = TestLCD::new().split();
-        let mut play_lcd = PlayLCD::new(lcd);
+        let mut play_lcd = PlayDisplay::new(lcd);
         play_lcd.update_ship_hull_health(98);
         screen.assert([
             "0 km      Hull:  98%",
@@ -119,7 +119,7 @@ mod test_play_lcd {
     #[test]
     fn can_display_ship_distance() {
         let (lcd, screen) = TestLCD::new().split();
-        let mut play_lcd = PlayLCD::new(lcd);
+        let mut play_lcd = PlayDisplay::new(lcd);
         play_lcd.update_ship_distance(9);
         screen.assert([
             "9 km      Hull: 100%",
@@ -164,7 +164,7 @@ mod test_play_lcd {
     #[test]
     fn can_display_directive_and_countdown() {
         let (lcd, screen) = TestLCD::new().split();
-        let mut play_lcd = PlayLCD::new(lcd);
+        let mut play_lcd = PlayDisplay::new(lcd);
 
         play_lcd.display_directive("        Test        ", "        Stuff      ");
         screen.assert([
