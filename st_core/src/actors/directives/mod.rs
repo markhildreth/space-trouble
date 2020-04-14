@@ -5,7 +5,7 @@ mod controls;
 mod ship_actions;
 
 use crate::common::*;
-use control_init_state::ControlInitState;
+use control_init_state::{ControlInitReadyState, ControlInitState};
 use playing_state::PlayingState;
 
 // TODO: The boilerplate code below could be done away with using
@@ -39,12 +39,33 @@ impl Handles<TickEvent> for DirectivesActor {
 
 impl Handles<ControlInitReportedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ControlInitReportedEvent, ctx: &mut Context) {
-        let old_state = self.state.take().unwrap();
+        let ready_state = match &mut self.state {
+            Some(States::ControlInit(s)) => s.handle_report(ev.action),
+            _ => ControlInitReadyState::NotReady,
+        };
+
+        if ready_state == ControlInitReadyState::Ready {
+            ctx.send(ControlInitFinishedEvent {});
+        }
+    }
+}
+
+impl Handles<GameStartedEvent> for DirectivesActor {
+    fn handle(&mut self, _: GameStartedEvent, ctx: &mut Context) {
+        let old_state = self.state.take();
+
         let new_state = match old_state {
-            States::ControlInit(s) => s.handle_report_init_control_value(ev, ctx),
+            Some(States::ControlInit(s)) => {
+                let ship_state = s.finish();
+                Some(States::Playing(PlayingState::new(
+                    0x1234_5678,
+                    ship_state,
+                    ctx.now(),
+                )))
+            }
             _ => old_state,
         };
-        self.state.replace(new_state);
+        self.state = new_state;
     }
 }
 
