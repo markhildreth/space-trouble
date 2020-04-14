@@ -8,22 +8,33 @@ use crate::common::*;
 use control_init_state::{ControlInitReadyState, ControlInitState};
 use playing_state::PlayingState;
 
-// TODO: The boilerplate code below could be done away with using
-// macros most likely.
-
 enum States {
+    Transition,
     ControlInit(ControlInitState),
     Playing(PlayingState),
 }
 
 pub struct DirectivesActor {
-    state: Option<States>,
+    state: States,
+}
+
+impl DirectivesActor {
+    fn replace_state<F>(&mut self, f: F)
+    where
+        F: Fn(States) -> States,
+    {
+        let mut old_state = States::Transition;
+        core::mem::swap(&mut self.state, &mut old_state);
+
+        let mut new_state = f(old_state);
+        core::mem::swap(&mut self.state, &mut new_state);
+    }
 }
 
 impl Default for DirectivesActor {
     fn default() -> DirectivesActor {
         DirectivesActor {
-            state: Some(States::ControlInit(ControlInitState::default())),
+            state: States::ControlInit(ControlInitState::default()),
         }
     }
 }
@@ -31,7 +42,7 @@ impl Default for DirectivesActor {
 impl Handles<TickEvent> for DirectivesActor {
     fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
         match &mut self.state {
-            Some(States::Playing(s)) => s.handle_tick(ctx),
+            States::Playing(s) => s.handle_tick(ctx),
             _ => (),
         }
     }
@@ -40,7 +51,7 @@ impl Handles<TickEvent> for DirectivesActor {
 impl Handles<ControlInitReportedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ControlInitReportedEvent, ctx: &mut Context) {
         let ready_state = match &mut self.state {
-            Some(States::ControlInit(s)) => s.handle_report(ev.action),
+            States::ControlInit(s) => s.handle_report(ev.action),
             _ => ControlInitReadyState::NotReady,
         };
 
@@ -52,41 +63,23 @@ impl Handles<ControlInitReportedEvent> for DirectivesActor {
 
 impl Handles<GameStartedEvent> for DirectivesActor {
     fn handle(&mut self, _: GameStartedEvent, ctx: &mut Context) {
-        let old_state = self.state.take();
-
-        let new_state = match old_state {
-            Some(States::ControlInit(s)) => {
+        self.replace_state(|old_state| {
+            if let States::ControlInit(s) = old_state {
                 let ship_state = s.finish();
-                Some(States::Playing(PlayingState::new(
-                    0x1234_5678,
-                    ship_state,
-                    ctx.now(),
-                )))
+                States::Playing(PlayingState::new(0x1234_5678, ship_state, ctx.now()))
+            } else {
+                old_state
             }
-            _ => old_state,
-        };
-        self.state = new_state;
+        });
     }
 }
 
 impl Handles<ActionPerformedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ActionPerformedEvent, ctx: &mut Context) {
         match &mut self.state {
-            Some(States::ControlInit(s)) => s.handle_action_performed(ev.action),
-            Some(States::Playing(s)) => s.handle_action_performed(ev.action, ctx),
+            States::ControlInit(s) => s.handle_action_performed(ev.action),
+            States::Playing(s) => s.handle_action_performed(ev.action, ctx),
             _ => (),
         };
-    }
-}
-
-impl From<PlayingState> for States {
-    fn from(s: PlayingState) -> States {
-        States::Playing(s)
-    }
-}
-
-impl From<ControlInitState> for States {
-    fn from(s: ControlInitState) -> States {
-        States::ControlInit(s)
     }
 }
