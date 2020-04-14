@@ -20,7 +20,8 @@ struct PlayingState<T: LCD> {
 }
 
 impl<T: LCD> PlayingState<T> {
-    fn new(lcd: T) -> PlayingState<T> {
+    fn new(mut lcd: T) -> PlayingState<T> {
+        lcd.clear();
         PlayingState {
             display: PlayDisplay::new(lcd),
             directive_time_span: None,

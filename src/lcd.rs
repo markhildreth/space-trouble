@@ -29,7 +29,7 @@ impl LCD for LCDImpl {
     }
 
     fn clear(&mut self) {
-        self.0.reset();
+        self.0.clear();
     }
 }
 
