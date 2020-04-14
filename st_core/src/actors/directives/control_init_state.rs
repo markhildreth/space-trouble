@@ -37,12 +37,7 @@ impl ControlInitState {
         }
     }
 
-    pub(super) fn handle_action_performed(
-        mut self,
-        ev: ActionPerformedEvent,
-        _ctx: &mut Context,
-    ) -> States {
-        self.ship_actions.perform(ev.action);
-        self.into()
+    pub(super) fn handle_action_performed(&mut self, action: Action) {
+        self.ship_actions.perform(action);
     }
 }

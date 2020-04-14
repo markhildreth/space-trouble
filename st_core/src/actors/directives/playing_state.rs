@@ -1,5 +1,4 @@
 use super::ship_actions::{GenerateFailReason, ShipActions};
-use super::States;
 use rand::rngs::SmallRng;
 use rand::SeedableRng;
 
@@ -30,7 +29,7 @@ impl PlayingState {
         }
     }
 
-    pub(super) fn handle_tick(mut self, _ev: TickEvent, ctx: &mut Context) -> States {
+    pub(super) fn handle_tick(&mut self, ctx: &mut Context) {
         match self.directive {
             CurrentDirective::WaitingForDirective { wait_until } => {
                 if ctx.now() >= wait_until {
@@ -49,21 +48,15 @@ impl PlayingState {
                 }
             }
         }
-
-        self.into()
     }
 
-    pub(super) fn handle_action_performed(
-        mut self,
-        ev: ActionPerformedEvent,
-        ctx: &mut Context,
-    ) -> States {
-        self.ship_actions.perform(ev.action);
+    pub(super) fn handle_action_performed(&mut self, action: Action, ctx: &mut Context) {
+        self.ship_actions.perform(action);
 
         let mut valid = false;
 
         if let CurrentDirective::OutstandingDirective { action, .. } = self.directive {
-            if action == ev.action {
+            if action == action {
                 valid = true;
                 ctx.send(DirectiveCompletedEvent {});
                 self.directive = CurrentDirective::WaitingForDirective {
@@ -75,8 +68,6 @@ impl PlayingState {
         if !valid {
             ctx.send(UpdateHullHealthEvent { delta: -2 })
         }
-
-        self.into()
     }
 
     fn generate_directive(&mut self, now: Instant) -> Result<Directive, GenerateFailReason> {

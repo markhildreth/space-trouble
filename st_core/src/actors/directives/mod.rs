@@ -29,13 +29,11 @@ impl Default for DirectivesActor {
 }
 
 impl Handles<TickEvent> for DirectivesActor {
-    fn handle(&mut self, ev: TickEvent, ctx: &mut Context) {
-        let old_state = self.state.take().unwrap();
-        let new_state = match old_state {
-            States::Playing(s) => s.handle_tick(ev, ctx).into(),
-            _ => old_state,
-        };
-        self.state.replace(new_state);
+    fn handle(&mut self, _: TickEvent, ctx: &mut Context) {
+        match &mut self.state {
+            Some(States::Playing(s)) => s.handle_tick(ctx),
+            _ => (),
+        }
     }
 }
 
@@ -52,12 +50,11 @@ impl Handles<ControlInitReportedEvent> for DirectivesActor {
 
 impl Handles<ActionPerformedEvent> for DirectivesActor {
     fn handle(&mut self, ev: ActionPerformedEvent, ctx: &mut Context) {
-        let old_state = self.state.take().unwrap();
-        let new_state = match old_state {
-            States::ControlInit(s) => s.handle_action_performed(ev, ctx),
-            States::Playing(s) => s.handle_action_performed(ev, ctx),
+        match &mut self.state {
+            Some(States::ControlInit(s)) => s.handle_action_performed(ev.action),
+            Some(States::Playing(s)) => s.handle_action_performed(ev.action, ctx),
+            _ => (),
         };
-        self.state.replace(new_state);
     }
 }
 
